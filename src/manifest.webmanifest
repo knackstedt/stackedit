@@ -1,0 +1,16 @@
+{
+  "name": "DotGlitch",
+  "short_name": "DotGlitch",
+  "theme_color": "#07fa87",
+  "background_color": "#121212",
+  "display": "standalone",
+  "scope": "./",
+  "start_url": "./",
+  "icons": [
+    {
+      "src": "assets/channel.png",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+:host {
+    height: 100%;
+    width: 100%;
+    display: flex;
+}
+
+ngx-lazy-loader {
+    display: block;
+    height: 100%;
+    width: 100%;
+    overflow-y: auto;
+    contain: content;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    contain: content;
+    overflow: hidden;
+}

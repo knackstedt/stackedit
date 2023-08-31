@@ -1,0 +1,70 @@
+/* You can add global styles to this file, and also import other style files */
+@import "material.scss";
+@import "@fontsource/material-icons-outlined";
+@import "@fontsource/fira-sans/100";
+@import "@fontsource/fira-sans/200";
+@import "@fontsource/fira-sans/300";
+@import "@fontsource/fira-sans/400";
+@import "@fontsource/fira-sans/500";
+@import "@fontsource/fira-sans/600";
+
+body { margin: 0 }
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    font-family: 'Fira Sans', Arial;
+    background-color: var(--background-color, #121212);
+    color: var(--text-color);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+mat-icon.material-icons {
+    font-family: "Material Icons Outlined";
+
+    font-size: 24px;
+}
+
+a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+
+// dark
+:root {
+    --text-color: #efefef;
+    --background-color: #121212;
+    // --background-secondary-color: #00
+}
+
+.light {
+    --text-color: #121212;
+    --background-color: #efefef;
+    --ngx-ctx-menu-text-color: #111;
+}
+
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background-color: #1373c4;
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-track {
+    border-radius: 10px;
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-corner {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+}

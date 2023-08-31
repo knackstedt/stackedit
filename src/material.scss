@@ -1,0 +1,94 @@
+@use '@angular/material' as mat;
+@include mat.core();
+
+$app-typography: mat.define-typography-config($font-family: 'Fira Sans');
+
+$light-primary: mat.define-palette(mat.$blue-palette);
+$light-accent: mat.define-palette(mat.$blue-grey-palette, A200, A100, A400);
+$light-warn: mat.define-palette(mat.$red-palette);
+
+$light-theme: mat.define-light-theme((
+    color: (
+        primary: $light-primary,
+        accent: $light-accent,
+        warn: $light-warn,
+    ),
+    typography: $app-typography)
+);
+
+$dark-primary: mat.define-palette(mat.$blue-palette, 700, 500, 800);
+$dark-accent: mat.define-palette(mat.$purple-palette, 700, 500, 800);
+$dark-warn: mat.define-palette(mat.$deep-orange-palette, 700, 500, 800);
+
+$dark-theme: mat.define-dark-theme((
+    color: (
+        primary: $dark-primary,
+        accent: $dark-accent,
+        warn: $dark-warn,
+    ),
+    typography: $app-typography)
+);
+
+:root {
+    --mdc-typography-body1-line-height: 30px;
+    --mdc-typography-body1-font-size: 14px;
+    --mdc-typography-button-letter-spacing: 0;
+    --mdc-typography-body2-letter-spacing: 0;
+    --mdc-typography-body1-letter-spacing: 0;
+    --mdc-typography-subtitle2-letter-spacing: 0;
+    --mdc-typography-subtitle1-letter-spacing: 0;
+    --mdc-typography-headline6-letter-spacing: 0;
+    --mdc-typography-caption-letter-spacing: 0;
+}
+
+@include mat.all-component-themes($dark-theme);
+
+.light {
+    @include mat.all-component-colors($light-theme);
+}
+
+.mat-tab-body-wrapper {
+  height: 100%;
+}
+
+.mat-mdc-tab-group {
+    height: 100%;
+}
+
+.mat-mdc-tab {
+    flex-grow: 0!important;
+}
+
+.mat-mdc-tab-body-wrapper {
+    flex: 1;
+}
+.mat-mdc-tab-body-content {
+    overflow: hidden;
+}
+
+.mat-drawer-container {
+    height: 100%;
+}
+
+.mat-icon {
+    vertical-align: middle;
+}
+
+.dark {
+    --mdc-theme-surface: #212121;
+    .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+        background-color: #212121;
+    }
+    .mat-mdc-form-field-focus-overlay {
+        background-color: rgba(255, 255, 255, 0.27)
+    }
+}
+
+mat-sidenav-container.mat-sidenav-container {
+    background-color: unset;
+    color: unset;
+}
+mat-sidenav.mat-sidenav {
+    background-color: unset;
+    color: unset;
+}
