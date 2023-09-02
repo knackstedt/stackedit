@@ -12,9 +12,48 @@
                 <div class="layout__panel layout__panel--navigation-bar" v-show="styles.showNavigationBar"
                     [ngStyle]="{height: constants.navigationBarHeight + 'px'}">
                     <!-- <navigation-bar></navigation-bar> -->
+                    <div class="toolbar">
+                        <!-- Header -->
+                        <mat-icon [ngx-menu]="textSizeMenu">format_size</mat-icon>
+                        <!-- Color -->
+                        <!-- <mat-icon (click)="1">format_color_text</mat-icon> -->
+
+                        <!-- Bold -->
+                        <mat-icon (click)="boldText()">format_bold</mat-icon>
+                        <!-- Italic -->
+                        <mat-icon (click)="italicizeText()">format_italic</mat-icon>
+                        <!-- Strikethrough -->
+                        <mat-icon (click)="strikethroughText()">format_strikethrough</mat-icon>
+                        <!-- Underscore -->
+                        <!-- <mat-icon>format_underlined</mat-icon> -->
+
+                        <!-- Quote -->
+                        <mat-icon (click)="blockQuoteText()">format_quote</mat-icon>
+                        <!-- Link -->
+                        <mat-icon (click)="1">link</mat-icon>
+
+                        <!-- Ordered list -->
+                        <mat-icon (click)="insertOrderedList()">format_list_numbered</mat-icon>
+                        <!-- Unordered list -->
+                        <mat-icon (click)="insertList()">format_list_bulleted</mat-icon>
+                        <!-- Checklist -->
+                        <mat-icon (click)="insertCheckList()">rule</mat-icon>
+
+                        <!-- Table -->
+                        <mat-icon >table_chart</mat-icon>
+                        <!-- Image -->
+                        <mat-icon>add_photo_alternate</mat-icon>
+                        <!-- Inline code -->
+                        <mat-icon (click)="insertInlineCode()">code</mat-icon>
+                        <!-- Code Block -->
+                        <mat-icon (click)="insertCodeBlock()">data_object</mat-icon>
+
+                        <!-- Mermaid Diagrams... -->
+                        <mat-icon>account_tree</mat-icon>
+                    </div>
                 </div>
-                <div class="layout__panel flex flex--row" [ngStyle]="{height: styles.innerHeight + 'px'}"
-                    style=""
+                <div class="layout__panel flex flex--row"
+                    style="flex: 1"
                 >
                     <div class="layout__panel layout__panel--editor" v-show="styles.showEditor"
                         [ngStyle]="{width: (styles.editorWidth + styles.editorGutterWidth) + 'px', fontSize: styles.fontSize + 'px'}">
@@ -40,6 +79,24 @@
                     <div class="layout__panel layout__panel--button-bar" v-show="styles.showEditor"
                         [ngStyle]="{width: constants.buttonBarWidth + 'px'}">
                         <!-- <button-bar></button-bar> -->
+                        <div>
+                            <button>
+                                <!-- Toddle preview panel on/off -->
+                                <mat-icon></mat-icon>
+                                <!-- Toggle view mode on -->
+                                <mat-icon></mat-icon>
+
+                                <span style="flex: 1"></span>
+
+                                <!-- What is focus mode? -->
+                                <mat-icon></mat-icon>
+
+                                <!-- Toggle scroll sync -->
+                                <mat-icon></mat-icon>
+                                <!-- Toggle status bar (blue bar at bottom with stats) -->
+                                <mat-icon></mat-icon>
+                            </button>
+                        </div>
                     </div>
                     <div class="layout__panel layout__panel--preview" v-show="styles.showPreview"
                         [ngStyle]="{width: (styles.previewWidth + styles.previewGutterWidth) + 'px', fontSize: styles.fontSize + 'px'}">
