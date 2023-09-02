@@ -1,3 +1,45 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.toolbar {
+    display: flex;
+    height: 48px;
+    align-items: center;
+    gap: 4px;
+
+    mat-icon {
+        cursor: pointer;
+        line-height: 24px;
+        padding: 6px;
+        width: 36px;
+        height: 36px;
+
+        border-radius: 50%;
+        transition: background-color 200ms ease;
+        &:hover {
+            background-color: #fffc;
+        }
+    }
+}
+
+
+
+
+
+
+
+
 ::ng-deep {
     .icon-provider {
             width: 100%;
@@ -2291,6 +2333,11 @@
             text-decoration: underline
         }
 
+        .markdown-highlighting .email,
+        .markdown-highlighting .url {
+            color: rgba(0, 0, 0, .28)
+        }
+
         .markdown-highlighting .linkdef .url {
             color: rgba(0, 0, 0, .28)
         }
@@ -3717,7 +3764,8 @@
             font-variant-ligatures: no-common-ligatures;
             white-space: pre-wrap;
             word-break: break-word;
-            word-wrap: break-word
+            word-wrap: break-word;
+            scroll-behavior: smooth;
         }
 
         .editor__inner * {
@@ -3749,7 +3797,8 @@
         }
 
         .preview__inner-1 {
-            overflow: auto
+            overflow: auto;
+            scroll-behavior: smooth;
         }
 
         .preview__inner-2 {
@@ -4062,11 +4111,13 @@
         }
 
         .layout__panel--navigation-bar {
-            background-color: #2c2c2c
+            background-color: #2c2c2c;
+            flex: 0 0 44px;
         }
 
         .layout__panel--status-bar {
-            background-color: #007acc
+            background-color: #007acc;
+            flex: 0 0 20px;
         }
 
         .layout__panel--editor {
