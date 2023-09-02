@@ -1,5 +1,5 @@
+import 'zone.js';  // Included with Angular CLI.
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-
 import { AppModule } from './app/app.module';
 
 platformBrowserDynamic().bootstrapModule(AppModule)

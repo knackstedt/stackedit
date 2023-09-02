@@ -23,7 +23,6 @@
             "outputPath": "dist/stackedit",
             "index": "src/index.html",
             "main": "src/main.ts",
-            "polyfill": "src/polyfills.ts",
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "preserveSymlinks": true,
@@ -91,6 +90,5 @@
         }
       }
     }
-  },
-  "defaultProject": "dotglitch"
+  }
 }
