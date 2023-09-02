@@ -1,4 +1,4 @@
-import 'mermaid';
+import mermaid from 'mermaid';
 import utils from '../utils';
 
 const config = {
@@ -43,7 +43,7 @@ containerElt.className = 'hidden-rendering-container';
 document.body.appendChild(containerElt);
 
 let init = () => {
-    window.mermaid.initialize(config);
+    mermaid.initialize(config);
     init = () => { };
 };
 
@@ -51,7 +51,7 @@ const render = (elt) => {
     try {
         init();
         const svgId = `mermaid-svg-${utils.uid()}`;
-        window.mermaid.mermaidAPI.render(svgId, elt.textContent, () => {
+        mermaid.mermaidAPI.render(svgId, elt.textContent, () => {
             while (elt.firstChild) {
                 elt.removeChild(elt.lastChild);
             }
