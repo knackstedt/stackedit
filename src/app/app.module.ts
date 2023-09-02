@@ -14,17 +14,19 @@ import { MatDialogModule } from '@angular/material/dialog';
 // import { NgxAppMenuDirective, NgxContextMenuDirective } from '@dotglitch/ngx-ctx-menu';
 // import { NgxLazyLoaderModule } from '@dotglitch/ngx-lazy-loader';
 // import { RegisteredComponents } from 'src/app/component.registry';
+import { EditorComponent } from './editor/editor.component';
 
 
 @NgModule({
     declarations: [
-        AppComponent,
-    ],
+        AppComponent
+   ],
     imports: [
         CommonModule,
         BrowserModule,
         BrowserAnimationsModule,
         HttpClientModule,
+        EditorComponent,
         // NgxAppMenuDirective,
         // NgxContextMenuDirective,
         MatButtonModule,

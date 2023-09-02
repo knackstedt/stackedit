@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import 'babel-polyfill';
 import * as OfflinePluginRuntime from 'offline-plugin/runtime';
-import './extensions';
+import './app/editor/extensions';
 import './services/optional';
 import './icons';
 import App from './components/App';
@@ -50,9 +50,13 @@ if (!localStorage.installPrompted) {
 
 Vue.config.productionTip = false;
 
-/* eslint-disable no-new */
-new Vue({
-  el: '#app',
-  store,
-  render: h => h(App),
-});
+
+export const CreateEditor = (el: HTMLElement) => {
+    /* eslint-disable no-new */
+    return new Vue({
+        el: '#app',
+        store,
+        render: h => h(App),
+    });
+
+}
