@@ -22,7 +22,12 @@
                             <div class="gutter__background" v-if="styles.editorGutterWidth"
                                 [ngStyle]="{width: styles.editorGutterWidth + 'px'}"></div>
                         </div>
-                        <div class="editor" (click)="editorSvc.clEditor.focus()">
+                        <div
+                            class="editor"
+                            (click)="editorSvc.clEditor.focus()"
+                            (pointerenter)="editorSvc.editorIsActive = true"
+                            (pointerleave)="editorSvc.editorIsActive = false"
+                        >
                             <div class="editor__inner markdown-highlighting"></div>
                         </div>
 

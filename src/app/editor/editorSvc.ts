@@ -60,6 +60,8 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
     previewSelectionRange: null,
     previewSelectionStartOffset: null,
 
+    editorIsActive: false,
+
     /**
      * Initialize the Prism grammar with the options
      */
@@ -445,17 +447,14 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
 
         // Aha!...
         const scrollEditor = allowDebounce(() => {
-            console.log("f");
-            editorSvc.restoreScrollPosition(editorSvc.getScrollPosition(editorElt));
+            editorSvc.restoreScrollPosition(editorSvc.getScrollPosition(editorSvc.editorIsActive ? editorElt : previewElt));
         }, 100);
         const scrollPreview = allowDebounce(() => {
-            console.log("j");
-            editorSvc.restoreScrollPosition(editorSvc.getScrollPosition(previewElt));
+            editorSvc.restoreScrollPosition(editorSvc.getScrollPosition(editorSvc.editorIsActive ? editorElt : previewElt));
         }, 100);
 
         editorElt.parentNode.addEventListener('scroll', scrollEditor);
         previewElt.parentNode.addEventListener('scroll', scrollPreview);
-
 
         const refreshPreview = allowDebounce(() => {
             this.convert();
