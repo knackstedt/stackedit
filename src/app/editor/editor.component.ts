@@ -2,7 +2,7 @@ import { Component, OnInit, ViewContainerRef } from '@angular/core';
 
 import editorSvc from './editorSvc'
 import markdownConversionSvc from 'src/app/editor/markdownConversionSvc';
-import { NgClass, NgStyle } from '@angular/common';
+import { NgClass, NgIf, NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { TooltipDirective, MenuDirective, MenuItem } from '@dotglitch/ngx-common';
 
@@ -18,6 +18,7 @@ const pagedownHandler = name => () => {
     templateUrl: './editor.component.html',
     styleUrls: ['./editor.component.scss'],
     imports: [
+        NgIf,
         NgClass,
         NgStyle,
         MatIconModule,
@@ -31,7 +32,7 @@ export class EditorComponent implements OnInit {
     get $el() { return this.viewContainer.element.nativeElement as HTMLElement }
 
 
-    wrapText(before = '', after = '', indent?: number) {
+    wrapText(before = '', after = '', indent?: number, insertNewline = false) {
         const { selectionStart, selectionEnd } = editorSvc.clEditor.selectionMgr;
         let text = editorSvc.clEditor.getContent() as string;
 
@@ -48,13 +49,29 @@ export class EditorComponent implements OnInit {
             preString = preString.slice(0, preString.length - before.length);
             postString = postString.slice(after.length);
 
+            // Move the selection to what it will be after removing the text
+            editorSvc.clEditor.selectionMgr.selectionStart += before.length;
+            editorSvc.clEditor.selectionMgr.selectionEnd += before.length;
+
             // Clear before and after to re-use the result logic.
             before = '';
             after = '';
             indent = null;
+            insertNewline = false;
+        }
+        else {
+            editorSvc.clEditor.selectionMgr.selectionStart += before.length;
+            editorSvc.clEditor.selectionMgr.selectionEnd += before.length;
         }
 
         let updatedSelection = selectionText;
+
+        if (insertNewline) {
+            // Insert a newline at the start if we're in the middle of a selection.
+            if (!updatedSelection.startsWith('\n'))
+                updatedSelection = "\n" + updatedSelection;
+        }
+
 
         if (indent) {
             // Indent all lines in the selection
@@ -73,7 +90,7 @@ export class EditorComponent implements OnInit {
 
     injectHeading(size: number) {
         const headerString = ''.padStart(size, '#') + ' ';
-        this.wrapText(headerString);
+        this.wrapText(headerString, '', null, true);
     }
 
     textSizeMenu: MenuItem[] = [
@@ -102,7 +119,7 @@ export class EditorComponent implements OnInit {
     }
 
     blockQuoteText() {
-        this.wrapText("> ", '', 2);
+        this.wrapText("> ", '\n', 2, true);
     }
 
     insertLink() {
@@ -110,15 +127,15 @@ export class EditorComponent implements OnInit {
     }
 
     insertOrderedList() {
-        this.wrapText("1. ", '', 3);
+        this.wrapText("1. ", '', 3, true);
     }
 
     insertList() {
-        this.wrapText(" - ", '', 3);
+        this.wrapText(" - ", '', 3, true);
     }
 
     insertCheckList() {
-        this.wrapText(" - [ ]", '', 6);
+        this.wrapText(" - [ ] ", '', 7, true);
     }
 
     insertInlineCode() {
@@ -127,16 +144,155 @@ export class EditorComponent implements OnInit {
 
     insertCodeBlock() {
         // TODO: align to start of line
-        this.wrapText("```", "```");
+        this.wrapText("```\n", "\n```", null, true);
     }
 
 
+    /**
+      * | Heading |     |
+        | ---     | --- |
+        |         |     |
+     */
     tableMenu: MenuItem[] = [
         { label: "", }
+
+
     ];
 
     diagramMenu: MenuItem[] = [
-        { label: "", }
+        { label: "Mermaid Diagrams:"},
+        "separator",
+        { label: "Examples", link: "https://mermaid.js.org/syntax/examples.html", linkTarget: "_blank" },
+        { label: "Flow Chart", action: () => this.wrapText(`\`\`\`mermaid
+flowchart LR
+    markdown["\`This ** is ** _Markdown_\`"]
+    newLines["\`Line1
+    Line 2
+    Line 3\`"]
+    markdown --> newLines
+\`\`\``) },
+        { label: "Sequence Diagram", action: () => this.wrapText(`\`\`\`mermaid
+sequenceDiagram
+Alice->>John: Hello John, how are you?
+John-->>Alice: Great!
+Alice-)John: See you later!
+\`\`\``) },
+        { label: "Class Diagram", action: () => this.wrapText(`\`\`\`mermaid
+classDiagram
+    Animal <|-- Duck
+    Animal <|-- Fish
+    Animal <|-- Zebra
+    Animal : +int age
+    Animal : +String gender
+    Animal: +isMammal()
+    Animal: +mate()
+
+    class Duck{
+        +String beakColor
+        +swim()
+        +quack()
+    }
+    class Fish{
+        -int sizeInFeet
+        -canEat()
+    }
+    class Zebra{
+        +bool is_wild
+        +run()
+    }
+\`\`\``) },
+        { label: "State Diagram", action: () => this.wrapText(`\`\`\`mermaid
+stateDiagram-v2
+    [*] --> Still
+    Still --> [*]
+
+    Still --> Moving
+    Moving --> Still
+    Moving --> Crash
+    Crash --> [*]
+\`\`\``) },
+        { label: "Entity Relationship Diagram", action: () => this.wrapText(`\`\`\`mermaid
+erDiagram
+    CUSTOMER ||--o{ ORDER : places
+    ORDER ||--|{ LINE-ITEM : contains
+    CUSTOMER }|..|{ DELIVERY-ADDRESS : uses
+\`\`\``) },
+        { label: "User Journey Diagram", action: () => this.wrapText(`\`\`\`mermaid
+journey
+    title My working day
+    section Go to work
+    Make tea: 5: Me
+    Go upstairs: 3: Me
+    Do work: 1: Me, Cat
+    section Go home
+    Go downstairs: 5: Me
+    Sit down: 5: Me
+\`\`\``) },
+        { label: "Gantt Chart", action: () => this.wrapText(`\`\`\`mermaid
+gantt
+    title A Gantt Diagram
+    dateFormat  YYYY-MM-DD
+    section Section
+    A task           :a1, 2014-01-01, 30d
+    Another task     :after a1  , 20d
+    section Another
+    Task in sec      :2014-01-12  , 12d
+    another task      : 24d
+\`\`\``) },
+        { label: "Pie Chart", action: () => this.wrapText(`\`\`\`mermaid
+pie title Pets adopted by volunteers
+    "Dogs" : 386
+    "Cats" : 85
+    "Rats" : 15
+\`\`\``) },
+        { label: "Quadrant Chart", action: () => this.wrapText(`\`\`\`mermaid
+quadrantChart
+    title Reach and engagement of campaigns
+    x-axis Low Reach --> High Reach
+    y-axis Low Engagement --> High Engagement
+    quadrant-1 We should expand
+    quadrant-2 Need to promote
+    quadrant-3 Re-evaluate
+    quadrant-4 May be improved
+    Campaign A: [0.3, 0.6]
+    Campaign B: [0.45, 0.23]
+    Campaign C: [0.57, 0.69]
+    Campaign D: [0.78, 0.34]
+    Campaign E: [0.40, 0.34]
+    Campaign F: [0.35, 0.78]
+\`\`\``) },
+        { label: "Requirement Diagram", action: () => this.wrapText(`\`\`\`mermaid
+requirementDiagram
+
+    requirement test_req {
+    id: 1
+    text: the test text.
+    risk: high
+    verifymethod: test
+    }
+
+    element test_entity {
+    type: simulation
+    }
+
+    test_entity - satisfies -> test_req
+\`\`\``) },
+        { label: "Mindmap", action: () => this.wrapText(`\`\`\`mermaid
+mindmap
+      Root
+          A
+            B
+            C
+\`\`\``) },
+        { label: "Timeline", action: () => this.wrapText(`\`\`\`mermaid
+timeline
+      title History of Social Media Platform
+      2002 : LinkedIn
+      2004 : Facebook
+           : Google
+      2005 : Youtube
+      2006 : Twitter
+\`\`\``) }
     ];
 
     editorSvc = editorSvc;
@@ -177,7 +333,30 @@ export class EditorComponent implements OnInit {
         statusBarHeight: 20,
     }
 
-    constructor(private viewContainer: ViewContainerRef) { }
+
+    constructor(private viewContainer: ViewContainerRef) {
+        // TODO: Connect keybinds
+        // ctrl + / => comment;
+        // ctrl + b => bold;
+        // ctrl + i => Italic;
+        // ctrl + a => select all;
+        // ctrl + l => kill line;
+        // ctrl + shift + d => dupe current line
+    }
+
+
+    cursorIsInHeading = false;
+    cursorIsInBold = false;
+    cursorIsInItalic = false;
+    cursorIsInStrikethrough = false;
+    cursorIsInBlockquote = false;
+    cursorIsInLink = false;
+    cursorIsInOrderedList = false;
+    cursorIsInList = false;
+    cursorIsInChecklist = false;
+    cursorIsInTable = false;
+    cursorIsInInlineCode = false;
+    cursorIsInCode = false;
 
     ngOnInit() {
         markdownConversionSvc.init(); // Needs to be inited before mount
@@ -188,6 +367,76 @@ export class EditorComponent implements OnInit {
         window.addEventListener('mouseup', this.saveSelection);
         window.addEventListener('focusin', this.saveSelection);
         window.addEventListener('contextmenu', this.saveSelection);
+
+
+        // Track the current state of the cursor
+        window.addEventListener('keyup', this.onSelectionChange.bind(this));
+        window.addEventListener('click', this.onSelectionChange.bind(this));
+    }
+
+    async onSelectionChange() {
+        // this.editorSvc.selectionManager.on("selectionChanged", async (start, end, range) => {
+        const text = this.editorSvc.clEditor.getContent();
+        const lines = text.split('\n');
+
+        // const { selectionStart, selectionEnd } = editorSvc.clEditor.selectionMgr;
+
+        // const startLineNo = text.slice(0, selectionStart).match(/[\r\n]/g)?.length;
+        // const endLineNo = text.slice(0, selectionEnd).match(/[\r\n]/g)?.length;
+
+        // const selectedLine = text[startLineNo];
+
+        const { parentElement } = this.editorSvc.selectionRange.commonAncestorContainer as Node;
+
+        const inheritedClasses = [];
+        let currentElement: HTMLElement = parentElement;
+        for (let i = 0; i < 10 && !currentElement.classList.contains("cledit-section"); i++) {
+            currentElement.classList.forEach(c => inheritedClasses.push(c));
+            currentElement = currentElement.parentElement;
+        }
+
+        this.cursorIsInHeading = false;
+        this.cursorIsInBold = false;
+        this.cursorIsInItalic = false;
+        this.cursorIsInStrikethrough = false;
+        this.cursorIsInBlockquote = false;
+        this.cursorIsInLink = false;
+        this.cursorIsInOrderedList = false;
+        this.cursorIsInList = false;
+        this.cursorIsInChecklist = false;
+        this.cursorIsInTable = false;
+        this.cursorIsInInlineCode = false;
+        this.cursorIsInCode = false;
+
+        if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].some(c => inheritedClasses.includes(c)))
+            this.cursorIsInHeading = true;
+        if (inheritedClasses.includes("bold"))
+            this.cursorIsInBold = true;
+        if (inheritedClasses.includes("italic"))
+            this.cursorIsInItalic = true;
+        if (inheritedClasses.includes("strike"))
+            this.cursorIsInStrikethrough = true;
+        if (inheritedClasses.includes("blockquote"))
+            this.cursorIsInBlockquote = true;
+        if (inheritedClasses.includes("bold"))
+            this.cursorIsInLink = true;
+
+        // These need custom markdown highlighting to work properly
+        if (inheritedClasses.includes("1"))
+            this.cursorIsInOrderedList = true;
+        if (inheritedClasses.includes("1"))
+            this.cursorIsInList = true;
+        if (inheritedClasses.includes("1"))
+            this.cursorIsInChecklist = true;
+
+        // Needs custom highlighting
+        if (inheritedClasses.includes("table"))
+            this.cursorIsInTable = true;
+
+        if (inheritedClasses.includes("code-snippet"))
+            this.cursorIsInInlineCode = true;
+        if (inheritedClasses.includes("code-block"))
+            this.cursorIsInCode = true;
     }
 
     ngAfterViewInit() {

@@ -6,7 +6,7 @@ const styleElts = [];
 function createStyleSheet(document) {
     const styleElt = document.createElement('style');
     styleElt.type = 'text/css';
-    styleElt.innerHTML = '.cledit-section * { display: inline; }';
+    styleElt.innerHTML = '.cledit-section * { display: inline; } .cledit-section .injected div {display: block}';
     document.head.appendChild(styleElt);
     styleElts.push(styleElt);
 }

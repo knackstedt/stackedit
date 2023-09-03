@@ -17,12 +17,43 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
     contentElt.setAttribute('tabindex', '0'); // To have focus even when disabled
     editor.toggleEditable = (isEditable) => {
         contentElt.contentEditable = isEditable == null ? !contentElt.contentEditable : isEditable;
+        contentElt.spellcheck = false;
     };
     editor.toggleEditable(true);
 
     function getTextContent() {
+
+        // function recursivelyCollectChildrenText(el) {
+        //     // This element has a content override, so we'll read that instead.
+        //     if (el.getAttribute('data-source')) {
+        //         const text = el.getAttribute('data-source')
+        //             .replace(/\\n/gm, '\n')
+        //             .replace(/\\"/gm, '"');
+
+        //         return `\`\`\`<injected>\n${text}\n\`\`\``;
+        //     }
+
+        //     // This doesn't have children, so we can simply read the textContent
+        //     else if (el.children.length == 0) {
+        //         return el.textContent;
+        //     }
+
+        //     // This has children, and no content override
+        //     else {
+        //         const sections = [...el.children].map(c =>
+        //             recursivelyCollectChildrenText(c));
+
+        //         return sections.join('');
+        //     }
+        // }
+
+        // const text = recursivelyCollectChildrenText(contentElt);
+
         // Markdown-it sanitization (Mac/DOS to Unix)
         let textContent = contentElt.textContent.replace(/\r[\n\u0085]?|[\u2424\u2028\u0085]/g, '\n');
+        // let textContent = text.replace(/\r[\n\u0085]?|[\u2424\u2028\u0085]/g, '\n');
+
+        // Append a newline at the end if one isn't present.
         if (textContent.slice(-1) !== '\n') {
             textContent += '\n';
         }
@@ -352,6 +383,7 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
                 "linkReferenceStyle": "full"
             });//store.getters['data/computedSettings'].turndown);
         turndownService.escape = str => str; // Disable escaping
+        // turndownService.keep(['div', 'span'])
     }
 
     contentElt.addEventListener('paste', (evt) => {
@@ -366,14 +398,23 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
                 try {
                     const html = clipboardData.getData('text/html');
                     if (html) {
-                        // TODO: Tolerate much more detailed HTML
+                        // TODO: Add a popup dialog to choose using whatever we
+                        // end up with, after using Turndown, or raw HTML propagation
+                        // Inject a custom fence around pasted content
+                        // data = `\`\`\`<injected>\n${html}\n\`\`\``;
+
                         const sanitizedHtml = htmlSanitizer.sanitizeHtml(html)
                             .replace(/&#160;/g, ' '); // Replace non-breaking spaces with classic spaces
                         if (sanitizedHtml) {
                             data = turndownService.turndown(sanitizedHtml);
                             // Handle double newlines added on HTML paste.
                             // TODO: Check if this needs to be placed elsewhere.
-                            data = data.replace(/\n\n/g, '\n');
+
+                            data = data
+                                // Fix duplicate newlines that are inserted
+                                .replace(/\n\n/g, '\n')
+                                // Fix duplicate spaces that get inserted
+                                .replace(/(?<!^)  /gm, ' ');
                         }
                     }
                 }
@@ -426,48 +467,8 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
     editor.removeMarker = removeMarker;
 
     editor.init = (opts = {}) => {
-        opts.content = `
-## Sample token
-dt0e01.ABCDEFABCDEFABCDEFABCDEF.0123456012345601234560123456012345601234560123456012345601234560
+        opts.content = ``;
 
-
-## Legend
-dt0e01 - identifier for an Elevate API token (distinguish from Saas / IAM tokens)
-ABCDEFABCDEFABCDEFABCDEF - Public Key
-0123456012345601234560123456012345601234560123456012345601234560 - Private key (used to decrypt sql password)
-
-esa_dt_secrets* table (in each tenant)
-254 + 24 + 2 + 8
-~288
-
-
-<!-- TODO Extend key char length -->
-key (360) value** | name | context
-! $elevate.<public  key>  <hashed  private  key> | <...> | <andrew.knackstedt@dynatrace.com>
-<!-- $elevate.<public key> <encrypted user email> | <...> | <andrew.knackstedt@dynatrace.com> -->
-<!-- $elevate.<public key> <encrypted sql password> | <...> | <andrew.knackstedt@dynatrace.com> -->
-
-
--  \* Only Administrator level service accounts can access the secrets table.
--  \*\* We use the private portion of the provided api token to decrypt the password.
-
-
-We then take that sql password, along with the \`context\` to create a new connection
-to the database impersonating the user marked as context.
-
-
-
-# For ELEVATE api access
-> esa_dt_secrets
-
-
-| id | key | value | name | context | owner |
-| --- |--- |--- |--- |--- |--- |
-| 1 | dt0e01.ABCDEFABCDEFABCDEFABCDEF | \<hashed\>| foobar | $apitoken | andrew.knackstedt@dynatrace.com |
-| 2 | EDTENV-000021 | \<hashed\> | lemonlime | $user | jeff.jefferson@customer.net |
-| 3 | EDTENV-000021 | \<hashed\> | tenant-wide env token | $tenant | $elevate |
-
-        `
         const options = ({
             getCursorFocusRatio() {
                 return 0.1;

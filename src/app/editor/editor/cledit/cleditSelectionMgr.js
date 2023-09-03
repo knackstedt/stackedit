@@ -50,6 +50,7 @@ function SelectionMgr(editor) {
             this.selectionEndContainer,
             this.selectionEndOffset,
         );
+
         if (this.cursorCoordinates.top !== coordinates.top ||
             this.cursorCoordinates.height !== coordinates.height ||
             this.cursorCoordinates.left !== coordinates.left
@@ -57,6 +58,7 @@ function SelectionMgr(editor) {
             this.cursorCoordinates = coordinates;
             this.$trigger('cursorCoordinatesChanged', coordinates);
         }
+
         if (adjustScroll) {
             let scrollEltHeight = scrollElt.clientHeight;
             if (typeof adjustScroll === 'number') {
@@ -69,9 +71,11 @@ function SelectionMgr(editor) {
                 + scrollElt.scrollTop;
             const minScrollTop = cursorTop - adjustment;
             const maxScrollTop = (cursorTop + adjustment) - scrollEltHeight;
+
             if (scrollElt.scrollTop > minScrollTop) {
                 scrollElt.scrollTop = minScrollTop;
-            } else if (scrollElt.scrollTop < maxScrollTop) {
+            }
+            else if (scrollElt.scrollTop < maxScrollTop) {
                 scrollElt.scrollTop = maxScrollTop;
             }
         }
@@ -105,20 +109,25 @@ function SelectionMgr(editor) {
         const min = Math.min(this.selectionStart, this.selectionEnd);
         const max = Math.max(this.selectionStart, this.selectionEnd);
         const selectionRange = this.createRange(min, max);
+
         if (!document.contains(selectionRange.commonAncestorContainer)) {
             return null;
         }
+
         const selection = window.getSelection();
         selection.removeAllRanges();
         const isBackward = this.selectionStart > this.selectionEnd;
+
         if (isBackward && selection.extend) {
             const beginRange = selectionRange.cloneRange();
             beginRange.collapse(false);
             selection.addRange(beginRange);
             selection.extend(selectionRange.startContainer, selectionRange.startOffset);
-        } else {
+        }
+        else {
             selection.addRange(selectionRange);
         }
+
         checkSelection(selectionRange);
         return selectionRange;
     };
@@ -244,6 +253,7 @@ function SelectionMgr(editor) {
             if (this.hasFocus()) {
                 let { selectionStart } = this;
                 let { selectionEnd } = this;
+
                 const selection = window.getSelection();
                 if (selection.rangeCount > 0) {
                     const selectionRange = selection.getRangeAt(0);
@@ -282,7 +292,8 @@ function SelectionMgr(editor) {
                         ) === 1) {
                             selectionStart = offset + selectionText.length;
                             selectionEnd = offset;
-                        } else {
+                        }
+                        else {
                             selectionStart = offset;
                             selectionEnd = offset + selectionText.length;
                         }
@@ -292,7 +303,8 @@ function SelectionMgr(editor) {
                             selectionEnd -= 1;
                             selectionStart = selectionEnd;
                             result = this.setSelectionStartEnd(selectionStart, selectionEnd);
-                        } else {
+                        }
+                        else {
                             setSelection(selectionStart, selectionEnd);
                             result = checkSelection(selectionRange);
                             // selectionRange doesn't change when selection is at the start of a section
@@ -312,6 +324,7 @@ function SelectionMgr(editor) {
             this.updateCursorCoordinates(saveCheckChange() && nextTickAdjustScroll);
             nextTickAdjustScroll = false;
         }, 10);
+
         const debouncedSave = debounce(() => {
             this.updateCursorCoordinates(saveCheckChange() && nextTickAdjustScroll);
             // In some cases we have to wait a little longer to see the
@@ -327,7 +340,8 @@ function SelectionMgr(editor) {
             if (debounced) {
                 nextTickAdjustScroll = nextTickAdjustScroll || adjustScrollParam;
                 debouncedSave();
-            } else {
+            }
+            else {
                 save();
             }
         };
@@ -342,21 +356,25 @@ function SelectionMgr(editor) {
     this.getCoordinates = (inputOffset, containerParam, offsetInContainerParam) => {
         let container = containerParam;
         let offsetInContainer = offsetInContainerParam;
+
         if (!container) {
             const offset = this.findContainer(inputOffset);
             ({ container } = offset);
             ({ offsetInContainer } = offset);
         }
+
         let containerElt = container;
         if (!containerElt.hasChildNodes() && container.parentNode) {
             containerElt = container.parentNode;
         }
+
         let isInvisible = false;
         while (!containerElt.offsetHeight) {
             isInvisible = true;
             if (containerElt.previousSibling) {
                 containerElt = containerElt.previousSibling;
-            } else {
+            }
+            else {
                 containerElt = containerElt.parentNode;
                 if (!containerElt) {
                     return {
@@ -367,11 +385,13 @@ function SelectionMgr(editor) {
                 }
             }
         }
+
         let rect;
         let left = 'left';
         if (isInvisible || container.textContent === '\n') {
             rect = containerElt.getBoundingClientRect();
-        } else {
+        }
+        else {
             const selectedChar = editor.getContent()[inputOffset];
             let startOffset = {
                 container,
@@ -386,18 +406,22 @@ function SelectionMgr(editor) {
                 if (startOffset.offsetInContainer === 0) {
                     // Need to calculate offset-1
                     startOffset = inputOffset - 1;
-                } else {
+                }
+                else {
                     startOffset.offsetInContainer -= 1;
                 }
-            } else if (endOffset.offsetInContainer === container.textContent.length) {
+            }
+            else if (endOffset.offsetInContainer === container.textContent.length) {
                 // Need to calculate offset+1
                 endOffset = inputOffset + 1;
-            } else {
+            }
+            else {
                 endOffset.offsetInContainer += 1;
             }
             const range = this.createRange(startOffset, endOffset);
             rect = range.getBoundingClientRect();
         }
+
         const contentRect = contentElt.getBoundingClientRect();
         return {
             top: Math.round((rect.top - contentRect.top) + contentElt.scrollTop),

@@ -13,6 +13,68 @@ import editorSvcDiscussions from './editor/editorSvcDiscussions';
 import editorSvcUtils from './editor/editorSvcUtils';
 
 
+
+import 'prismjs/components/prism-asciidoc';
+import 'prismjs/components/prism-awk';
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-batch';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cmake';
+import 'prismjs/components/prism-csharp';
+import 'prismjs/components/prism-cshtml';
+import 'prismjs/components/prism-csp';
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-csv';
+import 'prismjs/components/prism-dns-zone-file';
+import 'prismjs/components/prism-docker';
+import 'prismjs/components/prism-erlang';
+import 'prismjs/components/prism-excel-formula';
+import 'prismjs/components/prism-graphql';
+import 'prismjs/components/prism-gradle';
+import 'prismjs/components/prism-groovy';
+import 'prismjs/components/prism-hsts';
+import 'prismjs/components/prism-http';
+import 'prismjs/components/prism-icon';
+import 'prismjs/components/prism-ini';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-jq';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-json5';
+import 'prismjs/components/prism-jsonp';
+import 'prismjs/components/prism-jsstacktrace';
+import 'prismjs/components/prism-jsx';
+import 'prismjs/components/prism-log';
+import 'prismjs/components/prism-makefile';
+import 'prismjs/components/prism-markdown';
+import 'prismjs/components/prism-markup';
+import 'prismjs/components/prism-mermaid';
+import 'prismjs/components/prism-nginx';
+import 'prismjs/components/prism-perl';
+// import 'prismjs/components/prism-php';
+import 'prismjs/components/prism-plant-uml';
+import 'prismjs/components/prism-powerquery';
+import 'prismjs/components/prism-powershell';
+import 'prismjs/components/prism-sql';
+import 'prismjs/components/prism-properties';
+import 'prismjs/components/prism-puppet';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-regex';
+import 'prismjs/components/prism-rest';
+import 'prismjs/components/prism-ruby';
+import 'prismjs/components/prism-rust';
+import 'prismjs/components/prism-sass';
+import 'prismjs/components/prism-scheme';
+import 'prismjs/components/prism-scss';
+import 'prismjs/components/prism-sql';
+import 'prismjs/components/prism-toml';
+import 'prismjs/components/prism-tsx';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-uri';
+import 'prismjs/components/prism-yaml';
+import './prism-markdown-custom';
+
+
 const allowDebounce = (action, wait) => {
     let timeoutId;
     return (doDebounce = false, ...params) => {
@@ -128,9 +190,31 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
         editorSvc.$emit('previewCtxMeasured', null);
         this.previewCtxWithDiffs = null;
         editorSvc.$emit('previewCtxWithDiffs', null);
+
+        // This is the CL Editor for the text input
         const options = {
-            sectionHighlighter: section => Prism
-                .highlight(section.text, this.prismGrammars[section.data]),
+            sectionHighlighter: section => {
+
+                // TODO: Allow pasting code blocks with native rendering
+                // Render pasted code fence
+                if (section.text.match(/\`\`\`<injected>/)) {
+                    const text = section.text.replace(/\`\`\`<injected>/, '')
+                        .replace('\`\`\`', '');
+                    const source = text.replace(/[\r\n]/gm, '\\n').replace(/"/gm, '\\"');
+                    const d = document.createElement('div');
+                    d.innerHTML = text;
+                    d.classList.add("injected");
+                    d.setAttribute("data-source", source);
+                    return d.outerHTML;
+                    return `<div class="injected" source="${'123'}">${text}</div>`;
+                }
+
+                // const lang = section.text.match(/\`\`\`(?<lang>[a-z]+)\n/i)?.groups?.lang;
+
+                const res = Prism.highlight(section.text, Prism.languages.markdown, 'markdown');
+                return `<div class="prism language-markdown">${res}</div>`;
+
+            },
             sectionParser: (text) => {
                 this.parsingCtx = markdownConversionSvc.parseSections(this.converter, text);
                 return this.parsingCtx.sections;

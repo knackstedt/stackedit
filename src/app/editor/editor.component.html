@@ -1,144 +1,125 @@
-    <div class="layout" [class.layout--revision]="'revisionContent'">
-        <div class="layout__panel flex flex--row" [ngClass]="{'flex--end': styles.showSideBar}" style="display: flex;">
-            <!-- <div class="layout__panel layout__panel--explorer" v-show="styles.showExplorer"
-                [attr.aria-hidden]="!styles.showExplorer"
-                [ngStyle]="{width: styles.layoutOverflow ? '100%' : constants.explorerWidth + 'px'}">
-                <explorer></explorer>
-            </div> -->
-            <div class="layout__panel flex flex--column" tour-step-anchor="welcome,end"
-                [ngStyle]="{width: styles.innerWidth + 'px'}"
-                style="flex-direction: column;"
-            >
-                <div class="layout__panel layout__panel--navigation-bar" v-show="styles.showNavigationBar"
-                    [ngStyle]="{height: constants.navigationBarHeight + 'px'}">
-                    <!-- <navigation-bar></navigation-bar> -->
-                    <div class="toolbar">
-                        <!-- Header -->
-                        <mat-icon [ngx-menu]="textSizeMenu">format_size</mat-icon>
-                        <!-- Color -->
-                        <!-- <mat-icon (click)="1">format_color_text</mat-icon> -->
+<div class="layout dark">
+    <div class="layout__panel flex flex--row" [ngClass]="{'flex--end': styles.showSideBar}" style="display: flex;">
+        <!-- <div class="layout__panel layout__panel--explorer" v-show="styles.showExplorer"
+            [attr.aria-hidden]="!styles.showExplorer"
+            [ngStyle]="{width: styles.layoutOverflow ? '100%' : constants.explorerWidth + 'px'}">
+            <explorer></explorer>
+        </div> -->
+        <div class="layout__panel flex flex--column"
+            style="flex-direction: column; width: 100%"
+        >
+            <div class="layout__panel layout__panel--navigation-bar" [ngStyle]="{height: constants.navigationBarHeight + 'px'}">
+                <!-- <navigation-bar></navigation-bar> -->
+                <div class="toolbar">
+                    <!-- Header -->
+                    <mat-icon [ngx-menu]="textSizeMenu" [class.reflect]="cursorIsInHeading">format_size</mat-icon>
+                    <!-- Color -->
+                    <!-- <mat-icon (click)="1">format_color_text</mat-icon> -->
 
-                        <!-- Bold -->
-                        <mat-icon (click)="boldText()">format_bold</mat-icon>
-                        <!-- Italic -->
-                        <mat-icon (click)="italicizeText()">format_italic</mat-icon>
-                        <!-- Strikethrough -->
-                        <mat-icon (click)="strikethroughText()">format_strikethrough</mat-icon>
-                        <!-- Underscore -->
-                        <!-- <mat-icon>format_underlined</mat-icon> -->
+                    <!-- Bold -->
+                    <mat-icon (click)="boldText()" [class.reflect]="cursorIsInBold">format_bold</mat-icon>
+                    <!-- Italic -->
+                    <mat-icon (click)="italicizeText()" [class.reflect]="cursorIsInItalic">format_italic</mat-icon>
+                    <!-- Strikethrough -->
+                    <mat-icon (click)="strikethroughText()" [class.reflect]="cursorIsInStrikethrough">format_strikethrough</mat-icon>
+                    <!-- Underscore -->
+                    <!-- <mat-icon>format_underlined</mat-icon> -->
 
-                        <!-- Quote -->
-                        <mat-icon (click)="blockQuoteText()">format_quote</mat-icon>
-                        <!-- Link -->
-                        <mat-icon (click)="1">link</mat-icon>
+                    <!-- Quote -->
+                    <mat-icon (click)="blockQuoteText()" [class.reflect]="cursorIsInBlockquote">format_quote</mat-icon>
+                    <!-- Link -->
+                    <mat-icon (click)="1" [class.reflect]="cursorIsInLink">link</mat-icon>
 
-                        <!-- Ordered list -->
-                        <mat-icon (click)="insertOrderedList()">format_list_numbered</mat-icon>
-                        <!-- Unordered list -->
-                        <mat-icon (click)="insertList()">format_list_bulleted</mat-icon>
-                        <!-- Checklist -->
-                        <mat-icon (click)="insertCheckList()">rule</mat-icon>
+                    <!-- Ordered list -->
+                    <mat-icon (click)="insertOrderedList()" [class.reflect]="cursorIsInOrderedList">format_list_numbered</mat-icon>
+                    <!-- Unordered list -->
+                    <mat-icon (click)="insertList()" [class.reflect]="cursorIsInList">format_list_bulleted</mat-icon>
+                    <!-- Checklist -->
+                    <mat-icon (click)="insertCheckList()" [class.reflect]="cursorIsInChecklist">rule</mat-icon>
 
-                        <!-- Table -->
-                        <mat-icon >table_chart</mat-icon>
-                        <!-- Image -->
-                        <mat-icon>add_photo_alternate</mat-icon>
-                        <!-- Inline code -->
-                        <mat-icon (click)="insertInlineCode()">code</mat-icon>
-                        <!-- Code Block -->
-                        <mat-icon (click)="insertCodeBlock()">data_object</mat-icon>
+                    <!-- Table -->
+                    <mat-icon [class.reflect]="cursorIsInTable">table_chart</mat-icon>
+                    <!-- Image -->
+                    <mat-icon>add_photo_alternate</mat-icon>
+                    <!-- Inline code -->
+                    <mat-icon (click)="insertInlineCode()" [class.reflect]="cursorIsInInlineCode">code</mat-icon>
+                    <!-- Code Block -->
+                    <mat-icon (click)="insertCodeBlock()" [class.reflect]="cursorIsInCode">data_object</mat-icon>
 
-                        <!-- Mermaid Diagrams... -->
-                        <mat-icon>account_tree</mat-icon>
-                    </div>
+                    <!-- Mermaid Diagrams... -->
+                    <mat-icon [ngx-menu]="diagramMenu">account_tree</mat-icon>
                 </div>
-                <div class="layout__panel flex flex--row"
+            </div>
+            <div class="layout__panel flex flex--row"
+                style="flex: 1"
+            >
+                <div class="layout__panel layout__panel--editor" v-show="styles.showEditor"
+                    [ngStyle]="{ fontSize: styles.fontSize + 'px'}"
                     style="flex: 1"
                 >
-                    <div class="layout__panel layout__panel--editor" v-show="styles.showEditor"
-                        [ngStyle]="{width: (styles.editorWidth + styles.editorGutterWidth) + 'px', fontSize: styles.fontSize + 'px'}">
-                        <div class="gutter" [ngStyle]="{left: styles.editorGutterLeft + 'px'}">
-                            <div class="gutter__background" v-if="styles.editorGutterWidth"
-                                [ngStyle]="{width: styles.editorGutterWidth + 'px'}"></div>
-                        </div>
-                        <div
-                            class="editor"
-                            (click)="editorSvc.clEditor.focus()"
-                            (pointerenter)="editorSvc.editorIsActive = true"
-                            (pointerleave)="editorSvc.editorIsActive = false"
-                        >
-                            <div class="editor__inner markdown-highlighting"></div>
-                        </div>
-
-                        <!-- <editor></editor> -->
-                        <div class="gutter" [ngStyle]="{left: styles.editorGutterLeft + 'px'}">
-                            <!-- <sticky-comment v-if="styles.editorGutterWidth && stickyComment === 'top'"></sticky-comment> -->
-                            <!-- <current-discussion v-if="styles.editorGutterWidth"></current-discussion> -->
-                        </div>
-                    </div>
-                    <div class="layout__panel layout__panel--button-bar" v-show="styles.showEditor"
-                        [ngStyle]="{width: constants.buttonBarWidth + 'px'}">
-                        <!-- <button-bar></button-bar> -->
-                        <div>
-                            <button>
-                                <!-- Toddle preview panel on/off -->
-                                <mat-icon></mat-icon>
-                                <!-- Toggle view mode on -->
-                                <mat-icon></mat-icon>
-
-                                <span style="flex: 1"></span>
-
-                                <!-- What is focus mode? -->
-                                <mat-icon></mat-icon>
-
-                                <!-- Toggle scroll sync -->
-                                <mat-icon></mat-icon>
-                                <!-- Toggle status bar (blue bar at bottom with stats) -->
-                                <mat-icon></mat-icon>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="layout__panel layout__panel--preview" v-show="styles.showPreview"
-                        [ngStyle]="{width: (styles.previewWidth + styles.previewGutterWidth) + 'px', fontSize: styles.fontSize + 'px'}">
-                        <div class="gutter" [ngStyle]="{left: styles.previewGutterLeft + 'px'}">
-                            <div class="gutter__background" v-if="styles.previewGutterWidth"
-                                [ngStyle]="{width: styles.previewGutterWidth + 'px'}"></div>
-                        </div>
-
-                        <div class="preview">
-                            <div class="preview__inner-1">
-                                <div class="preview__inner-2"></div>
-                                <div class="gutter"></div>
-                            </div>
-                        </div>
-
-                        <!-- <preview></preview> -->
-                        <div class="gutter" [ngStyle]="{left: styles.previewGutterLeft + 'px'}">
-                            <!-- <sticky-comment v-if="styles.previewGutterWidth && stickyComment === 'top'"></sticky-comment> -->
-                            <!-- <current-discussion v-if="styles.previewGutterWidth"></current-discussion> -->
-                        </div>
-                    </div>
-                    <div class="layout__panel layout__panel--find-replace" v-if="showFindReplace">
-                        <!-- <find-replace></find-replace> -->
+                    <div
+                        class="editor"
+                        (click)="editorSvc.clEditor.focus()"
+                        (pointerenter)="editorSvc.editorIsActive = true"
+                        (pointerleave)="editorSvc.editorIsActive = false"
+                    >
+                        <div class="editor__inner markdown-highlighting"></div>
                     </div>
                 </div>
-                <div class="layout__panel layout__panel--status-bar" v-show="styles.showStatusBar"
-                    [ngStyle]="{height: constants.statusBarHeight + 'px'}">
-                    <!-- <status-bar></status-bar> -->
+                <div class="layout__panel layout__panel--button-bar" *ngIf="styles.showEditor"
+                    [ngStyle]="{width: constants.buttonBarWidth + 'px', flex: '0 0' + constants.buttonBarWidth + 'px'}"
+
+                >
+                    <!-- <button-bar></button-bar> -->
+                    <div>
+                            <!-- Toddle preview panel on/off -->
+                            <mat-icon></mat-icon>
+                            <!-- Toggle view mode on -->
+                            <mat-icon></mat-icon>
+
+                            <span style="flex: 1"></span>
+
+                            <!-- What is focus mode? -->
+                            <mat-icon></mat-icon>
+
+                            <!-- Toggle scroll sync -->
+                            <mat-icon></mat-icon>
+                            <!-- Toggle status bar (blue bar at bottom with stats) -->
+                            <mat-icon></mat-icon>
+                    </div>
+                </div>
+                <div class="layout__panel layout__panel--preview" v-show="styles.showPreview"
+                    [ngStyle]="{fontSize: styles.fontSize + 'px'}"
+                    style="flex: 1"
+                >
+
+                    <div class="preview">
+                        <div class="preview__inner-1">
+                            <div class="preview__inner-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layout__panel layout__panel--find-replace" v-if="showFindReplace">
+                    <!-- <find-replace></find-replace> -->
                 </div>
             </div>
-            <div class="layout__panel layout__panel--side-bar" v-show="styles.showSideBar"
-                [ngStyle]="{width: styles.layoutOverflow ? '100%' : constants.sideBarWidth + 'px'}">
-                <!-- <side-bar></side-bar> -->
-                    <div class="toc">
-                        <div class="toc__mask"></div>
-                        <div class="toc__inner"></div>
-                    </div>
-
+            <div class="layout__panel layout__panel--status-bar" *ngIf="styles.showStatusBar"
+                [ngStyle]="{height: constants.statusBarHeight + 'px'}">
+                <!-- <status-bar></status-bar> -->
+                <div>
+                    <span></span>
+                </div>
             </div>
         </div>
-        <!-- <tour v-if="!light && !layoutSettings.welcomeTourFinished"></tour> -->
+        <div class="layout__panel layout__panel--side-bar" v-show="styles.showSideBar"
+            [ngStyle]="{width: styles.layoutOverflow ? '100%' : constants.sideBarWidth + 'px'}">
+            <div class="toc">
+                <div class="toc__mask"></div>
+                <div class="toc__inner"></div>
+            </div>
+        </div>
     </div>
+</div>
 
 
 
