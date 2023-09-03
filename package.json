@@ -33,7 +33,7 @@
         "clipboard": "^1.7.1",
         "diff-match-patch": "^1.0.0",
         "katex": "^0.13.0",
-        "markdown-it": "^8.4.1",
+        "markdown-it": "^13.0.1",
         "markdown-it-abbr": "^1.0.4",
         "markdown-it-deflist": "^2.1.0",
         "markdown-it-emoji": "^2.0.2",

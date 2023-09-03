@@ -47,7 +47,7 @@ const inlineBaseRules2 = [
     'balance_pairs',
     'strikethrough',
     'emphasis',
-    'text_collapse',
+    // 'text_collapse'
 ];
 export default (extensionSvc) => {
     extensionSvc.onGetOptions((options, properties) => Object
