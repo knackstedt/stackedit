@@ -1,9 +1,6 @@
-import katexPlugin from './extensions/katexExtension'; // install shit
-import markdownPlugin from './extensions/markdownExtension'; // install shit
-import mermaidPlugin from './extensions/mermaidExtension'; // install shit
-import emojiPlugin from './extensions/emojiExtension'; // install shit
-// import store from '../store.1';
-
+import markdownPlugin from './extensions/markdownExtension';
+import mermaidPlugin from './extensions/mermaidExtension';
+import emojiPlugin from './extensions/emojiExtension';
 
 const getOptionsListeners = [];
 const initConverterListeners = [];
@@ -43,11 +40,9 @@ const extensionSvc = {
     },
 }
 
-katexPlugin(extensionSvc);
 markdownPlugin(extensionSvc);
 mermaidPlugin(extensionSvc);
 emojiPlugin(extensionSvc);
-
 
 export default extensionSvc;
 

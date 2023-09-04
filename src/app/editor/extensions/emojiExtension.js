@@ -1,6 +1,6 @@
 import markdownItEmoji from 'markdown-it-emoji';
-export default (extensionSvc) => {
 
+export default (extensionSvc) => {
     extensionSvc.onGetOptions((options, properties) => {
         options.emoji = properties.extensions.emoji.enabled;
         options.emojiShortcuts = properties.extensions.emoji.shortcuts;
