@@ -43,7 +43,7 @@
         "markdown-it-pandoc-renderer": "1.2.0",
         "markdown-it-sub": "^1.0.0",
         "markdown-it-sup": "^1.0.0",
-        "mermaid": "^8.9.2",
+        "mermaid": "^9.4.3",
         "prismjs": "^1.29.0",
         "request": "^2.85.0",
         "tslib": "^2.3.0",
