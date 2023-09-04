@@ -1,6 +1,6 @@
-import '../libs/clunderscore';
-import presets from '../data/presets';
-import constants from '../data/constants';
+import './libs/clunderscore';
+import presets from './data/presets';
+import constants from './data/constants';
 
 // For utils.uid()
 const uidLength = 16;
