@@ -1,10 +1,11 @@
-import { Component, OnInit, ViewContainerRef } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnInit, Output, ViewContainerRef } from '@angular/core';
 
 import editorSvc from './editorSvc'
 import markdownConversionSvc from 'src/app/editor/markdownConversionSvc';
-import { NgClass, NgIf, NgStyle } from '@angular/common';
+import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { TooltipDirective, MenuDirective, MenuItem } from '@dotglitch/ngx-common';
+import { TooltipDirective, MenuDirective, MenuItem, KeyboardService } from '@dotglitch/ngx-common';
+import { Subscription } from 'rxjs';
 
 window['editorSvc'] = editorSvc
 
@@ -19,6 +20,7 @@ const pagedownHandler = name => () => {
     styleUrls: ['./editor.component.scss'],
     imports: [
         NgIf,
+        NgFor,
         NgClass,
         NgStyle,
         MatIconModule,
@@ -31,6 +33,8 @@ export class EditorComponent implements OnInit {
 
     get $el() { return this.viewContainer.element.nativeElement as HTMLElement }
 
+    @Input() value: string = '';
+    @Output() valueChange = new EventEmitter<string>();
 
     wrapText(before = '', after = '', indent?: number, insertNewline = false) {
         const { selectionStart, selectionEnd } = editorSvc.clEditor.selectionMgr;
@@ -146,18 +150,18 @@ export class EditorComponent implements OnInit {
         // TODO: align to start of line
         this.wrapText("```\n", "\n```", null, true);
     }
-
+    insertComment() {
+        this.wrapText("<!-- ", " -->", null, true);
+    }
 
     /**
       * | Heading |     |
         | ---     | --- |
         |         |     |
      */
-    tableMenu: MenuItem[] = [
-        { label: "", }
+    insertTable(cols: number, rows: number) {
 
-
-    ];
+    }
 
     diagramMenu: MenuItem[] = [
         { label: "Mermaid Diagrams:"},
@@ -333,15 +337,45 @@ timeline
         statusBarHeight: 20,
     }
 
+    private keybindings: Subscription[] = [];
 
-    constructor(private viewContainer: ViewContainerRef) {
-        // TODO: Connect keybinds
-        // ctrl + / => comment;
-        // ctrl + b => bold;
-        // ctrl + i => Italic;
-        // ctrl + a => select all;
-        // ctrl + l => kill line;
-        // ctrl + shift + d => dupe current line
+    constructor(
+        private readonly viewContainer: ViewContainerRef,
+        private readonly keyboard: KeyboardService
+    ) {
+        this.keybindings = [
+            this.keyboard.onKeyCommand({
+                label: "Comment",
+                key: "/",
+                ctrl: true
+            }).subscribe(this.insertComment.bind(this)),
+            this.keyboard.onKeyCommand({
+                label: "Bold",
+                key: "b",
+                ctrl: true
+            }).subscribe(this.boldText.bind(this)),
+            this.keyboard.onKeyCommand({
+                label: "Italic",
+                key: "i",
+                ctrl: true
+            }).subscribe(this.italicizeText.bind(this)),
+            // this.keyboard.onKeyCommand({
+            //     label: "Select All",
+            //     key: "/",
+            //     ctrl: true
+            // }).subscribe(this.insertComment.bind(this)),
+            this.keyboard.onKeyCommand({
+                label: "Delete Line",
+                key: "l",
+                ctrl: true
+            }).subscribe(this.insertComment.bind(this)),
+            this.keyboard.onKeyCommand({
+                label: "Duplicate Current Line",
+                key: "d",
+                ctrl: true,
+                shift: true
+            }).subscribe(this.insertComment.bind(this))
+        ];
     }
 
 
@@ -360,20 +394,14 @@ timeline
 
     ngOnInit() {
         markdownConversionSvc.init(); // Needs to be inited before mount
-        this.updateBodySize();
-
-        window.addEventListener('resize', this.updateBodySize);
-        window.addEventListener('keyup', this.saveSelection);
-        window.addEventListener('mouseup', this.saveSelection);
-        window.addEventListener('focusin', this.saveSelection);
-        window.addEventListener('contextmenu', this.saveSelection);
-
 
         // Track the current state of the cursor
         window.addEventListener('keyup', this.onSelectionChange.bind(this));
         window.addEventListener('click', this.onSelectionChange.bind(this));
     }
 
+    @HostListener("document:keyup")
+    @HostListener("document:pointerup")
     async onSelectionChange() {
         // this.editorSvc.selectionManager.on("selectionChanged", async (start, end, range) => {
         const text = this.editorSvc.clEditor.getContent();
@@ -454,20 +482,16 @@ timeline
         setTimeout(focus, 100);
         // this.$watch(() => this.styles.showEditor, focus);
 
-        // editorSvc.clEditor.focus();
+        editorSvc.clEditor.focus();
+
+        // Bind the 'value' property
+        editorSvc.clEditor.setContent(this.value);
+        editorSvc.clEditor.on('contentChanged', (content, diffs, sectionList) => {
+            this.valueChange.next(content);
+        });
     }
 
     ngOnDestroy() {
-        // window.removeEventListener('resize', this.updateStyle);
-        window.removeEventListener('keyup', this.saveSelection);
-        window.removeEventListener('mouseup', this.saveSelection);
-        window.removeEventListener('focusin', this.saveSelection);
-        window.removeEventListener('contextmenu', this.saveSelection);
-    }
-
-    saveSelection = () => editorSvc.saveSelection(true);
-
-    updateBodySize() {
-        // unknown
+        this.keybindings.forEach(k => k.unsubscribe());
     }
 }
