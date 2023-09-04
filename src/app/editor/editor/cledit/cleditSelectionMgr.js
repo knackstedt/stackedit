@@ -392,7 +392,7 @@ function SelectionMgr(editor) {
             rect = containerElt.getBoundingClientRect();
         }
         else {
-            const selectedChar = editor.getContent()[inputOffset];
+            const selectedChar = editor.value[inputOffset];
             let startOffset = {
                 container,
                 offsetInContainer,

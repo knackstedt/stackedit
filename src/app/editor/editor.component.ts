@@ -421,35 +421,9 @@ timeline
 
     ngOnInit() {
         markdownConversionSvc.init(); // Needs to be inited before mount
-
-        // Track the current state of the cursor
-        window.addEventListener('keyup', this.onSelectionChange.bind(this));
-        window.addEventListener('click', this.onSelectionChange.bind(this));
     }
 
-    @HostListener("document:keyup")
-    @HostListener("document:pointerup")
     async onSelectionChange() {
-        // this.editorSvc.selectionManager.on("selectionChanged", async (start, end, range) => {
-        const text = this.editorSvc.clEditor.getContent();
-        const lines = text.split('\n');
-
-        // const { selectionStart, selectionEnd } = editorSvc.clEditor.selectionMgr;
-
-        // const startLineNo = text.slice(0, selectionStart).match(/[\r\n]/g)?.length;
-        // const endLineNo = text.slice(0, selectionEnd).match(/[\r\n]/g)?.length;
-
-        // const selectedLine = text[startLineNo];
-
-        const { parentElement } = this.editorSvc.selectionRange.commonAncestorContainer as Node;
-
-        const inheritedClasses = [];
-        let currentElement: HTMLElement = parentElement;
-        for (let i = 0; i < 10 && !currentElement.classList.contains("cledit-section"); i++) {
-            currentElement.classList.forEach(c => inheritedClasses.push(c));
-            currentElement = currentElement.parentElement;
-        }
-
         this.cursorIsInHeading = false;
         this.cursorIsInBold = false;
         this.cursorIsInItalic = false;
@@ -462,6 +436,17 @@ timeline
         this.cursorIsInTable = false;
         this.cursorIsInInlineCode = false;
         this.cursorIsInCode = false;
+
+        const { parentElement } = this.editorSvc?.selectionRange?.commonAncestorContainer as Node || {};
+
+        if (!parentElement) return;
+
+        const inheritedClasses = [];
+        let currentElement: HTMLElement = parentElement;
+        for (let i = 0; i < 10 && !currentElement.classList.contains("cledit-section"); i++) {
+            currentElement.classList.forEach(c => inheritedClasses.push(c));
+            currentElement = currentElement.parentElement;
+        }
 
         if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].some(c => inheritedClasses.includes(c)))
             this.cursorIsInHeading = true;
@@ -516,6 +501,9 @@ timeline
         editorSvc.clEditor.on('contentChanged', (content, diffs, sectionList) => {
             this.valueChange.next(content);
         });
+
+        // Handle cursor position updates
+        editorSvc.clEditor.selectionMgr.on("cursorCoordinatesChanged", this.onSelectionChange.bind(this))
     }
 
     ngOnDestroy() {

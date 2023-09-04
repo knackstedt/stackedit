@@ -194,23 +194,23 @@ export default {
         }
     },
     applyContent() {
-        if (clEditor) {
-            const content = {
-                comments: {},
-                discussions: {},
-                hash: 0,
-                id: null,
-                properties: "\n",
-                text: "\n",
-                type: "content"
-            }//store.getters['content/current'];
-            if (clEditor.setContent(content.text, true).range) {
-                // Marker will be recreated on contentChange
-                removeDiscussionMarkers();
-            } else {
-                syncDiscussionMarkers(content, false);
-            }
-        }
+    //     if (clEditor) {
+    //         const content = {
+    //             comments: {},
+    //             discussions: {},
+    //             hash: 0,
+    //             id: null,
+    //             properties: "\n",
+    //             text: "\n",
+    //             type: "content"
+    //         }//store.getters['content/current'];
+    //         if (clEditor.setContent(content.text, true).range) {
+    //             // Marker will be recreated on contentChange
+    //             removeDiscussionMarkers();
+    //         } else {
+    //             syncDiscussionMarkers(content, false);
+    //         }
+    //     }
     },
     getTrimmedSelection() {
         const { selectionMgr } = clEditor;

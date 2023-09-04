@@ -9,7 +9,9 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
         $scrollElt: scrollElt,
         $keystrokes: [],
         $markers: {},
+        value: ''
     };
+
     cledit.Utils.createEventHooks(editor);
     const { debounce } = cledit.Utils;
 
@@ -22,44 +24,47 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
 
     function getTextContent() {
 
-        // function recursivelyCollectChildrenText(el) {
-        //     // This element has a content override, so we'll read that instead.
-        //     if (el.getAttribute('data-source')) {
-        //         const text = el.getAttribute('data-source')
-        //             .replace(/\\n/gm, '\n')
-        //             .replace(/\\"/gm, '"');
 
-        //         return `\`\`\`<injected>\n${text}\n\`\`\``;
-        //     }
+        function recursivelyCollectChildrenText(el) {
+            // This element has a content override, so we'll read that instead.
+            if (el.nodeType == 1 && el.getAttribute('source')) {
+                const text = el.getAttribute('source')
+                    .replace(/\\n/gm, '\n')
+                    .replace(/\\"/gm, '"');
 
-        //     // This doesn't have children, so we can simply read the textContent
-        //     else if (el.children.length == 0) {
-        //         return el.textContent;
-        //     }
+                return text;
+                // return `\`\`\`<injected>\n${text}\n\`\`\``;
+            }
 
-        //     // This has children, and no content override
-        //     else {
-        //         const sections = [...el.children].map(c =>
-        //             recursivelyCollectChildrenText(c));
+            // This doesn't have children, so we can simply read the textContent
+            else if (el.nodeType != 1 || el.childNodes.length == 0) {
+                return el.textContent;
+            }
 
-        //         return sections.join('');
-        //     }
-        // }
+            // This has childNodes, and no content override
+            else {
+                const sections = [...el.childNodes].map(c =>
+                    recursivelyCollectChildrenText(c));
 
-        // const text = recursivelyCollectChildrenText(contentElt);
+                return sections.join('');
+            }
+        }
+
+        const text = recursivelyCollectChildrenText(contentElt);
+
 
         // Markdown-it sanitization (Mac/DOS to Unix)
-        let textContent = contentElt.textContent.replace(/\r[\n\u0085]?|[\u2424\u2028\u0085]/g, '\n');
-        // let textContent = text.replace(/\r[\n\u0085]?|[\u2424\u2028\u0085]/g, '\n');
+        // let textContent = contentElt.textContent.replace(/\r[\n\u0085]?|[\u2424\u2028\u0085]/g, '\n');
+        let textContent = text.replace(/\r[\n\u0085]?|[\u2424\u2028\u0085]/g, '\n');
 
         // Append a newline at the end if one isn't present.
         if (textContent.slice(-1) !== '\n') {
             textContent += '\n';
         }
-        return textContent;
+        return editor.value = textContent;
     }
 
-    let lastTextContent = getTextContent();
+    let lastTextContent = '';
     const highlighter = new cledit.Highlighter(editor);
 
     /* eslint-disable new-cap */
@@ -89,6 +94,8 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
     let noContentFix = false;
 
     function setContent(value, noUndo, maxStartOffsetOpt) {
+        editor.value = value;
+
         const textContent = getTextContent();
         const maxStartOffset = maxStartOffsetOpt != null && maxStartOffsetOpt < textContent.length
             ? maxStartOffsetOpt
@@ -171,6 +178,7 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
 
     let watcher;
     let skipSaveSelection;
+    // Primarily invoked by mutation observer
     function checkContentChange(mutations) {
         watcher.noWatch(() => {
             const removedSections = [];
@@ -301,12 +309,14 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
         const textContent = getTextContent();
         let min = Math.min(selectionMgr.selectionStart, selectionMgr.selectionEnd);
         let max = Math.max(selectionMgr.selectionStart, selectionMgr.selectionEnd);
+
         const state = {
             before: textContent.slice(0, min),
             after: textContent.slice(max),
             selection: textContent.slice(min, max),
             isBackwardSelection: selectionMgr.selectionStart > selectionMgr.selectionEnd,
         };
+
         editor.$keystrokes.cl_some((keystroke) => {
             if (!keystroke.handler(evt, state, editor)) {
                 return false;
@@ -490,7 +500,8 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
         editor.$trigger('contentChanged', lastTextContent, [0, lastTextContent], sectionList);
         if (options.selectionStart !== undefined && options.selectionEnd !== undefined) {
             editor.setSelection(options.selectionStart, options.selectionEnd);
-        } else {
+        }
+        else {
             selectionMgr.saveSelectionState();
         }
         undoMgr.init(options);
