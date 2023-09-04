@@ -1,7 +1,5 @@
 import DiffMatchPatch from 'diff-match-patch';
 import cledit from './cledit';
-import animationSvc from './animationSvc';
-// import store from '../../store.1';
 
 const diffMatchPatch = new DiffMatchPatch();
 
@@ -148,10 +146,5 @@ export default {
         } else if (scrollTop > maxScrollTop) {
             scrollTop = maxScrollTop;
         }
-        // TODO: Animation
-        animationSvc.animate(scrollerElt)
-            .scrollTop(scrollTop)
-            .duration(360)
-            .start();
     },
 };

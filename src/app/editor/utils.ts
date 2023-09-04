@@ -1,4 +1,3 @@
-import yaml from 'js-yaml';
 import '../libs/clunderscore';
 import presets from '../data/presets';
 import constants from '../data/constants';
@@ -192,20 +191,6 @@ export default {
             .map(c => `%${`00${c.charCodeAt(0).toString(16)}`.slice(-2)}`)
             .join('');
         return decodeURIComponent(uriEncodedStr);
-    },
-    computeProperties(yamlProperties) {
-        let properties = {} as any;
-        try {
-            properties = yaml.safeLoad(yamlProperties) || {};
-        } catch (e) {
-            // Ignore
-        }
-        const extensions = properties.extensions || {};
-        const computedPreset = deepCopy(computedPresets[extensions.preset] || computedPresets['default']);
-        const computedExtensions = deepOverride(computedPreset, properties.extensions);
-        computedExtensions.preset = extensions.preset;
-        properties.extensions = computedExtensions;
-        return properties;
     },
     randomize(value) {
         return Math.floor((1 + (Math.random() * 0.2)) * value);
