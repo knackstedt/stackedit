@@ -38,7 +38,27 @@
                     <mat-icon (click)="insertCheckList()" [class.reflect]="cursorIsInChecklist">rule</mat-icon>
 
                     <!-- Table -->
-                    <mat-icon [class.reflect]="cursorIsInTable">table_chart</mat-icon>
+                    <mat-icon [ngx-tooltip]="tablePopup" [ngx-tooltip-config]="{ triggers: ['click'], position: 'bottom' }" [class.reflect]="cursorIsInTable">table_chart</mat-icon>
+                    <ng-template #tablePopup let-data="data" let-dialog="dialog">
+                        <div
+                            *ngFor="let ctx of [{cols: 0, rows: 0}]"
+                            class="table-popup"
+                        >
+                            <div>{{ctx.cols}}x{{ctx.rows}}</div>
+                            <div class="grouped">
+                                <div class="table-row" *ngFor="let row of [1,2,3,4,5,6]">
+                                    <div
+                                        *ngFor="let col of [1,2,3,4,5,6]"
+                                        class="col-cell"
+                                        [class.selected]="ctx.cols >= col && ctx.rows >= row"
+                                        (pointerenter)="ctx.cols = col; ctx.rows = row"
+                                        (click)="insertTable(ctx.cols, ctx.rows); dialog.close()"
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-template>
+
                     <!-- Image -->
                     <mat-icon>add_photo_alternate</mat-icon>
                     <!-- Inline code -->

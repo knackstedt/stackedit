@@ -1,35 +1,60 @@
+::ng-deep :root {
+    --primary-color: #0c93e4;
+}
 
-.light {
+::ng-deep .light {
     --editor-background-color: #ffffff;
     --preview-background-color: #f3f3f3;
     --text-color: #121212;
     --text-muted-color: rgba(0, 0, 0, .28);
+    --selection-color: var(--primary-color);
+
+    --toolbar-background-color: #c4c4c4;
+    --toolbar-icon-color: var(--text-color);
+    --toolbar-icon-hover-color: var(--text-color);
+    --toolbar-icon-hover-background-color: #fffc;
+    --toolbar-table-border-color: #dee2e6;
+    --toolbar-table-border-hover-color: var(--primary-color);
+    --toolbar-table-background-color: #0000;
+    --toolbar-table-background-hover-color: #d7e0ff;
 
     --md-border-color: #dcdcdc;
     --md-header-border-color: #fff;
     --md-keyword-color: #000;
     --md-blockquote-color: #444;
     --md-blockquote-border-color: rgba(0, 0, 0, .1);
-    --md-anchor-color: #0c93e4;
+    --md-anchor-color: var(--primary-color);
 
 }
 
-.dark {
+::ng-deep .dark {
     --editor-background-color: #181a1b;
     --preview-background-color: #1f2123;
     --text-color: #efefef;
     --text-muted-color: rgba(255, 255, 255, .28);
+    --selection-color: var(--primary-color);
+
+    --toolbar-background-color: #2c2c2c;
+    --toolbar-icon-color: var(--text-color);
+    --toolbar-icon-hover-color: var(--text-color);
+    --toolbar-icon-hover-background-color: #555c;
+    --toolbar-table-border-color: #003468;
+    --toolbar-table-border-hover-color: var(--primary-color);
+    --toolbar-table-background-color: #0000;
+    --toolbar-table-background-hover-color: #00f6;
+
     --md-border-color: #474747;
     --md-header-border-color: #000;
     --md-blockquote-color: #aaa;
     --md-blockquote-border-color: hsla(0, 0%, 100%, .1);
     --md-keyword-color: #fff;
-    --md-anchor-color: #0c93e4;
+    --md-anchor-color: var(--primary-color);
 }
 
 .editor {
     font-family: 'Fira Sans';
     background-color: var(--editor-background-color);
+    cursor: text;
 
     .editor__inner.monospaced {
         font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
@@ -46,6 +71,9 @@
 
     .prism {
         background-color: #f0f0f0;
+    }
+    ::ng-deep *::selection {
+        background-color: var(--selection-color);
     }
 }
 
@@ -64,9 +92,11 @@
 
 .toolbar {
     display: flex;
-    height: 48px;
+    height: 100%;
     align-items: center;
     gap: 4px;
+    color: var(--toolbar-icon-color);
+    background-color: var(--toolbar-background-color);
 
     mat-icon {
         cursor: pointer;
@@ -80,7 +110,8 @@
         position: relative;
 
         &:hover {
-            background-color: #fffc;
+            background-color: var(--toolbar-icon-hover-background-color);
+            color: var(--toolbar-icon-hover-color);
         }
 
         &::after {
@@ -104,6 +135,30 @@
     }
 }
 
+.table-popup {
+    background-color: var(--background-color);
+    padding: 12px;
+    border-radius: 6px;
+
+    .table-row, .table-col {
+        display: flex;
+        gap: 2px;
+    }
+
+    .col-cell {
+        width: 16px;
+        height: 16px;
+        border: 1px solid var(--toolbar-table-border-color);
+        background-color: var(--toolbar-table-background-color);
+        cursor: pointer;
+
+        transition: background-color 200ms ease, border-color 200ms ease;
+        &.selected {
+            background-color: var(--toolbar-table-background-hover-color);
+            border-color: var(--toolbar-table-border-hover-color);
+        }
+    }
+}
 
 ::ng-deep {
     .icon-provider {

@@ -155,12 +155,35 @@ export class EditorComponent implements OnInit {
     }
 
     /**
-      * | Heading |     |
-        | ---     | --- |
-        |         |     |
+      * | Heading 1 |     |
+        | ---       | --- |
+        |           |     |
      */
     insertTable(cols: number, rows: number) {
+        let text: string[] = [];
 
+        for (let i = 0; i < rows+2; i++) {
+            // Empty cell
+            let placeholder = ''.padStart(8 + (cols.toString().length), ' ');
+            let cells: string[] = [];
+
+            // If we're on the second row, we place dashes in the cell.
+            if (i == 1)
+                placeholder = ''.padStart(8 + (cols.toString().length),'-');
+
+            for (let j = 0; j < cols; j++) {
+                // If we're on the first row, we use "Heading 1" etc.
+                if (i == 0)
+                    placeholder = "Heading " + (j+1);
+
+                cells.push(placeholder);
+            }
+
+            text.push("| " + cells.join(" | ") + " |");
+        }
+
+        const table = text.join('\n');
+        this.wrapText('', '\n' + table, null, true)
     }
 
     diagramMenu: MenuItem[] = [
@@ -374,7 +397,11 @@ timeline
                 key: "d",
                 ctrl: true,
                 shift: true
-            }).subscribe(this.insertComment.bind(this))
+            }).subscribe(this.insertComment.bind(this)),
+            this.keyboard.onKeyCommand({
+                label: "BREAKPOINT",
+                key: "pause"
+            }).subscribe(() => {debugger})
         ];
     }
 
