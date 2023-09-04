@@ -2,22 +2,29 @@
 .light {
     --editor-background-color: #ffffff;
     --preview-background-color: #f3f3f3;
+    --text-color: #121212;
+    --text-muted-color: rgba(0, 0, 0, .28);
+
     --md-border-color: #dcdcdc;
     --md-header-border-color: #fff;
-    --text-color: #121212;
-
-    --text-muted-color: rgba(0, 0, 0, .28);
     --md-keyword-color: #000;
+    --md-blockquote-color: #444;
+    --md-blockquote-border-color: rgba(0, 0, 0, .1);
+    --md-anchor-color: #0c93e4;
 
 }
+
 .dark {
     --editor-background-color: #181a1b;
     --preview-background-color: #1f2123;
-    --md-border-color: #474747;
-    --md-header-border-color: #000;
     --text-color: #efefef;
     --text-muted-color: rgba(255, 255, 255, .28);
+    --md-border-color: #474747;
+    --md-header-border-color: #000;
+    --md-blockquote-color: #aaa;
+    --md-blockquote-border-color: hsla(0, 0%, 100%, .1);
     --md-keyword-color: #fff;
+    --md-anchor-color: #0c93e4;
 }
 
 .editor {
@@ -303,7 +310,7 @@
     }
 
     a {
-        color: #0c93e4;
+        color: var(--md-anchor-color);
         text-decoration: underline;
         text-decoration-skip: ink
     }
@@ -327,15 +334,9 @@
     }
 
     blockquote {
-        color: rgba(0, 0, 0, .5);
+        color: var(--md-blockquote-color);
         padding-left: 1.5em;
-        border-left: 5px solid rgba(0, 0, 0, .1)
-    }
-
-    .app--dark .layout__panel--editor blockquote,
-    .app--dark .layout__panel--preview blockquote {
-        color: hsla(0, 0%, 100%, .4);
-        border-left-color: hsla(0, 0%, 100%, .1)
+        border-left: 5px solid var(--md-blockquote-border-color)
     }
 
     code {
@@ -515,21 +516,6 @@
         }
     }
 
-    .stackedit--pdf blockquote {
-        border-left-color: #ececec
-    }
-
-    .stackedit--pdf .katex-mathml,
-    .stackedit--pdf annotation {
-        display: none
-    }
-
-    .stackedit--pdf .stackedit__html {
-        padding-left: 0;
-        padding-right: 0;
-        max-width: none
-    }
-
     .markdown-highlighting {
         color: var(--text-color);
         caret-color: var(--text-color);
@@ -538,11 +524,6 @@
         -webkit-font-smoothing: auto;
         -moz-osx-font-smoothing: auto;
         font-weight: 400
-    }
-
-    .app--dark .markdown-highlighting {
-        color: hsla(0, 0%, 100%, .8);
-        caret-color: #fff
     }
 
     .markdown-highlighting .code {
@@ -560,17 +541,17 @@
         font-size: .85em
     }
 
-    .app--dark .markdown-highlighting .pre {
-        color: hsla(0, 0%, 100%, .8)
-    }
+    // .app--dark .markdown-highlighting .pre {
+    //     color: hsla(0, 0%, 100%, .8)
+    // }
 
-    .markdown-highlighting .pre [class*=language-] {
-        color: #000
-    }
+    // .markdown-highlighting .pre [class*=language-] {
+    //     color: #000
+    // }
 
-    .app--dark .markdown-highlighting .pre [class*=language-] {
-        color: #fff
-    }
+    // .app--dark .markdown-highlighting .pre [class*=language-] {
+    //     color: #fff
+    // }
 
     .markdown-highlighting .pre * {
         font-size: inherit !important
@@ -582,14 +563,10 @@
     }
 
     .markdown-highlighting .tag {
-        color: rgba(0, 0, 0, .8);
+        color: var(--text-color);
         font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
         font-size: .85em;
         font-weight: 600
-    }
-
-    .app--dark .markdown-highlighting .tag {
-        color: hsla(0, 0%, 100%, .8)
     }
 
     .markdown-highlighting .tag .attr-name,
@@ -602,25 +579,11 @@
         font-size: inherit !important
     }
 
-    .markdown-highlighting .latex,
-    .markdown-highlighting .math {
-        color: rgba(0, 0, 0, .8)
-    }
-
-    .app--dark .markdown-highlighting .latex,
-    .app--dark .markdown-highlighting .math {
-        color: hsla(0, 0%, 100%, .8)
-    }
-
     .markdown-highlighting .entity {
-        color: rgba(0, 0, 0, .8);
+        color: var(--text-color);
         font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
         font-size: .85em;
         font-style: italic
-    }
-
-    .app--dark .markdown-highlighting .entity {
-        color: hsla(0, 0%, 100%, .8)
     }
 
     .markdown-highlighting .entity * {
@@ -667,11 +630,7 @@
     }
 
     .markdown-highlighting .blockquote {
-        color: rgba(0, 0, 0, .48)
-    }
-
-    .app--dark .markdown-highlighting .blockquote {
-        color: hsla(0, 0%, 100%, .48)
+        color: var(--md-blockquote-color)
     }
 
     .markdown-highlighting .h1,
@@ -769,15 +728,7 @@
 
     .markdown-highlighting .email,
     .markdown-highlighting .url {
-        color: rgba(0, 0, 0, .4)
-    }
-
-    .markdown-highlighting .linkdef .url {
-        color: rgba(0, 0, 0, .4)
-    }
-
-    .app--dark .markdown-highlighting .linkdef .url {
-        color: hsla(0, 0%, 100%, .4)
+        color: var(--text-muted-color)
     }
 
     .markdown-highlighting .fn,
@@ -808,19 +759,8 @@
         color: var(--text-color)
     }
 
-    .app--dark .markdown-highlighting .img .cl-underlined-text,
-    .app--dark .markdown-highlighting .imgref .cl-underlined-text,
-    .app--dark .markdown-highlighting .link .cl-underlined-text,
-    .app--dark .markdown-highlighting .linkref .cl-underlined-text {
-        color: #fff
-    }
-
     .markdown-highlighting .cl-title {
-        color: rgba(0, 0, 0, .8)
-    }
-
-    .app--dark .markdown-highlighting .cl-title {
-        color: hsla(0, 0%, 100%, .8)
+        color: var(--text-color)
     }
 
     .markdown-highlighting--inline .cl-toc,
@@ -841,21 +781,6 @@
 
     input[type=checkbox] {
         outline: 5px auto #349be8
-    }
-
-    .app--dark .layout__panel--editor .button,
-    .app--dark .layout__panel--preview .button {
-        color: #ccc
-    }
-
-    .app--dark .layout__panel--editor .button:active,
-    .app--dark .layout__panel--editor .button:focus,
-    .app--dark .layout__panel--editor .button:hover,
-    .app--dark .layout__panel--preview .button:active,
-    .app--dark .layout__panel--preview .button:focus,
-    .app--dark .layout__panel--preview .button:hover {
-        color: #ccc;
-        background-color: hsla(0, 0%, 100%, .067)
     }
 
     .flex {
@@ -962,7 +887,8 @@
         position: absolute;
         width: 100%;
         height: 100%;
-        overflow: auto
+        overflow: auto;
+        scroll-behavior: smooth;
     }
 
     .editor__inner {
@@ -1036,38 +962,5 @@
     .layout__panel--status-bar {
         background-color: #007acc;
         flex: 0 0 20px;
-    }
-
-    .layout__panel--editor {
-        background-color: #fff
-    }
-
-    .app--dark .layout__panel--editor {
-        background-color: #1e1e1e
-    }
-
-    .layout__panel--button-bar,
-    .layout__panel--preview {
-        background-color: #f3f3f3
-    }
-
-    .app--dark .layout__panel--button-bar,
-    .app--dark .layout__panel--preview {
-        background-color: #252525
-    }
-
-    .layout__panel--explorer,
-    .layout__panel--side-bar {
-        background-color: #ddd
-    }
-
-    .layout__panel--find-replace {
-        background-color: #e6e6e6;
-        position: absolute;
-        left: 0;
-        bottom: 0;
-        width: 300px;
-        height: auto;
-        border-top-right-radius: 3px
     }
 }
