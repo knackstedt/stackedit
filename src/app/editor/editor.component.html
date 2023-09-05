@@ -14,7 +14,42 @@
                     <!-- Header -->
                     <mat-icon [ngx-menu]="textSizeMenu" [class.reflect]="cursorIsInHeading">format_size</mat-icon>
                     <!-- Color -->
-                    <!-- <mat-icon (click)="1">format_color_text</mat-icon> -->
+                    <mat-icon [ngx-tooltip]="colorPopup" [ngx-tooltip-config]="{ triggers: ['click'], position: 'bottom' }">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" style="margin-top: -3px;">
+                            <path style="fill: {{currentTextColor}}" d="M2 20L2 24L22 24L22 20L2 20z" />
+                            <path fill="var(--text-color)" d="M10.75 3L5.49 17L7.91 17L9.18 13.42L14.83 13.42L16.09 17L18.51 17L13.25 3L10.75 3z M11.94 5.6L12.06 5.6L14.09 11.39L9.91 11.39L11.94 5.6z" />
+                        </svg>
+                    </mat-icon>
+                    <ng-template #colorPopup let-dialog="dialog">
+                        <div
+                            *ngFor="let ctx of [{color: '#000'}]"
+                            class="table-popup"
+                        >
+                            <div
+                                [style.color]="ctx.color"
+                                [style.background-color]=""
+                            >
+                                {{ctx.color}}
+                            </div>
+                            <div class="grouped" style="display: flex; gap: 2px; flex-direction: column;">
+                                <div class="table-row" *ngFor="let row of colorList">
+                                    <div
+                                        *ngFor="let color of row"
+                                        class="col-cell"
+                                        style="width: 24px; height: 24px"
+                                        [style.background-color]="color + 'ee'"
+                                        [style.border-color]="color + ''"
+                                        (click)="currentTextColor = color; dialog.close()"
+                                        (pointerenter)="ctx.color = color"
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </ng-template>
+                    <!-- <button>
+
+                    </button> -->
 
                     <!-- Bold -->
                     <mat-icon (click)="boldText()" [class.reflect]="cursorIsInBold">format_bold</mat-icon>
@@ -28,7 +63,31 @@
                     <!-- Quote -->
                     <mat-icon (click)="blockQuoteText()" [class.reflect]="cursorIsInBlockquote">format_quote</mat-icon>
                     <!-- Link -->
-                    <mat-icon (click)="1" [class.reflect]="cursorIsInLink">link</mat-icon>
+                    <mat-icon [ngx-tooltip]="linkPopup" [ngx-tooltip-config]="{ triggers: ['click'], position: 'bottom' }" [class.reflect]="cursorIsInLink">link</mat-icon>
+                    <ng-template #linkPopup let-dialog="dialog">
+                        <div
+                            *ngFor="let ctx of [{text: editorSvc.clEditor.selectionMgr.getSelectedText()}]"
+                            class="link-popup"
+                            cursorIsInLink
+                        >
+                            <div class="simple-input">
+                                <input #url type="text" required="">
+                                <label>URL</label>
+                            </div>
+                            <div class="simple-input">
+                                <input #label [value]="ctx.text" type="text">
+                                <label>Label</label>
+                            </div>
+
+                            <mat-icon
+                                [style.color]="url.value?.length > 2 ? 'var(--text-color)' : 'var(--text-muted-color)'"
+                                [style.cursor]="url.value?.length > 2 ? 'unset' : 'pointer'"
+                                (click)="insertLink(url.value, label.value); dialog.close()"
+                            >
+                                check
+                            </mat-icon>
+                        </div>
+                    </ng-template>
 
                     <!-- Ordered list -->
                     <mat-icon (click)="insertOrderedList()" [class.reflect]="cursorIsInOrderedList">format_list_numbered</mat-icon>
@@ -60,7 +119,25 @@
                     </ng-template>
 
                     <!-- Image -->
-                    <mat-icon>add_photo_alternate</mat-icon>
+                    <mat-icon [ngx-tooltip]="imagePopup" [ngx-tooltip-config]="{ triggers: ['click'], position: 'bottom' }">add_photo_alternate</mat-icon>
+                    <ng-template #imagePopup let-dialog="dialog">
+                        <div
+                            *ngFor="let ctx of [{color: '#000'}]"
+                            class="photo-popup"
+                        >
+                            <div class="simple-input">
+                                <input type="text" name="" required="">
+                                <label>Username</label>
+                            </div>
+                            <div class="simple-input">
+                                <input type="password" name="" required="">
+                                <label>Password</label>
+                            </div>
+
+                            <mat-icon>check</mat-icon>
+                        </div>
+                    </ng-template>
+
                     <!-- Inline code -->
                     <mat-icon (click)="insertInlineCode()" [class.reflect]="cursorIsInInlineCode">code</mat-icon>
                     <!-- Code Block -->

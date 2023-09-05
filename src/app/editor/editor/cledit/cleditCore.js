@@ -27,13 +27,12 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
 
         function recursivelyCollectChildrenText(el) {
             // This element has a content override, so we'll read that instead.
-            if (el.nodeType == 1 && el.getAttribute('source')) {
+            if (el.nodeType == 1 && el.getAttribute('source') != null) {
                 const text = el.getAttribute('source')
                     .replace(/\\n/gm, '\n')
                     .replace(/\\"/gm, '"');
 
                 return text;
-                // return `\`\`\`<injected>\n${text}\n\`\`\``;
             }
 
             // This doesn't have children, so we can simply read the textContent
@@ -268,16 +267,6 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
         return true;
     }
 
-    // In case of Ctrl/Cmd+A outside the editor element
-    windowKeydownListener = (evt) => {
-        if (!tryDestroy()) {
-            keydownHandler(() => {
-                adjustCursorPosition();
-            })(evt);
-        }
-    };
-    window.addEventListener('keydown', windowKeydownListener);
-
     // Mouseup can happen outside the editor element
     windowMouseListener = () => {
         if (!tryDestroy()) {
@@ -301,6 +290,7 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
         selectionMgr.saveSelectionState.cl_bind(selectionMgr, true, false),
     );
 
+    // This handles 'Enter' and keyboard arrow events.
     contentElt.addEventListener('keydown', keydownHandler((evt) => {
         selectionMgr.saveSelectionState();
 
@@ -403,14 +393,15 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
         let { clipboardData } = evt;
         if ( clipboardData ) {
             data = clipboardData.getData('text/plain');
-            if (turndownService) {
+            // TODO: Re-enable after paste dialog is added.
+            if (false && turndownService) {
                 try {
                     const html = clipboardData.getData('text/html');
                     if (html) {
                         // TODO: Add a popup dialog to choose using whatever we
                         // end up with, after using Turndown, or raw HTML propagation
                         // Inject a custom fence around pasted content
-                        // data = `\`\`\`<injected>\n${html}\n\`\`\``;
+                        // data = `\n\`\`\`<injected>\n${html}\n</injected>\n\`\`\`\n`;
 
                         const sanitizedHtml = htmlSanitizer.sanitizeHtml(html)
                             .replace(/&#160;/g, ' '); // Replace non-breaking spaces with classic spaces

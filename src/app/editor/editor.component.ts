@@ -17,7 +17,10 @@ const pagedownHandler = name => () => {
 @Component({
     selector: 'app-editor',
     templateUrl: './editor.component.html',
-    styleUrls: ['./editor.component.scss'],
+    styleUrls: [
+        './editor.component.scss',
+        './palette.scss'
+    ],
     imports: [
         NgIf,
         NgFor,
@@ -35,6 +38,30 @@ export class EditorComponent implements OnInit {
 
     @Input() value: string = '';
     @Output() valueChange = new EventEmitter<string>();
+
+    readonly colorList = [
+        // Gray  red     yellow  green   gcyan   lblue   dblue   violet  puke    brown
+        "#000000 #4c4c4c #666666 #808080 #999999 #b3b3b3 #cccccc #e6e6e6 #f2f2f2 #ffffff".split(' '),
+        "#d4dae4 #ffcdd2 #f9e6ad #bce4ce #bdf0e9 #b3e5fc #aec1ff #c5c0da #d6bdcc #d2c5c1".split(' '),
+        "#b0b8cd #fe9998 #f4d679 #90d2af #92e7dc #81d4fa #88a3f9 #9f97c1 #c492ac #b4a09a".split(' '),
+        "#949db1 #f35c4e #edb90f #33b579 #02d7c5 #29b6f6 #5874cd #7e6bad #a9537c #826358".split(' '),
+        "#727a8c #e94633 #eaa100 #36955f #11b3a5 #039be5 #2349ae #584a8f #963a64 #624339".split(' '),
+        "#5e6677 #d73c2d #ea8f00 #247346 #018b80 #0288d1 #163fa2 #4f4083 #81355a #5d4037".split(' '),
+        "#3f4757 #ca3626 #ea7e00 #1d5b38 #026b60 #0277bd #083596 #473776 #6e3051 #4e342e".split(' '),
+        "#1d2534 #bb2b1a #ea5d00 #17492d #024f43 #01579b #002381 #3a265f #4c2640 #3e2723".split(' ')
+
+
+        // ...[
+        //     'A700',
+        //     'A400',
+        //     'A200',
+        //     'A100'
+        // ].map(n => 'red.pink.purple.indigo.cyan.teal.lightGreen.yellow.orange'.split('.').map(c => c+'-'+n))
+        // 'grey-900',
+        // 'grey-600',
+        // 'grey-400',
+        // 'grey-50',
+    ]
 
     wrapText(before = '', after = '', indent?: number, insertNewline = false) {
         const { selectionStart, selectionEnd } = editorSvc.clEditor.selectionMgr;
@@ -92,6 +119,27 @@ export class EditorComponent implements OnInit {
         editorSvc.clEditor.setContent(patchedText);
     }
 
+    /**
+     * Replace the current selection with the given text.
+     */
+    replaceText(text: string) {
+        const { selectionStart, selectionEnd } = editorSvc.clEditor.selectionMgr;
+        let content = editorSvc.clEditor.getContent() as string;
+
+        const startIndex = Math.min(selectionStart, selectionEnd);
+        const endIndex = Math.max(selectionStart, selectionEnd);
+
+        const preString = content.slice(0, startIndex);
+        const postString = content.slice(endIndex);
+
+        const patchedText =
+            preString +
+            text +
+            postString;
+
+        editorSvc.clEditor.setContent(patchedText);
+    }
+
     injectHeading(size: number) {
         const headerString = ''.padStart(size, '#') + ' ';
         this.wrapText(headerString, '', null, true);
@@ -106,8 +154,11 @@ export class EditorComponent implements OnInit {
         { label: "Heading 6", action: () => this.injectHeading(6) }
     ];
 
-    colorizeText() {
-
+    colorizeText(color: string) {
+        this.wrapText(`<span style="color: ${color}">`, "</span>");
+    }
+    setTextFont(font: string) {
+        this.wrapText(`<span style="font-family: ${font}">`, "</span>");
     }
 
     boldText() {
@@ -126,8 +177,8 @@ export class EditorComponent implements OnInit {
         this.wrapText("> ", '\n', 2, true);
     }
 
-    insertLink() {
-
+    insertLink(url, label) {
+        this.replaceText(`[${label}](${url})`);
     }
 
     insertOrderedList() {
@@ -418,6 +469,7 @@ timeline
     cursorIsInTable = false;
     cursorIsInInlineCode = false;
     cursorIsInCode = false;
+    currentTextColor = "#f00";
 
     ngOnInit() {
         markdownConversionSvc.init(); // Needs to be inited before mount

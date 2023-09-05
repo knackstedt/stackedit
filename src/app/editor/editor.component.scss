@@ -65,8 +65,20 @@
         font-size: inherit !important
     }
 
-    .cledit-section .injected * {
-        display: unset;
+    ::ng-deep .cledit-section .injection-portal {
+        contain: content;
+        overflow: auto;
+
+        &>div {
+            display: flex;
+            flex-direction: column;
+        }
+        // * {
+        //     display: unset;
+        // }
+        div {
+            display: block;
+        }
     }
 
     .prism {
@@ -135,11 +147,18 @@
     }
 }
 
+/**
+    Tooltip styles
+*/
+.link-popup,
+.photo-popup,
 .table-popup {
     background-color: var(--background-color);
     padding: 12px;
     border-radius: 6px;
+}
 
+.table-popup {
     .table-row, .table-col {
         display: flex;
         gap: 2px;
@@ -157,6 +176,45 @@
             background-color: var(--toolbar-table-background-hover-color);
             border-color: var(--toolbar-table-border-hover-color);
         }
+    }
+}
+
+.link-popup,
+.photo-popup {
+
+    .simple-input {
+        position: relative;
+    }
+
+    .simple-input input {
+        width: 100%;
+        padding: 10px 0;
+        font-size: 16px;
+        color: var(--text-color);
+        margin-bottom: 30px;
+        border: none;
+        border-bottom: 1px solid var(--text-color);
+        outline: none;
+        background: transparent;
+    }
+
+    .simple-input label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 10px 0;
+        font-size: 16px;
+        color: var(--text-color);
+        pointer-events: none;
+        transition: .5s;
+    }
+
+    .simple-input input:focus~label,
+    .simple-input input:valid~label {
+        top: -20px;
+        left: 0;
+        color: var(--primary-color);
+        font-size: 12px;
     }
 }
 
