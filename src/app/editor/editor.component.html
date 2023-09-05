@@ -142,7 +142,7 @@
                     <mat-icon (click)="insertCodeBlock()" [class.reflect]="cursorIsInCode">data_object</mat-icon>
 
                     <!-- Mermaid Diagrams... -->
-                    <mat-icon [ngx-menu]="diagramMenu">account_tree</mat-icon>
+                    <mat-icon [ngx-menu]="diagramMenu" [ngx-menu-config]="{ customClass: ['medmaid-menu'] }">account_tree</mat-icon>
                 </div>
             </div>
             <div class="layout__panel flex flex--row"

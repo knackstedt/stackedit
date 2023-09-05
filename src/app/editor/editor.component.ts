@@ -9,11 +9,6 @@ import { Subscription } from 'rxjs';
 
 window['editorSvc'] = editorSvc
 
-const pagedownHandler = name => () => {
-    editorSvc.pagedownEditor.uiManager.doClick(name);
-    return true;
-};
-
 @Component({
     selector: 'app-editor',
     templateUrl: './editor.component.html',
@@ -239,23 +234,23 @@ export class EditorComponent implements OnInit {
 
     diagramMenu: MenuItem[] = [
         { label: "Mermaid Diagrams:"},
-        "separator",
         { label: "Examples", link: "https://mermaid.js.org/syntax/examples.html", linkTarget: "_blank" },
-        { label: "Flow Chart", action: () => this.wrapText(`\`\`\`mermaid
+        "separator",
+        { label: "Flow Chart", action: () => this.wrapText(`\n\`\`\`mermaid
 flowchart LR
-    markdown["\`This ** is ** _Markdown_\`"]
-    newLines["\`Line1
+    markdown[This ** is ** _Markdown_]
+    newLines["Line1
     Line 2
-    Line 3\`"]
+    Line 3"]
     markdown --> newLines
 \`\`\``) },
-        { label: "Sequence Diagram", action: () => this.wrapText(`\`\`\`mermaid
+        { label: "Sequence Diagram", action: () => this.wrapText(`\n\`\`\`mermaid
 sequenceDiagram
 Alice->>John: Hello John, how are you?
 John-->>Alice: Great!
 Alice-)John: See you later!
 \`\`\``) },
-        { label: "Class Diagram", action: () => this.wrapText(`\`\`\`mermaid
+        { label: "Class Diagram", action: () => this.wrapText(`\n\`\`\`mermaid
 classDiagram
     Animal <|-- Duck
     Animal <|-- Fish
@@ -279,7 +274,7 @@ classDiagram
         +run()
     }
 \`\`\``) },
-        { label: "State Diagram", action: () => this.wrapText(`\`\`\`mermaid
+        { label: "State Diagram", action: () => this.wrapText(`\n\`\`\`mermaid
 stateDiagram-v2
     [*] --> Still
     Still --> [*]
@@ -289,13 +284,13 @@ stateDiagram-v2
     Moving --> Crash
     Crash --> [*]
 \`\`\``) },
-        { label: "Entity Relationship Diagram", action: () => this.wrapText(`\`\`\`mermaid
+        { label: "Entity Relationship Diagram", action: () => this.wrapText(`\n\`\`\`mermaid
 erDiagram
     CUSTOMER ||--o{ ORDER : places
     ORDER ||--|{ LINE-ITEM : contains
     CUSTOMER }|..|{ DELIVERY-ADDRESS : uses
 \`\`\``) },
-        { label: "User Journey Diagram", action: () => this.wrapText(`\`\`\`mermaid
+        { label: "User Journey Diagram", action: () => this.wrapText(`\n\`\`\`mermaid
 journey
     title My working day
     section Go to work
@@ -306,7 +301,7 @@ journey
     Go downstairs: 5: Me
     Sit down: 5: Me
 \`\`\``) },
-        { label: "Gantt Chart", action: () => this.wrapText(`\`\`\`mermaid
+        { label: "Gantt Chart", action: () => this.wrapText(`\n\`\`\`mermaid
 gantt
     title A Gantt Diagram
     dateFormat  YYYY-MM-DD
@@ -317,29 +312,13 @@ gantt
     Task in sec      :2014-01-12  , 12d
     another task      : 24d
 \`\`\``) },
-        { label: "Pie Chart", action: () => this.wrapText(`\`\`\`mermaid
+        { label: "Pie Chart", action: () => this.wrapText(`\n\`\`\`mermaid
 pie title Pets adopted by volunteers
     "Dogs" : 386
     "Cats" : 85
     "Rats" : 15
 \`\`\``) },
-        { label: "Quadrant Chart", action: () => this.wrapText(`\`\`\`mermaid
-quadrantChart
-    title Reach and engagement of campaigns
-    x-axis Low Reach --> High Reach
-    y-axis Low Engagement --> High Engagement
-    quadrant-1 We should expand
-    quadrant-2 Need to promote
-    quadrant-3 Re-evaluate
-    quadrant-4 May be improved
-    Campaign A: [0.3, 0.6]
-    Campaign B: [0.45, 0.23]
-    Campaign C: [0.57, 0.69]
-    Campaign D: [0.78, 0.34]
-    Campaign E: [0.40, 0.34]
-    Campaign F: [0.35, 0.78]
-\`\`\``) },
-        { label: "Requirement Diagram", action: () => this.wrapText(`\`\`\`mermaid
+        { label: "Requirement Diagram", action: () => this.wrapText(`\n\`\`\`mermaid
 requirementDiagram
 
     requirement test_req {
@@ -355,21 +334,21 @@ requirementDiagram
 
     test_entity - satisfies -> test_req
 \`\`\``) },
-        { label: "Mindmap", action: () => this.wrapText(`\`\`\`mermaid
+        { label: "Mindmap", action: () => this.wrapText(`\n\`\`\`mermaid
 mindmap
-      Root
-          A
-            B
-            C
+    Root
+        A
+          B
+          C
 \`\`\``) },
-        { label: "Timeline", action: () => this.wrapText(`\`\`\`mermaid
+        { label: "Timeline", action: () => this.wrapText(`\n\`\`\`mermaid
 timeline
-      title History of Social Media Platform
-      2002 : LinkedIn
-      2004 : Facebook
-           : Google
-      2005 : Youtube
-      2006 : Twitter
+    title History of Social Media Platform
+    2002 : LinkedIn
+    2004 : Facebook
+        : Google
+    2005 : Youtube
+    2006 : Twitter
 \`\`\``) }
     ];
 

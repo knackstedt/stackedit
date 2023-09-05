@@ -51,6 +51,26 @@
     --md-anchor-color: var(--primary-color);
 }
 
+::ng-deep {
+    .ngx-menu.medmaid-menu {
+        .mat-mdc-dialog-container .mdc-dialog__surface {
+            background-color: var(--editor-background-color);
+        }
+    }
+
+    .preview {
+        svg[id^="mermaid-svg"] {
+            .node {
+                rect, circle, ellipse, polygon, path {
+                    fill: #fff4dd;
+                    stroke: hsl(40.5882352941, 60%, 83.3333333333%);
+                    stroke-width: 1px;
+                }
+            }
+        }
+    }
+}
+
 .editor {
     font-family: 'Fira Sans';
     background-color: var(--editor-background-color);
@@ -331,225 +351,228 @@
         font-style: italic
     }
 
-    article,
-    aside,
-    footer,
-    header,
-    nav,
-    section {
-        display: block
-    }
+    .preview {
 
-    h1 {
-        font-size: 2em;
-        margin: .67em 0
-    }
+        article,
+        aside,
+        footer,
+        header,
+        nav,
+        section {
+            display: block
+        }
 
-    figcaption,
-    figure {
-        display: block
-    }
+        h1 {
+            font-size: 2em;
+            margin: .67em 0
+        }
 
-    figure {
-        margin: 1em 40px
-    }
+        figcaption,
+        figure {
+            display: block
+        }
 
-    hr {
-        box-sizing: content-box;
-        height: 0;
-        overflow: visible
-    }
+        figure {
+            margin: 1em 40px
+        }
 
-    abbr[title] {
-        border-bottom: none;
-        text-decoration: underline;
-        text-decoration: underline dotted
-    }
+        hr {
+            box-sizing: content-box;
+            height: 0;
+            overflow: visible
+        }
 
-    b,
-    strong {
-        font-weight: inherit;
-        font-weight: bolder
-    }
+        abbr[title] {
+            border-bottom: none;
+            text-decoration: underline;
+            text-decoration: underline dotted
+        }
 
-    code,
-    kbd,
-    samp {
-        font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
-        font-size: 1em
-    }
+        b,
+        strong {
+            font-weight: inherit;
+            font-weight: bolder
+        }
 
-    img {
-        border-style: none
-    }
+        code,
+        kbd,
+        samp {
+            font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
+            font-size: 1em
+        }
 
-    blockquote,
-    dl,
-    ol,
-    p,
-    pre,
-    ul {
-        margin: 1.2em 0
-    }
+        img {
+            border-style: none
+        }
 
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-        margin: 1.8em 0;
-        line-height: 1.33
-    }
+        blockquote,
+        dl,
+        ol,
+        p,
+        pre,
+        ul {
+            margin: 1.2em 0
+        }
 
-    h1:after,
-    h2:after {
-        content: "";
-        display: block;
-        position: relative;
-        top: .33em;
-        border-bottom: 1px solid hsla(0, 0%, 50%, .33)
-    }
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            margin: 1.8em 0;
+            line-height: 1.33
+        }
 
-    ol ol,
-    ol ul,
-    ul ol,
-    ul ul {
-        margin: 0
-    }
+        h1:after,
+        h2:after {
+            content: "";
+            display: block;
+            position: relative;
+            top: .33em;
+            border-bottom: 1px solid hsla(0, 0%, 50%, .33)
+        }
 
-    dt {
-        font-weight: 700
-    }
+        ol ol,
+        ol ul,
+        ul ol,
+        ul ul {
+            margin: 0
+        }
 
-    a {
-        color: var(--md-anchor-color);
-        text-decoration: underline;
-        text-decoration-skip: ink
-    }
+        dt {
+            font-weight: 700
+        }
 
-    a:focus,
-    a:hover {
-        text-decoration: none
-    }
+        a {
+            color: var(--md-anchor-color);
+            text-decoration: underline;
+            text-decoration-skip: ink
+        }
 
-    code,
-    pre,
-    samp {
-        font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
-        font-size: .85em
-    }
+        a:focus,
+        a:hover {
+            text-decoration: none
+        }
 
-    code *,
-    pre *,
-    samp * {
-        font-size: inherit
-    }
+        code,
+        pre,
+        samp {
+            font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
+            font-size: .85em
+        }
 
-    blockquote {
-        color: var(--md-blockquote-color);
-        padding-left: 1.5em;
-        border-left: 5px solid var(--md-blockquote-border-color)
-    }
+        code *,
+        pre *,
+        samp * {
+            font-size: inherit
+        }
 
-    code {
-        background-color: rgba(0, 0, 0, .05);
-        border-radius: 3px;
-        padding: 2px 4px
-    }
+        blockquote {
+            color: var(--md-blockquote-color);
+            padding-left: 1.5em;
+            border-left: 5px solid var(--md-blockquote-border-color)
+        }
 
-    hr {
-        border: 0;
-        border-top: 1px solid hsla(0, 0%, 50%, .33);
-        margin: 2em 0
-    }
+        code {
+            background-color: rgba(0, 0, 0, .05);
+            border-radius: 3px;
+            padding: 2px 4px
+        }
 
-    pre>code {
-        background-color: rgba(0, 0, 0, .05);
-        display: block;
-        padding: .5em;
-        -webkit-text-size-adjust: none;
-        overflow-x: auto;
-        white-space: pre
-    }
+        hr {
+            border: 0;
+            border-top: 1px solid hsla(0, 0%, 50%, .33);
+            margin: 2em 0
+        }
 
-    .toc ul {
-        list-style-type: none;
-        padding-left: 20px
-    }
+        pre>code {
+            background-color: rgba(0, 0, 0, .05);
+            display: block;
+            padding: .5em;
+            -webkit-text-size-adjust: none;
+            overflow-x: auto;
+            white-space: pre
+        }
 
-    table {
-        background-color: transparent;
-        border-collapse: collapse;
-        border-spacing: 0
-    }
+        .toc ul {
+            list-style-type: none;
+            padding-left: 20px
+        }
 
-    td,
-    th {
-        // border-right: 1px solid var(--md-border-color);
-        padding: 8px 12px
-    }
+        table {
+            background-color: transparent;
+            border-collapse: collapse;
+            border-spacing: 0
+        }
 
-    td:last-child,
-    th:last-child {
-        border-right: 0
-    }
+        td,
+        th {
+            // border-right: 1px solid var(--md-border-color);
+            padding: 8px 12px
+        }
 
-    td {
-        border-top: 1px solid var(--md-border-color);
-    }
-    tr:first-of-type td {
-        border-top: 1px solid var(--md-header-border-color);
-    }
+        td:last-child,
+        th:last-child {
+            border-right: 0
+        }
 
-    mark {
-        background-color: #f8f840
-    }
+        td {
+            border-top: 1px solid var(--md-border-color);
+        }
+        tr:first-of-type td {
+            border-top: 1px solid var(--md-header-border-color);
+        }
 
-    kbd {
-        font-family: Lato, Helvetica Neue, Helvetica, sans-serif;
-        background-color: #fff;
-        border: 1px solid rgba(63, 63, 63, .25);
-        border-radius: 3px;
-        box-shadow: 0 1px 0 rgba(63, 63, 63, .25);
-        color: #333;
-        display: inline-block;
-        font-size: .8em;
-        margin: 0 .1em;
-        padding: .1em .6em;
-        white-space: nowrap
-    }
+        mark {
+            background-color: #f8f840
+        }
 
-    abbr[title] {
-        border-bottom: 1px dotted #777;
-        cursor: help
-    }
+        kbd {
+            font-family: Lato, Helvetica Neue, Helvetica, sans-serif;
+            background-color: #fff;
+            border: 1px solid rgba(63, 63, 63, .25);
+            border-radius: 3px;
+            box-shadow: 0 1px 0 rgba(63, 63, 63, .25);
+            color: #333;
+            display: inline-block;
+            font-size: .8em;
+            margin: 0 .1em;
+            padding: .1em .6em;
+            white-space: nowrap
+        }
 
-    img {
-        max-width: 100%
-    }
+        abbr[title] {
+            border-bottom: 1px dotted #777;
+            cursor: help
+        }
 
-    .task-list-item {
-        list-style-type: none
-    }
+        img {
+            max-width: 100%
+        }
 
-    .task-list-item-checkbox {
-        margin: 0 .2em 0 -1.3em
-    }
+        .task-list-item {
+            list-style-type: none
+        }
 
-    .footnote {
-        font-size: .8em;
-        position: relative;
-        top: -.25em;
-        vertical-align: top
-    }
+        .task-list-item-checkbox {
+            margin: 0 .2em 0 -1.3em
+        }
 
-    .page-break-after {
-        page-break-after: always
-    }
+        .footnote {
+            font-size: .8em;
+            position: relative;
+            top: -.25em;
+            vertical-align: top
+        }
 
-    .abc-notation-block {
-        overflow-x: auto !important
+        .page-break-after {
+            page-break-after: always
+        }
+
+        .abc-notation-block {
+            overflow-x: auto !important
+        }
     }
 
     .stackedit__html {
