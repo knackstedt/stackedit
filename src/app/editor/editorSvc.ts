@@ -2,7 +2,7 @@ import Vue from 'vue';
 import DiffMatchPatch from 'diff-match-patch';
 import Prism from 'prismjs';
 import markdownItPandocRenderer from 'markdown-it-pandoc-renderer';
-import cledit from './editor/cledit';
+import cledit from './editor/cledit/index';
 import pagedown from './libs/pagedown';
 import htmlSanitizer from './libs/htmlSanitizer';
 import markdownConversionSvc from './markdownConversionSvc';
@@ -586,7 +586,7 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
                 }) && imgElt;
         };
 
-        const triggerImgCacheGc = cledit.Utils.debounce(() => {
+        const triggerImgCacheGc = cledit['Utils'].debounce(() => {
             Object.entries(imgCache).forEach(([src, entries]) => {
                 // Filter entries that are not attached to the DOM
                 const filteredEntries = (entries as any[]).filter(imgElt => this.editorElt.contains(imgElt));

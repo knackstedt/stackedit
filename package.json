@@ -10,7 +10,7 @@
     "main": "index.js",
     "scripts": {
         "dev": "ng serve --port 8080 --ssl",
-        "build": "ng build"
+        "build": "ng build --project package"
     },
     "dependencies": {
         "@angular-builders/custom-webpack": "^15.0.0",

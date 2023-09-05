@@ -2,6 +2,25 @@
   "$schema": "../node_modules/ng-packagr/ng-package.schema.json",
   "dest": "../dist/stackedit",
   "lib": {
-    "entryFile": "src/app/editor/editor.component.ts"
-  }
+    "entryFile": "app/editor/editor.component.ts"
+  },
+    "allowedNonPeerDependencies": [
+        "diff-match-patch",
+            "dompurify",
+            "markdown-it",
+            "markdown-it-abbr",
+            "markdown-it-deflist",
+            "markdown-it-emoji",
+            "markdown-it-footnote",
+            "markdown-it-imsize",
+            "markdown-it-mark",
+            "markdown-it-pandoc-renderer",
+            "markdown-it-sub",
+            "markdown-it-sup",
+            "mermaid",
+            "prismjs",
+            "turndown",
+            "vue",
+            "vuex"
+    ]
 }
