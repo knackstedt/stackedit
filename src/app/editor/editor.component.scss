@@ -57,18 +57,6 @@
             background-color: var(--editor-background-color);
         }
     }
-
-    .preview {
-        svg[id^="mermaid-svg"] {
-            .node {
-                rect, circle, ellipse, polygon, path {
-                    fill: #fff4dd;
-                    stroke: hsl(40.5882352941, 60%, 83.3333333333%);
-                    stroke-width: 1px;
-                }
-            }
-        }
-    }
 }
 
 .editor {
