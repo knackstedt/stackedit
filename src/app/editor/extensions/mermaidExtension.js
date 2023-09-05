@@ -5,7 +5,18 @@ const config = {
     logLevel: 5,
     startOnLoad: false,
     arrowMarkerAbsolute: false,
-    theme: 'neutral',
+    theme: 'base',
+    securityLevel: "strict",
+    themeVariables: {
+        primaryColor: '#464646',
+        primaryTextColor: '#fff',
+        // primaryBorderColor: '#7C0000',
+        lineColor: '#84FFFF',
+        secondaryColor: '#00E5FF',
+        tertiaryColor: '#536DFE',
+        noteBkgColor: '#84FFFF',
+        noteTextColor: '#121212'
+    },
     flowchart: {
         htmlLabels: true,
         curve: 'linear',
@@ -47,19 +58,23 @@ let init = () => {
     init = () => { };
 };
 
-const render = (elt) => {
-    try {
-        init();
-        const svgId = `mermaid-svg-${utils.uid()}`;
-        mermaid.mermaidAPI.render(svgId, elt.textContent, () => {
-            while (elt.firstChild) {
-                elt.removeChild(elt.lastChild);
-            }
-            elt.appendChild(containerElt.querySelector(`#${svgId}`));
-        }, containerElt);
-    } catch (e) {
-        console.error(e); // eslint-disable-line no-console
-    }
+const render = async (elt) => {
+    init();
+    const svgId = `mermaid-svg-${utils.uid()}`;
+
+    mermaid.mermaidAPI.renderAsync(svgId, elt.textContent, () => {
+        while (elt.firstChild) {
+            elt.removeChild(elt.lastChild);
+        }
+
+        const el = containerElt.querySelector('#' + svgId)
+        elt.appendChild(el);
+    }, containerElt)
+        .catch(e => {
+            // In the event of an invalid mermaid chart, render the section with an error message.
+            elt.innerHTML = `<pre>${e.message}</pre>`;
+        });
+
 };
 
 export default (extensionSvc) => {
