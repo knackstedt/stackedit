@@ -88,9 +88,9 @@ Prism.languages.insertBefore('markdown', 'url', {
 
 Prism.languages.insertBefore('markdown', 'comment', {
     'color': {
-        pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*?<\/span>/g,
+        pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*<\/span>/g,
         lookbehind: true,
-        greedy: true,
+        greedy: false,
         inside: {
             "color-hex": {
                 pattern: /#(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})(?=[^A-Fa-f0-9])/,
@@ -98,7 +98,7 @@ Prism.languages.insertBefore('markdown', 'comment', {
                 greedy: true
             },
             "content": {
-                pattern: /(?<=<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">).+?(?=<\/span>)/,
+                pattern: /(?<=<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">).+(?=<\/span>)/,
                 lookbehind: true,
                 greedy: true,
                 inside: {
@@ -115,7 +115,7 @@ Prism.languages.insertBefore('markdown', 'comment', {
         }
     }
 });
-
+Prism.languages.markdown.color.inside.content.inside.color = Prism.languages.markdown.color;
 
 const tableCell = /(?:\\.|``(?:[^`\r\n]|`(?!`))+``|`[^`\r\n]+`|[^\\|\r\n`])+/.source;
 const tableRow = /\|?__(?:\|__)+\|?(?:(?:\n|\r\n?)|(?![\s\S]))/.source.replace(/__/g, function () { return tableCell; });
