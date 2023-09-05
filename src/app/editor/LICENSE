@@ -1,3 +1,34 @@
+/**
+ *
+ * Disclaimer: The Apache 2.0 license applies to the following files:
+ *     - all files under `./data`, `./editor` `./extensions` `./libs`
+ *     - editorSvc.ts
+ *     - extensionSvc.ts
+ *     - markdownConversionSvc.ts
+ *     - diffUtils.js
+ *     - utils.ts
+ *     - variables.scss
+ *
+ * All other files fall under the MIT license referenced in the package.json, unless
+ * otherwise specified.
+ *
+ *
+ * Disclaimed changes:
+ * - Rewrote editor and preview components to use Angular instead of Vue
+ * - Rewrote several files to TS
+ * - Added support for rendering color text
+ * - Upgraded several dependencies
+ * - Optimized event handling (generically across clEdit)
+ * - Improved content parsing on paste (duplicate lines, extra spaces etc.)
+ * - Improved dark & light mode support
+ * - Packaging for Angular component distribution
+ *
+ */
+
+
+
+
+
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
