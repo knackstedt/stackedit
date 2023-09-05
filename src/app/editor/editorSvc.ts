@@ -197,17 +197,16 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
 
                 // TODO: Allow pasting code blocks with native rendering
                 // Render pasted code fence
-                if (section.text.match(/\`\`\`<injected>/)) {
-                    const text = section.text.replace(/\`\`\`<injected>/, '')
-                        .replace('\`\`\`', '');
-                    const source = text.replace(/[\r\n]/gm, '\\n').replace(/"/gm, '\\"');
-                    const d = document.createElement('div');
-                    d.innerHTML = text;
-                    d.classList.add("injected");
-                    d.setAttribute("data-source", source);
-                    return d.outerHTML;
-                    return `<div class="injected" source="${'123'}">${text}</div>`;
-                }
+                // if (section.text.match(/\`\`\`<injected>/)) {
+                //     const text = section.text.replace(/\`\`\`<injected>/, '')
+                //         .replace('\`\`\`', '');
+                //     const source = text.replace(/[\r\n]/gm, '\\n').replace(/"/gm, '\\"');
+                //     const d = document.createElement('div');
+                //     d.innerHTML = text;
+                //     d.classList.add("injected");
+                //     d.setAttribute("data-source", source);
+                //     return d.outerHTML;
+                // }
 
                 // const lang = section.text.match(/\`\`\`(?<lang>[a-z]+)\n/i)?.groups?.lang;
 
@@ -316,7 +315,8 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
                     }
                     if (insertBeforeTocElt) {
                         this.tocElt.insertBefore(sectionTocElt, insertBeforeTocElt);
-                    } else {
+                    }
+                    else {
                         this.tocElt.appendChild(sectionTocElt);
                     }
 
@@ -625,122 +625,73 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
         let imgEltsToCache = [];
         // TODO: inline images config
         // if (store.getters['data/computedSettings'].editor.inlineImages) {
-        if (true) {
-            this.clEditor.highlighter.on('sectionHighlighted', (section) => {
-                section.elt.getElementsByClassName('token img').cl_each((imgTokenElt) => {
-                    const srcElt = imgTokenElt.querySelector('.token.cl-src');
-                    if (srcElt) {
-                        // Create an img element before the .img.token and wrap both elements
-                        // into a .token.img-wrapper
-                        const imgElt = document.createElement('img');
-                        imgElt.style.display = 'none';
-                        const uri = srcElt.textContent;
-                        if (!/^unsafe/.test(htmlSanitizer.sanitizeUri(uri, true))) {
-                            imgElt.onload = () => {
-                                imgElt.style.display = '';
-                            };
-                            imgElt.src = uri;
-                            // Take img size into account
-                            const sizeElt = imgTokenElt.querySelector('.token.cl-size');
-                            if (sizeElt) {
-                                const match = sizeElt.textContent.match(/=(\d*)x(\d*)/);
-                                if (match[1]) {
-                                    imgElt.width = parseInt(match[1], 10);
-                                }
-                                if (match[2]) {
-                                    imgElt.height = parseInt(match[2], 10);
-                                }
-                            }
-                            imgEltsToCache.push(imgElt);
-                        }
-                        const imgTokenWrapper = document.createElement('span');
-                        imgTokenWrapper.className = 'token img-wrapper';
-                        imgTokenElt.parentNode.insertBefore(imgTokenWrapper, imgTokenElt);
-                        imgTokenWrapper.appendChild(imgElt);
-                        imgTokenWrapper.appendChild(imgTokenElt);
-                    }
-                });
-            });
-        }
+        this.clEditor.highlighter.on('sectionHighlighted', (section) => {
 
-        this.clEditor.highlighter.on('highlighted', () => {
-            imgEltsToCache.forEach((imgElt) => {
-                const cachedImgElt = getFromImgCache(imgElt);
-                if (cachedImgElt) {
-                    // Found a previously loaded image that has just been released
-                    imgElt.parentNode.replaceChild(cachedImgElt, imgElt);
-                } else {
-                    addToImgCache(imgElt);
+            // Render images inline in the editor.
+            section.elt.getElementsByClassName('token img').cl_each((imgTokenElt) => {
+                const srcElt = imgTokenElt.querySelector('.token.cl-src');
+                if (!srcElt) return;
+
+                // Create an img element before the .img.token and wrap both elements
+                // into a .token.img-wrapper
+                const imgElt = document.createElement('img');
+                imgElt.style.display = 'none';
+                const uri = srcElt.textContent;
+                if (true || !/^unsafe/.test(htmlSanitizer.sanitizeUri(uri, true))) {
+                    imgElt.onload = () => {
+                        imgElt.style.display = '';
+                    };
+                    imgElt.src = uri;
+                    // Take img size into account
+                    const sizeElt = imgTokenElt.querySelector('.token.cl-size');
+                    if (sizeElt) {
+                        const match = sizeElt.textContent.match(/=(\d*)x(\d*)/);
+                        if (match[1]) {
+                            imgElt.width = parseInt(match[1], 10);
+                        }
+                        if (match[2]) {
+                            imgElt.height = parseInt(match[2], 10);
+                        }
+                    }
+                    imgEltsToCache.push(imgElt);
                 }
+
+                const imgTokenWrapper = document.createElement('span');
+                imgTokenWrapper.className = 'token img-wrapper';
+                imgTokenElt.parentNode.insertBefore(imgTokenWrapper, imgTokenElt);
+                imgTokenWrapper.appendChild(imgElt);
+                imgTokenWrapper.appendChild(imgTokenElt);
             });
-            imgEltsToCache = [];
-            // Eject released images from cache
-            triggerImgCacheGc();
+
+            section.elt.querySelectorAll('.injection-fence').cl_each((fenceElement: HTMLElement) => {
+                const insertWrapper = document.createElement('div');
+                insertWrapper.className = 'token injection-portal';
+                insertWrapper.setAttribute("source", '');
+
+                // fenceElement.setAttribute('source', fenceElement.textContent);
+                const insertion = fenceElement.textContent.replace(/^```<injected>\n?|<\/injected>\s*```$/g, '');
+
+                insertWrapper.innerHTML = insertion;//htmlSanitizer.sanitizeHtml(insertion);
+                fenceElement.insertAdjacentElement('beforebegin', insertWrapper);
+                // insertWrapper.appendChild(fenceElement);
+            });
         });
 
-
-
-        // clEditorSvc.setPreviewElt(element[0].querySelector('.preview__inner-2'))
-        // var previewElt = element[0].querySelector('.preview')
-        // clEditorSvc.isPreviewTop = previewElt.scrollTop < 10
-        // previewElt.addEventListener('scroll', function () {
-        //   var isPreviewTop = previewElt.scrollTop < 10
-        //   if (isPreviewTop !== clEditorSvc.isPreviewTop) {
-        //     clEditorSvc.isPreviewTop = isPreviewTop
-        //     scope.$apply()
-        //   }
-        // })
-
-        // Watch file content changes
-        let lastContentId = null;
-        let lastProperties;
-        // TODO: This does ...something?
-        // store.watch(
-        //     () => store.getters['content/currentChangeTrigger'],
-        //     () => {
-        //         const content = store.getters['content/current'];
-        //         // Track ID changes
-        //         let initClEditor = false;
-        //         if (content.id !== lastContentId) {
-        //             instantPreview = true;
-        //             lastContentId = content.id;
-        //             initClEditor = true;
+        // this.clEditor.highlighter.on('highlighted', () => {
+        //     imgEltsToCache.forEach((imgElt) => {
+        //         const cachedImgElt = getFromImgCache(imgElt);
+        //         if (cachedImgElt) {
+        //             // Found a previously loaded image that has just been released
+        //             imgElt.parentNode.replaceChild(cachedImgElt, imgElt);
+        //         } else {
+        //             addToImgCache(imgElt);
         //         }
-        //         // Track properties changes
-        //         if (content.properties !== lastProperties) {
-        //             lastProperties = content.properties;
-        //             const options = extensionSvc.getOptions(store.getters['content/currentProperties']);
-        //             if (utils.serializeObject(options) !== utils.serializeObject(this.options)) {
-        //                 this.options = options;
-        //                 this.initPrism();
-        //                 this.initConverter();
-        //                 initClEditor = true;
-        //             }
-        //         }
-        //         if (initClEditor) {
-        //             this.initClEditor();
-        //         }
-        //         // Apply potential text and discussion changes
-        //         this.applyContent();
-        //     }, {
-        //     immediate: true,
-        // },
-        // );
+        //     });
+        //     imgEltsToCache = [];
+        //     // Eject released images from cache
+        //     triggerImgCacheGc();
+        // });
 
-        // Disable editor if hidden or if no content is loaded
-        // TODO: ???
-        // store.watch(
-        //     () => store.getters['content/isCurrentEditable'],
-        //     editable => this.clEditor.toggleEditable(!!editable), {
-        //     immediate: true,
-        // },
-        // );
-
-        // TODO: This is what exactly?
-        // store.watch(
-        //     () => utils.serializeObject(store.getters['layout/styles']),
-        //     () => this.measureSectionDimensions(false, true, true),
-        // );
 
         this.measureSectionDimensions(false, true, true)
 
