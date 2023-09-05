@@ -636,257 +636,251 @@
         font-size: inherit;
         -webkit-font-smoothing: auto;
         -moz-osx-font-smoothing: auto;
-        font-weight: 400
+        font-weight: 400;
+
+        .code {
+            font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
+            font-size: .85em
+        }
+
+        .code * {
+            font-size: inherit !important
+        }
+
+        .pre {
+            color: rgba(0, 0, 0, .8);
+            font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
+            font-size: .85em
+        }
+
+        // .app--dark .pre {
+        //     color: hsla(0, 0%, 100%, .8)
+        // }
+
+        // .pre [class*=language-] {
+        //     color: #000
+        // }
+
+        // .app--dark .pre [class*=language-] {
+        //     color: #fff
+        // }
+
+        .pre * {
+            font-size: inherit !important
+        }
+
+        .pre,
+        .pre * {
+            line-height: 1.33
+        }
+
+        .tag {
+            color: var(--text-color);
+            font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
+            font-size: .85em;
+            font-weight: 600
+        }
+
+        .tag .attr-name,
+        .tag .attr-value,
+        .tag .punctuation {
+            font-weight: 400
+        }
+
+        .tag * {
+            font-size: inherit !important
+        }
+
+        .entity {
+            color: var(--text-color);
+            font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
+            font-size: .85em;
+            font-style: italic
+        }
+
+        .entity * {
+            font-size: inherit !important
+        }
+
+        .table {
+            font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
+            font-size: .85em
+        }
+
+        .table * {
+            font-size: inherit !important
+        }
+
+        .color,
+        .keyword,
+        .cl-hash,
+        .cl,
+        .hr,
+        .email,
+        .url,
+        .img,
+        .imgref,
+        .link,
+        .linkref,
+        .comment {
+            color: var(--text-muted-color);
+        }
+
+        .keyword {
+            font-weight: 600
+        }
+
+        .img-wrapper {
+            display: inline-block
+        }
+
+        .img-wrapper .img {
+            display: inline-block;
+            padding: 0;
+            background-color: transparent
+        }
+
+        .img-wrapper img {
+            max-width: 100%;
+            padding: 0 .15em;
+            box-sizing: content-box
+        }
+
+        .cl-toc {
+            font-size: 2.8em;
+            padding: .15em
+        }
+
+        .blockquote {
+            color: var(--md-blockquote-color)
+        }
+
+        .h1,
+        .h2,
+        .h3,
+        .h4,
+        .h5,
+        .h6,
+        .h11,
+        .h22 {
+            font-weight: 600
+        }
+
+        .h1,
+        .h1 *,
+        .h2,
+        .h2 *,
+        .h3,
+        .h3 *,
+        .h4,
+        .h4 *,
+        .h5,
+        .h5 *,
+        .h6,
+        .h6 *,
+        .h11,
+        .h11 *,
+        .h22,
+        .h22 * {
+            line-height: 1.33
+        }
+
+        .h1,
+        .h11 {
+            font-size: 2em
+        }
+
+        .h2,
+        .h22 {
+            font-size: 1.5em
+        }
+
+        .h3 {
+            font-size: 1.17em
+        }
+
+        .h4 {
+            font-size: 1em
+        }
+
+        .h5 {
+            font-size: .83em
+        }
+
+        .h6 {
+            font-size: .75em
+        }
+
+        .cl,
+        .hr {
+            font-style: normal;
+            font-weight: 400
+        }
+
+        .em,
+        .em .cl {
+            font-style: italic
+        }
+
+        .strong,
+        .strong .cl,
+        .term {
+            font-weight: 600
+        }
+
+        .cl-del-text {
+            text-decoration: line-through
+        }
+
+        .cl-mark-text {
+            background-color: #f8f840;
+            color: #000
+        }
+
+        .cl-underlined-text,
+        .email,
+        .url {
+            text-decoration: underline
+        }
+
+        .fn,
+        .inlinefn,
+        .sup {
+            font-size: smaller;
+            position: relative;
+            top: -.5em
+        }
+
+        .sub {
+            bottom: -.25em;
+            font-size: smaller;
+            position: relative
+        }
+
+        .img .cl-underlined-text,
+        .imgref .cl-underlined-text,
+        .link .cl-underlined-text,
+        .linkref .cl-underlined-text {
+            color: var(--text-color)
+        }
+
+        .cl-title {
+            color: var(--text-color)
+        }
+
+        &--inline .cl-toc,
+        &--inline .h1,
+        &--inline .h2,
+        &--inline .h3,
+        &--inline .h4,
+        &--inline .h5,
+        &--inline .h6,
+        &--inline .h11,
+        &--inline .h22 {
+            font-size: inherit
+        }
     }
 
-    .markdown-highlighting .code {
-        font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
-        font-size: .85em
-    }
-
-    .markdown-highlighting .code * {
-        font-size: inherit !important
-    }
-
-    .markdown-highlighting .pre {
-        color: rgba(0, 0, 0, .8);
-        font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
-        font-size: .85em
-    }
-
-    // .app--dark .markdown-highlighting .pre {
-    //     color: hsla(0, 0%, 100%, .8)
-    // }
-
-    // .markdown-highlighting .pre [class*=language-] {
-    //     color: #000
-    // }
-
-    // .app--dark .markdown-highlighting .pre [class*=language-] {
-    //     color: #fff
-    // }
-
-    .markdown-highlighting .pre * {
-        font-size: inherit !important
-    }
-
-    .markdown-highlighting .pre,
-    .markdown-highlighting .pre * {
-        line-height: 1.33
-    }
-
-    .markdown-highlighting .tag {
-        color: var(--text-color);
-        font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
-        font-size: .85em;
-        font-weight: 600
-    }
-
-    .markdown-highlighting .tag .attr-name,
-    .markdown-highlighting .tag .attr-value,
-    .markdown-highlighting .tag .punctuation {
-        font-weight: 400
-    }
-
-    .markdown-highlighting .tag * {
-        font-size: inherit !important
-    }
-
-    .markdown-highlighting .entity {
-        color: var(--text-color);
-        font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
-        font-size: .85em;
-        font-style: italic
-    }
-
-    .markdown-highlighting .entity * {
-        font-size: inherit !important
-    }
-
-    .markdown-highlighting .table {
-        font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
-        font-size: .85em
-    }
-
-    .markdown-highlighting .table * {
-        font-size: inherit !important
-    }
-
-    .markdown-highlighting .comment {
-        color: var(--text-muted-color);
-    }
-
-    .markdown-highlighting .keyword {
-        color: var(--md-keyword-color);
-        font-weight: 600
-    }
-
-    .markdown-highlighting .img-wrapper {
-        display: inline-block
-    }
-
-    .markdown-highlighting .img-wrapper .img {
-        display: inline-block;
-        padding: 0;
-        background-color: transparent
-    }
-
-    .markdown-highlighting .img-wrapper img {
-        max-width: 100%;
-        padding: 0 .15em;
-        box-sizing: content-box
-    }
-
-    .markdown-highlighting .cl-toc {
-        font-size: 2.8em;
-        padding: .15em
-    }
-
-    .markdown-highlighting .blockquote {
-        color: var(--md-blockquote-color)
-    }
-
-    .markdown-highlighting .h1,
-    .markdown-highlighting .h2,
-    .markdown-highlighting .h3,
-    .markdown-highlighting .h4,
-    .markdown-highlighting .h5,
-    .markdown-highlighting .h6,
-    .markdown-highlighting .h11,
-    .markdown-highlighting .h22 {
-        font-weight: 600
-    }
-
-    .markdown-highlighting .h1,
-    .markdown-highlighting .h1 *,
-    .markdown-highlighting .h2,
-    .markdown-highlighting .h2 *,
-    .markdown-highlighting .h3,
-    .markdown-highlighting .h3 *,
-    .markdown-highlighting .h4,
-    .markdown-highlighting .h4 *,
-    .markdown-highlighting .h5,
-    .markdown-highlighting .h5 *,
-    .markdown-highlighting .h6,
-    .markdown-highlighting .h6 *,
-    .markdown-highlighting .h11,
-    .markdown-highlighting .h11 *,
-    .markdown-highlighting .h22,
-    .markdown-highlighting .h22 * {
-        line-height: 1.33
-    }
-
-    .markdown-highlighting .h1,
-    .markdown-highlighting .h11 {
-        font-size: 2em
-    }
-
-    .markdown-highlighting .h2,
-    .markdown-highlighting .h22 {
-        font-size: 1.5em
-    }
-
-    .markdown-highlighting .h3 {
-        font-size: 1.17em
-    }
-
-    .markdown-highlighting .h4 {
-        font-size: 1em
-    }
-
-    .markdown-highlighting .h5 {
-        font-size: .83em
-    }
-
-    .markdown-highlighting .h6 {
-        font-size: .75em
-    }
-
-    .markdown-highlighting .cl-hash {
-        color: var(--text-muted-color)
-    }
-
-    .markdown-highlighting .cl,
-    .markdown-highlighting .hr {
-        color: var(--text-muted-color);
-        font-style: normal;
-        font-weight: 400
-    }
-
-    .markdown-highlighting .em,
-    .markdown-highlighting .em .cl {
-        font-style: italic
-    }
-
-    .markdown-highlighting .strong,
-    .markdown-highlighting .strong .cl,
-    .markdown-highlighting .term {
-        font-weight: 600
-    }
-
-    .markdown-highlighting .cl-del-text {
-        text-decoration: line-through
-    }
-
-    .markdown-highlighting .cl-mark-text {
-        background-color: #f8f840;
-        color: #000
-    }
-
-    .markdown-highlighting .cl-underlined-text,
-    .markdown-highlighting .email,
-    .markdown-highlighting .url {
-        text-decoration: underline
-    }
-
-    .markdown-highlighting .email,
-    .markdown-highlighting .url {
-        color: var(--text-muted-color)
-    }
-
-    .markdown-highlighting .fn,
-    .markdown-highlighting .inlinefn,
-    .markdown-highlighting .sup {
-        font-size: smaller;
-        position: relative;
-        top: -.5em
-    }
-
-    .markdown-highlighting .sub {
-        bottom: -.25em;
-        font-size: smaller;
-        position: relative
-    }
-
-    .markdown-highlighting .img,
-    .markdown-highlighting .imgref,
-    .markdown-highlighting .link,
-    .markdown-highlighting .linkref {
-        color: var(--text-muted-color);
-    }
-
-    .markdown-highlighting .img .cl-underlined-text,
-    .markdown-highlighting .imgref .cl-underlined-text,
-    .markdown-highlighting .link .cl-underlined-text,
-    .markdown-highlighting .linkref .cl-underlined-text {
-        color: var(--text-color)
-    }
-
-    .markdown-highlighting .cl-title {
-        color: var(--text-color)
-    }
-
-    .markdown-highlighting--inline .cl-toc,
-    .markdown-highlighting--inline .h1,
-    .markdown-highlighting--inline .h2,
-    .markdown-highlighting--inline .h3,
-    .markdown-highlighting--inline .h4,
-    .markdown-highlighting--inline .h5,
-    .markdown-highlighting--inline .h6,
-    .markdown-highlighting--inline .h11,
-    .markdown-highlighting--inline .h22 {
-        font-size: inherit
-    }
 
     :focus {
         outline: none
