@@ -1,7 +1,6 @@
 import DiffMatchPatch from 'diff-match-patch';
 import Prism from 'prismjs';
 import MarkdownIt from 'markdown-it';
-import markdownGrammarSvc from './markdownGrammarSvc';
 import extensionSvc from './extensionSvc';
 import utils from './utils';
 
@@ -140,7 +139,6 @@ export default {
         };
 
         this.defaultConverter = this.createConverter(this.defaultOptions);
-        this.defaultPrismGrammars = markdownGrammarSvc.makeGrammars(this.defaultOptions);
     },
 
     /**
@@ -248,7 +246,7 @@ export default {
             parsingCtx.markdownCoreRules.slice(2).forEach(rule => rule(parsingCtx.markdownState));
             parsingCtx.markdownState.isConverted = true;
         }
-        // ! This is already off
+
         const { tokens } = parsingCtx.markdownState;
 
         const html = parsingCtx.converter.renderer.render(
@@ -256,6 +254,7 @@ export default {
             parsingCtx.converter.options,
             parsingCtx.markdownState.env,
         );
+
         const htmlSectionList = html.split(htmlSectionMarker);
         if (htmlSectionList[0] === '') {
             htmlSectionList.shift();
@@ -271,7 +270,8 @@ export default {
                 valueArray,
             );
             htmlSectionDiff = diffMatchPatch.diff_main(oldSectionHash, newSectionHash, false);
-        } else {
+        }
+        else {
             htmlSectionDiff = [
                 [1, newSectionHash],
             ];

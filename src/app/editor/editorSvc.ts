@@ -6,7 +6,6 @@ import cledit from './editor/cledit';
 import pagedown from './libs/pagedown';
 import htmlSanitizer from './libs/htmlSanitizer';
 import markdownConversionSvc from './markdownConversionSvc';
-import markdownGrammarSvc from './markdownGrammarSvc';
 import sectionUtils from './editor/sectionUtils';
 import extensionSvc from './extensionSvc';
 import editorSvcDiscussions from './editor/editorSvcDiscussions';
@@ -108,7 +107,6 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
     clEditor: null,
     pagedownEditor: null,
     options: null,
-    prismGrammars: null,
     converter: null,
     parsingCtx: null,
     conversionCtx: null,
@@ -128,29 +126,6 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
      * Initialize the Prism grammar with the options
      */
     initPrism() {
-        const options = {
-            "emoji": true,
-            "emojiShortcuts": false,
-            "abc": true,
-            "math": true,
-            "abbr": true,
-            "breaks": true,
-            "deflist": true,
-            "del": true,
-            "fence": true,
-            "footnote": true,
-            "imgsize": true,
-            "linkify": true,
-            "mark": true,
-            "sub": true,
-            "sup": true,
-            "table": true,
-            "tasklist": true,
-            "typographer": true,
-            "mermaid": true,
-            insideFences: markdownConversionSvc.defaultOptions.insideFences,
-        };
-        this.prismGrammars = markdownGrammarSvc.makeGrammars(options);
     },
 
     /**
@@ -545,7 +520,8 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
             if (instantPreview) {
                 this.refreshPreview();
                 this.measureSectionDimensions(false, true);
-            } else {
+            }
+            else {
                 setTimeout(() => this.refreshPreview(), 10);
             }
             instantPreview = false;
