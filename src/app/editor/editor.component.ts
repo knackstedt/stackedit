@@ -1,7 +1,6 @@
 import { Component, EventEmitter, HostListener, Input, OnInit, Output, ViewContainerRef } from '@angular/core';
 
-import editorSvc from './editorSvc'
-import markdownConversionSvc from 'src/app/editor/markdownConversionSvc';
+import editorSvc from './editorSvc';
 import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { TooltipDirective, MenuDirective, MenuItem, KeyboardService } from '@dotglitch/ngx-common';
@@ -451,7 +450,7 @@ timeline
     currentTextColor = "#f00";
 
     ngOnInit() {
-        markdownConversionSvc.init(); // Needs to be inited before mount
+        // markdownConversionSvc.init(); // Needs to be inited before mount
     }
 
     async onSelectionChange() {

@@ -7,6 +7,9 @@ const config = {
     arrowMarkerAbsolute: false,
     theme: 'base',
     securityLevel: "strict",
+    wrap: true,
+    htmlLabels: true,
+    markdown: true,
     themeVariables: {
         primaryColor: '#464646',
         primaryTextColor: '#fff',
