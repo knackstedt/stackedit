@@ -39,7 +39,7 @@
                                         style="width: 24px; height: 24px"
                                         [style.background-color]="color + 'ee'"
                                         [style.border-color]="color + ''"
-                                        (click)="currentTextColor = color; dialog.close()"
+                                        (click)="colorizeText(currentTextColor = color); dialog.close()"
                                         (pointerenter)="ctx.color = color"
                                     ></div>
                                 </div>
@@ -47,9 +47,6 @@
                         </div>
 
                     </ng-template>
-                    <!-- <button>
-
-                    </button> -->
 
                     <!-- Bold -->
                     <mat-icon (click)="boldText()" [class.reflect]="cursorIsInBold">format_bold</mat-icon>
@@ -125,13 +122,14 @@
                             *ngFor="let ctx of [{color: '#000'}]"
                             class="photo-popup"
                         >
+                            <!-- TODO: handle upload -->
                             <div class="simple-input">
                                 <input type="text" name="" required="">
-                                <label>Username</label>
+                                <label>URL</label>
                             </div>
                             <div class="simple-input">
                                 <input type="password" name="" required="">
-                                <label>Password</label>
+                                <label>Alt. Text</label>
                             </div>
 
                             <mat-icon>check</mat-icon>
