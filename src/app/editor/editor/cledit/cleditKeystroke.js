@@ -40,6 +40,7 @@ function getNextWordOffset(text, offset, isBackward) {
 
 cledit.defaultKeystrokes = [
 
+    // CTRL+Z, CTRL+Y
     new Keystroke((evt, state, editor) => {
         if ((!evt.ctrlKey && !evt.metaKey) || evt.altKey) {
             return false;
@@ -64,6 +65,7 @@ cledit.defaultKeystrokes = [
         return false;
     }),
 
+    // TAB
     new Keystroke((evt, state) => {
         if (evt.which !== 9 /* tab */ || evt.metaKey || evt.ctrlKey) {
             return false;
@@ -80,15 +82,18 @@ cledit.defaultKeystrokes = [
                 state.before = strSplice(state.before, lf, 1);
             }
             state.selection = state.selection.replace(/^[ \t]/gm, '');
-        } else if (state.selection) {
-            state.before = strSplice(state.before, lf, 0, '\t');
-            state.selection = state.selection.replace(/\n(?=[\s\S])/g, '\n\t');
-        } else {
-            state.before += '\t';
+        }
+        else if (state.selection) {
+            state.before = strSplice(state.before, lf, 0, '    ');
+            state.selection = state.selection.replace(/\n(?=[\s\S])/g, '\n    ');
+        }
+        else {
+            state.before += '    ';
         }
         return true;
     }),
 
+    // ENTER
     new Keystroke((evt, state, editor) => {
         if (evt.which !== 13 /* enter */) {
             clearNewline = false;
@@ -116,6 +121,7 @@ cledit.defaultKeystrokes = [
         return true;
     }),
 
+    // BACKSPACE, DELETE
     new Keystroke((evt, state, editor) => {
         if (evt.which !== 8 /* backspace */ && evt.which !== 46 /* delete */) {
             return false;
@@ -135,17 +141,20 @@ cledit.defaultKeystrokes = [
                 }
                 evt.preventDefault();
                 return true;
-            } else if (evt.which === 8 && state.before.slice(-1) === '\n') {
+            }
+            else if (evt.which === 8 && state.before.slice(-1) === '\n') {
                 // Special treatment for end of lines
                 state.before = state.before.slice(0, -1);
                 evt.preventDefault();
                 return true;
-            } else if (evt.which === 46 && state.after.slice(0, 1) === '\n') {
+            }
+            else if (evt.which === 46 && state.after.slice(0, 1) === '\n') {
                 state.after = state.after.slice(1);
                 evt.preventDefault();
                 return true;
             }
-        } else {
+        }
+        else {
             state.selection = '';
             evt.preventDefault();
             return true;
@@ -153,6 +162,7 @@ cledit.defaultKeystrokes = [
         return false;
     }),
 
+    // LEFT_ARROW, RIGHT_ARROW
     new Keystroke((evt, state, editor) => {
         if (evt.which !== 37 /* left arrow */ && evt.which !== 39 /* right arrow */) {
             return false;
@@ -169,6 +179,7 @@ cledit.defaultKeystrokes = [
             editor.selectionMgr.selectionEnd,
             evt.which === 37,
         );
+
         if (evt.shiftKey) {
             // rebuild the state completely
             const min = Math.min(editor.selectionMgr.selectionStart, offset);
@@ -177,7 +188,8 @@ cledit.defaultKeystrokes = [
             state.after = textContent.slice(max);
             state.selection = textContent.slice(min, max);
             state.isBackwardSelection = editor.selectionMgr.selectionStart > offset;
-        } else {
+        }
+        else {
             state.before = textContent.slice(0, offset);
             state.after = textContent.slice(offset);
             state.selection = '';
