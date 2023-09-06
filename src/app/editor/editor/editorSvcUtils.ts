@@ -1,6 +1,5 @@
 import DiffMatchPatch from 'diff-match-patch';
-import cledit from './cledit';
-import { Utils } from 'src/app/editor/editor/cledit/cleditUtils';
+import { Utils } from './cledit/cleditUtils';
 
 const diffMatchPatch = new DiffMatchPatch();
 

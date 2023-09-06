@@ -4,9 +4,9 @@ import htmlSanitizer from '../../libs/htmlSanitizer';
 import { Utils } from './cleditUtils';
 import { Highlighter } from './cleditHighlighter';
 import { SelectionMgr } from './cleditSelectionMgr';
-import { UndoMgr } from 'src/app/editor/editor/cledit/cleditUndoMgr';
-import { Watcher } from 'src/app/editor/editor/cledit/cleditWatcher';
-import { defaultKeystrokes } from 'src/app/editor/editor/cledit/cleditKeystroke';
+import { UndoMgr } from './cleditUndoMgr';
+import { Watcher } from './cleditWatcher';
+import { defaultKeystrokes } from './cleditKeystroke';
 
 function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
     const scrollElt = scrollEltOpt || contentElt;

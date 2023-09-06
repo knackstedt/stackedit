@@ -2,7 +2,7 @@ import DiffMatchPatch from 'diff-match-patch';
 import cledit from './cledit';
 import utils from '../utils';
 import diffUtils from '../diffUtils';
-import { Marker } from 'src/app/editor/editor/cledit/cleditMarker';
+import { Marker } from './cledit/cleditMarker';
 
 let clEditor;
 // let discussionIds = {};

@@ -9,7 +9,7 @@ import sectionUtils from './editor/sectionUtils';
 import extensionSvc from './extensionSvc';
 import editorSvcDiscussions from './editor/editorSvcDiscussions';
 import editorSvcUtils from './editor/editorSvcUtils';
-import { Utils } from 'src/app/editor/editor/cledit/cleditUtils';
+import { Utils } from './editor/cledit/cleditUtils';
 
 import 'prismjs/components/prism-asciidoc';
 import 'prismjs/components/prism-awk';

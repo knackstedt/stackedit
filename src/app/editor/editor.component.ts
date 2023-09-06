@@ -1,10 +1,12 @@
 import { Component, EventEmitter, HostListener, Input, OnInit, Output, ViewContainerRef } from '@angular/core';
-
-import editorSvc from './editorSvc';
 import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { TooltipDirective, MenuDirective, MenuItem, KeyboardService } from '@dotglitch/ngx-common';
 import { Subscription } from 'rxjs';
+
+import editorSvc from './editorSvc';
 
 window['editorSvc'] = editorSvc
 
@@ -21,6 +23,7 @@ window['editorSvc'] = editorSvc
         NgClass,
         NgStyle,
         MatIconModule,
+        MatTooltipModule,
         TooltipDirective,
         MenuDirective
     ],
@@ -111,6 +114,7 @@ export class EditorComponent implements OnInit {
             postString;
 
         editorSvc.clEditor.setContent(patchedText);
+        editorSvc.clEditor.selectionMgr.setSelectionStartEnd(selectionStart + before, selectionEnd + after)
     }
 
     /**
