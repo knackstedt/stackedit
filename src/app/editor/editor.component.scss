@@ -435,7 +435,7 @@
         a {
             color: var(--md-anchor-color);
             text-decoration: underline;
-            text-decoration-skip: ink
+            // text-decoration-skip: ink
         }
 
         a:focus,
@@ -447,7 +447,7 @@
         pre,
         samp {
             font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
-            font-size: .85em
+            // font-size: .85em
         }
 
         code *,
