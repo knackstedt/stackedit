@@ -1,4 +1,8 @@
 // @ts-nocheck
+
+/**
+ * @type any
+ */
 var util = {},
   re = window.RegExp,
   SETTINGS = {
