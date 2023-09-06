@@ -1,8 +1,8 @@
 import DiffMatchPatch from 'diff-match-patch';
-import cledit from './cleditCore';
+import { Utils } from './cleditUtils';
 
-function UndoMgr(editor) {
-    cledit.Utils.createEventHooks(this);
+export function UndoMgr(editor) {
+    Utils.createEventHooks(this);
 
     /* eslint-disable new-cap */
     const diffMatchPatch = new DiffMatchPatch();
@@ -15,7 +15,7 @@ function UndoMgr(editor) {
     let currentState;
     let previousPatches = [];
     let currentPatches = [];
-    const { debounce } = cledit.Utils;
+    const { debounce } = Utils;
 
     this.options = {
         undoStackMaxSize: 200,
@@ -29,8 +29,8 @@ function UndoMgr(editor) {
             },
             reversePatches(patches) {
                 const reversedPatches = diffMatchPatch.patch_deepCopy(patches).reverse();
-                reversedPatches.cl_each((patch) => {
-                    patch.diffs.cl_each((diff) => {
+                reversedPatches.forEach((patch) => {
+                    patch.diffs.forEach((diff) => {
                         diff[0] = -diff[0];
                     });
                 });
@@ -69,6 +69,7 @@ function UndoMgr(editor) {
     }
 
     class State {
+        patches: any[];
         addToUndoStack() {
             undoStack.push(this);
             this.patches = previousPatches;
@@ -85,11 +86,11 @@ function UndoMgr(editor) {
     this.setCurrentMode = (mode) => {
         stateMgr.currentMode = mode;
     };
-    this.setDefaultMode = stateMgr.setDefaultMode.cl_bind(stateMgr);
+    this.setDefaultMode = stateMgr.setDefaultMode.bind(this)
 
     this.addDiffs = (oldContent, newContent, diffs) => {
         const patches = this.options.patchHandler.makePatches(oldContent, newContent, diffs);
-        patches.cl_each(patch => currentPatches.push(patch));
+        patches.forEach(patch => currentPatches.push(patch));
     };
 
     function saveCurrentPatches() {
@@ -117,7 +118,7 @@ function UndoMgr(editor) {
     this.canUndo = () => !!undoStack.length;
     this.canRedo = () => !!redoStack.length;
 
-    const restoreState = (patchesParam, isForward) => {
+    const restoreState = (patchesParam, isForward = false) => {
         let patches = patchesParam;
         // Update editor
         const content = editor.getContent();
@@ -165,7 +166,7 @@ function UndoMgr(editor) {
     };
 
     this.init = (options) => {
-        this.options.cl_extend(options || {});
+        this.options = {...options || {}};
         ({ selectionMgr } = editor);
         if (!currentState) {
             currentState = new State();
@@ -173,4 +174,3 @@ function UndoMgr(editor) {
     };
 }
 
-cledit.UndoMgr = UndoMgr;

@@ -1,10 +1,10 @@
-import cledit from './cleditCore';
+import { Utils } from './cleditUtils';
 
-function SelectionMgr(editor) {
-    const { debounce } = cledit.Utils;
+export function SelectionMgr(editor) {
+    const { debounce } = Utils;
     const contentElt = editor.$contentElt;
     const scrollElt = editor.$scrollElt;
-    cledit.Utils.createEventHooks(this);
+    Utils.createEventHooks(this);
 
     let lastSelectionStart = 0;
     let lastSelectionEnd = 0;
@@ -13,7 +13,7 @@ function SelectionMgr(editor) {
     this.cursorCoordinates = {};
 
     this.findContainer = (offset) => {
-        const result = cledit.Utils.findContainer(contentElt, offset);
+        const result = Utils.findContainer(contentElt, offset);
         if (result.container.nodeValue === '\n') {
             const hdLfElt = result.container.parentNode;
             if (hdLfElt.className === 'hd-lf' && hdLfElt.previousSibling && hdLfElt.previousSibling.tagName === 'BR') {
@@ -137,7 +137,7 @@ function SelectionMgr(editor) {
         lastSelectionEnd = this.selectionEnd;
     }, 50);
 
-    const setSelection = (start = this.selectionStart, end = this.selectionEnd) => {
+    const setSelection = (start: number = this.selectionStart, end: number = this.selectionEnd) => {
         this.selectionStart = start < 0 ? 0 : start;
         this.selectionEnd = end < 0 ? 0 : end;
         saveLastSelection();
@@ -234,7 +234,7 @@ function SelectionMgr(editor) {
 
             if (childA === childB) {
                 // This shouldn't be possible
-                throw module.createError('comparePoints got to case 4 and childA and childB are the same!');
+                throw new Error('comparePoints got to case 4 and childA and childB are the same!');
             }
             n = root.firstChild;
             while (n) {
@@ -281,7 +281,7 @@ function SelectionMgr(editor) {
                         let selectionText = `${selectionRange}`;
                         // Fix end of line when only br is selected
                         const brElt = selectionRange.endContainer.firstChild;
-                        if (brElt && brElt.tagName === 'BR' && selectionRange.endOffset === 1) {
+                        if (brElt && brElt['tagName'] === 'BR' && selectionRange.endOffset === 1) {
                             selectionText += '\n';
                         }
                         if (comparePoints(
@@ -405,7 +405,8 @@ function SelectionMgr(editor) {
                 left = 'right';
                 if (startOffset.offsetInContainer === 0) {
                     // Need to calculate offset-1
-                    startOffset = inputOffset - 1;
+                    // TODO: This may be a bug
+                    startOffset = inputOffset - 1 as any;
                 }
                 else {
                     startOffset.offsetInContainer -= 1;
@@ -434,7 +435,7 @@ function SelectionMgr(editor) {
         let offsetStart = 0;
         let offsetEnd = 0;
         let nextOffset = 0;
-        editor.getContent().split(/\s/).cl_some((word) => {
+        editor.getContent().split(/\s/).find((word) => {
             if (word) {
                 offsetStart = nextOffset;
                 offsetEnd = nextOffset + word.length;
@@ -452,4 +453,4 @@ function SelectionMgr(editor) {
     };
 }
 
-cledit.SelectionMgr = SelectionMgr;
+

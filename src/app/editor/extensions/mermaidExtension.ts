@@ -88,7 +88,7 @@ export default (extensionSvc) => {
 
     extensionSvc.onSectionPreview((elt) => {
         elt.querySelectorAll('.prism.language-mermaid')
-            .cl_each(diagramElt => render(diagramElt.parentNode));
+            .forEach(diagramElt => render(diagramElt.parentNode));
     });
 
 };

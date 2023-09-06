@@ -141,7 +141,7 @@ export default (extensionSvc) => {
 
     extensionSvc.onSectionPreview((elt, options, isEditor) => {
         // Highlight with Prism
-        elt.querySelectorAll('.prism').cl_each((prismElt) => {
+        elt.querySelectorAll('.prism').forEach((prismElt) => {
             if (!prismElt.$highlightedWithPrism) {
                 Prism.highlightElement(prismElt);
                 prismElt.$highlightedWithPrism = true;
@@ -149,15 +149,15 @@ export default (extensionSvc) => {
         });
 
         // Transform task spans into checkboxes
-        elt.querySelectorAll('span.task-list-item-checkbox').cl_each((spanElt) => {
+        elt.querySelectorAll('span.task-list-item-checkbox').forEach((spanElt) => {
             const checkboxElt = document.createElement('input');
             checkboxElt.type = 'checkbox';
             checkboxElt.className = 'task-list-item-checkbox';
             if (spanElt.classList.contains('checked')) {
-                checkboxElt.setAttribute('checked', true);
+                checkboxElt.setAttribute('checked', 'true');
             }
             if (!isEditor) {
-                checkboxElt.disabled = 'disabled';
+                checkboxElt.disabled = true;
             }
             spanElt.parentNode.replaceChild(checkboxElt, spanElt);
         });

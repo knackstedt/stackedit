@@ -1,6 +1,5 @@
-import cledit from './cleditCore';
 
-function Watcher(editor, listener) {
+export function Watcher(editor, listener) {
     this.isWatching = false;
     let contentObserver;
     this.startWatching = () => {
@@ -31,4 +30,3 @@ function Watcher(editor, listener) {
     };
 }
 
-cledit.Watcher = Watcher;

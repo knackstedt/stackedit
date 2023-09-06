@@ -1,17 +1,16 @@
-import cledit from './cleditCore';
+import { Utils } from './cleditUtils';
 
-function Keystroke(handler, priority) {
+export function Keystroke(handler, priority?) {
     this.handler = handler;
     this.priority = priority || 100;
 }
 
-cledit.Keystroke = Keystroke;
 
 let clearNewline;
 const charTypes = Object.create(null);
 
 // Word separators, as in Sublime Text
-'./\\()"\'-:,.;<>~!@#$%^&*|+=[]{}`~?'.split('').cl_each((wordSeparator) => {
+'./\\()"\'-:,.;<>~!@#$%^&*|+=[]{}`~?'.split('').forEach((wordSeparator) => {
     charTypes[wordSeparator] = 'wordSeparator';
 });
 charTypes[' '] = 'space';
@@ -38,7 +37,7 @@ function getNextWordOffset(text, offset, isBackward) {
     return result;
 }
 
-cledit.defaultKeystrokes = [
+export const defaultKeystrokes = [
 
     // CTRL+Z, CTRL+Y
     new Keystroke((evt, state, editor) => {
@@ -129,7 +128,7 @@ cledit.defaultKeystrokes = [
 
         editor.undoMgr.setCurrentMode('delete');
         if (!state.selection) {
-            const isJump = (cledit.Utils.isMac && evt.altKey) || (!cledit.Utils.isMac && evt.ctrlKey);
+            const isJump = (Utils.isMac && evt.altKey) || (!Utils.isMac && evt.ctrlKey);
             if (isJump) {
                 // Custom kill word behavior
                 const text = state.before + state.after;
@@ -167,7 +166,7 @@ cledit.defaultKeystrokes = [
         if (evt.which !== 37 /* left arrow */ && evt.which !== 39 /* right arrow */) {
             return false;
         }
-        const isJump = (cledit.Utils.isMac && evt.altKey) || (!cledit.Utils.isMac && evt.ctrlKey);
+        const isJump = (Utils.isMac && evt.altKey) || (!Utils.isMac && evt.ctrlKey);
         if (!isJump) {
             return false;
         }

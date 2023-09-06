@@ -1,5 +1,6 @@
 class SectionDimension {
-    constructor(startOffset, endOffset) {
+    height: number;
+    constructor(public startOffset: number, public endOffset: number) {
         this.startOffset = startOffset;
         this.endOffset = endOffset;
         this.height = endOffset - startOffset;

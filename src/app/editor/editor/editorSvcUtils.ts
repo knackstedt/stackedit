@@ -1,5 +1,6 @@
 import DiffMatchPatch from 'diff-match-patch';
 import cledit from './cledit';
+import { Utils } from 'src/app/editor/editor/cledit/cleditUtils';
 
 const diffMatchPatch = new DiffMatchPatch();
 
@@ -36,7 +37,7 @@ export default {
     /**
      * Restore the scroll position from the current file content state.
      */
-    restoreScrollPosition(scrollPosition) {
+    restoreScrollPosition(scrollPosition?) {
 
         if (scrollPosition && this.previewCtxMeasured) {
             const sectionDesc = this.previewCtxMeasured.sectionDescList[scrollPosition.sectionIdx];
@@ -116,8 +117,8 @@ export default {
      * Get the coordinates of an offset in the preview
      */
     getPreviewOffsetCoordinates(offset) {
-        const start = cledit.Utils.findContainer(this.previewElt, offset && offset - 1);
-        const end = cledit.Utils.findContainer(this.previewElt, offset || offset + 1);
+        const start = Utils.findContainer(this.previewElt, offset && offset - 1);
+        const end = Utils.findContainer(this.previewElt, offset || offset + 1);
         const range = document.createRange();
         range.setStart(start.container, start.offsetInContainer);
         range.setEnd(end.container, end.offsetInContainer);

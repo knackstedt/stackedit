@@ -2,9 +2,7 @@ import DiffMatchPatch from 'diff-match-patch';
 import cledit from './cledit';
 import utils from '../utils';
 import diffUtils from '../diffUtils';
-// import store from '../../store.1';
-import EditorClassApplier from './EditorClassApplier';
-import PreviewClassApplier from './PreviewClassApplier';
+import { Marker } from 'src/app/editor/editor/cledit/cleditMarker';
 
 let clEditor;
 // let discussionIds = {};
@@ -23,7 +21,7 @@ function getDiscussionMarkers(discussion, discussionId, onMarker) {
         const markerKey = `${discussionId}:${offsetName}`;
         let marker = discussionMarkers[markerKey];
         if (!marker) {
-            marker = new cledit.Marker(discussion[offsetName], offsetName === 'end');
+            marker = new Marker(discussion[offsetName], offsetName === 'end');
             marker.discussionId = discussionId;
             marker.offsetName = offsetName;
             clEditor.addMarker(marker);
@@ -33,54 +31,6 @@ function getDiscussionMarkers(discussion, discussionId, onMarker) {
     };
     getMarker('start');
     getMarker('end');
-}
-
-function syncDiscussionMarkers(content, writeOffsets) {
-    const discussions = {
-        ...content.discussions,
-    };
-    const newDiscussion = null; //store.getters['discussion/newDiscussion'];
-    if (newDiscussion) {
-        discussions[store.state.discussion.newDiscussionId] = {
-            ...newDiscussion,
-        };
-    }
-
-    Object.entries(discussionMarkers).forEach(([markerKey, marker]) => {
-        // Remove marker if discussion was removed
-        const discussion = discussions[marker.discussionId];
-        if (!discussion) {
-            clEditor.removeMarker(marker);
-            delete discussionMarkers[markerKey];
-        }
-    });
-
-    Object.entries(discussions).forEach(([discussionId, discussion]) => {
-        getDiscussionMarkers(discussion, discussionId, writeOffsets
-            ? (marker) => {
-                discussion[marker.offsetName] = marker.offset;
-            }
-            : (marker) => {
-                marker.offset = discussion[marker.offsetName];
-            });
-    });
-
-    // TODO:
-    if (writeOffsets && newDiscussion) {
-        // store.commit(
-        //     'discussion/patchNewDiscussion',
-        //     discussions[store.state.discussion.newDiscussionId],
-        // );
-    }
-}
-
-function removeDiscussionMarkers() {
-    Object.entries(discussionMarkers).forEach(([, marker]) => {
-        clEditor.removeMarker(marker);
-    });
-    discussionMarkers = {};
-    markerKeys = [];
-    markerIdxMap = Object.create(null);
 }
 
 const diffMatchPatch = new DiffMatchPatch();
@@ -135,15 +85,12 @@ export default {
                 ...utils.deepCopy(oldContent),
                 text: utils.sanitizeText(text),
             };
-            syncDiscussionMarkers(newContent, true);
             if (!isChangePatch) {
                 previousPatchableText = currentPatchableText;
                 currentPatchableText = diffUtils.makePatchableText(newContent, markerKeys, markerIdxMap);
             } else {
                 // Take a chance to restore discussion offsets on undo/redo
                 newContent.text = currentPatchableText;
-                diffUtils.restoreDiscussionOffsets(newContent, markerKeys);
-                syncDiscussionMarkers(newContent, false);
             }
             // TODO:
             // store.dispatch('content/patchCurrent', newContent);
@@ -163,7 +110,6 @@ export default {
             type: "content"
         }//store.getters['content/current'];
         if (content) {
-            removeDiscussionMarkers(); // Markers will be recreated on contentChanged
             const contentState = {
                 hash: 0,
                 id: null,
@@ -186,7 +132,6 @@ export default {
                 contentId = content.id;
                 currentPatchableText = diffUtils.makePatchableText(content, markerKeys, markerIdxMap);
                 previousPatchableText = currentPatchableText;
-                syncDiscussionMarkers(content, false);
                 options.content = content.text;
             }
 

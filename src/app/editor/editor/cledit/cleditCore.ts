@@ -1,6 +1,12 @@
 import DiffMatchPatch from 'diff-match-patch';
 import TurndownService from 'turndown/lib/turndown.browser.umd';
 import htmlSanitizer from '../../libs/htmlSanitizer';
+import { Utils } from './cleditUtils';
+import { Highlighter } from './cleditHighlighter';
+import { SelectionMgr } from './cleditSelectionMgr';
+import { UndoMgr } from 'src/app/editor/editor/cledit/cleditUndoMgr';
+import { Watcher } from 'src/app/editor/editor/cledit/cleditWatcher';
+import { defaultKeystrokes } from 'src/app/editor/editor/cledit/cleditKeystroke';
 
 function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
     const scrollElt = scrollEltOpt || contentElt;
@@ -9,17 +15,17 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
         $scrollElt: scrollElt,
         $keystrokes: [],
         $markers: {},
-        value: ''
+        value: '',
+        toggleEditable: (isEditable) => {
+            contentElt.contentEditable = isEditable == null ? !contentElt.contentEditable : isEditable;
+            contentElt.spellcheck = false;
+        }
     };
 
-    cledit.Utils.createEventHooks(editor);
-    const { debounce } = cledit.Utils;
+    Utils.createEventHooks(editor);
+    const { debounce } = Utils;
 
     contentElt.setAttribute('tabindex', '0'); // To have focus even when disabled
-    editor.toggleEditable = (isEditable) => {
-        contentElt.contentEditable = isEditable == null ? !contentElt.contentEditable : isEditable;
-        contentElt.spellcheck = false;
-    };
     editor.toggleEditable(true);
 
     function getTextContent() {
@@ -64,14 +70,14 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
     }
 
     let lastTextContent = '';
-    const highlighter = new cledit.Highlighter(editor);
+    const highlighter = new Highlighter(editor);
 
     /* eslint-disable new-cap */
     const diffMatchPatch = new DiffMatchPatch();
     /* eslint-enable new-cap */
-    const selectionMgr = new cledit.SelectionMgr(editor);
+    const selectionMgr = new SelectionMgr(editor);
 
-    function adjustCursorPosition(force) {
+    function adjustCursorPosition(force?) {
         selectionMgr.saveSelectionState(true, true, force);
     }
 
@@ -121,7 +127,7 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
         };
     }
 
-    const undoMgr = new cledit.UndoMgr(editor);
+    const undoMgr = new UndoMgr(editor);
 
     function replace(selectionStart, selectionEnd, replacement) {
         undoMgr.setDefaultMode('single');
@@ -138,7 +144,7 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
         const subtext = getTextContent().slice(startOffset);
         const value = subtext.replace(search, replacement);
         if (value !== subtext) {
-            const offset = editor.setContent(text.slice(0, startOffset) + value);
+            const offset = editor['setContent'](text.slice(0, startOffset) + value);
             selectionMgr.setSelectionStartEnd(offset.end, offset.end);
             selectionMgr.updateCursorCoordinates(true);
         }
@@ -197,10 +203,10 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
                 }
             }
 
-            mutations.cl_each((mutation) => {
+            mutations.forEach((mutation) => {
                 markModifiedSection(mutation.target);
-                mutation.addedNodes.cl_each(markModifiedSection);
-                mutation.removedNodes.cl_each(markModifiedSection);
+                mutation.addedNodes.forEach(markModifiedSection);
+                mutation.removedNodes.forEach(markModifiedSection);
             });
             highlighter.fixContent(modifiedSections, removedSections, noContentFix);
             noContentFix = false;
@@ -213,12 +219,12 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
 
         const newTextContent = getTextContent();
         const diffs = diffMatchPatch.diff_main(lastTextContent, newTextContent);
-        editor.$markers.cl_each((marker) => {
-            marker.adjustOffset(diffs);
+        Object.entries(editor.$markers).forEach(([key, marker]) => {
+            (marker as any).adjustOffset(diffs);
         });
 
         const sectionList = highlighter.parseSections(newTextContent);
-        editor.$trigger('contentChanged', newTextContent, diffs, sectionList);
+        editor['$trigger']('contentChanged', newTextContent, diffs, sectionList);
         if (!ignoreUndo) {
             undoMgr.addDiffs(lastTextContent, newTextContent, diffs);
             undoMgr.setDefaultMode('typing');
@@ -230,7 +236,7 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
     }
 
     // Detect editor changes
-    watcher = new cledit.Watcher(editor, checkContentChange);
+    watcher = new Watcher(editor, checkContentChange);
     watcher.startWatching();
 
     function setSelection(start, end) {
@@ -263,7 +269,7 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
         window.removeEventListener('mousedown', windowMouseListener);
         window.removeEventListener('mouseup', windowMouseListener);
         window.removeEventListener('resize', windowResizeListener);
-        editor.$trigger('destroy');
+        editor['$trigger']('destroy');
         return true;
     }
 
@@ -284,12 +290,6 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
     };
     window.addEventListener('resize', windowResizeListener);
 
-    // Provokes selection changes and does not fire mouseup event on Chrome/OSX
-    contentElt.addEventListener(
-        'contextmenu',
-        selectionMgr.saveSelectionState.cl_bind(selectionMgr, true, false),
-    );
-
     // This handles 'Enter' and keyboard arrow events.
     contentElt.addEventListener('keydown', keydownHandler((evt) => {
         selectionMgr.saveSelectionState();
@@ -307,13 +307,13 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
             isBackwardSelection: selectionMgr.selectionStart > selectionMgr.selectionEnd,
         };
 
-        editor.$keystrokes.cl_some((keystroke) => {
+        editor.$keystrokes.forEach((keystroke) => {
             if (!keystroke.handler(evt, state, editor)) {
                 return false;
             }
             const newContent = state.before + state.selection + state.after;
             if (newContent !== getTextContent()) {
-                editor.setContent(newContent, false, min);
+                editor['setContent'](newContent, false, min);
                 contentChanging = true;
                 skipSaveSelection = true;
                 highlighter.cancelComposition = true;
@@ -424,7 +424,8 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
             }
         }
         else {
-            ({ clipboardData } = window.clipboardData);
+            // TODO: This API might be deprecated.
+            ({ clipboardData } = window['clipboardData']);
             data = clipboardData && clipboardData.getData('Text');
         }
         if (!data) {
@@ -436,11 +437,11 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
     });
 
     contentElt.addEventListener('focus', () => {
-        editor.$trigger('focus');
+        editor['$trigger']('focus');
     });
 
     contentElt.addEventListener('blur', () => {
-        editor.$trigger('blur');
+        editor['$trigger']('blur');
     });
 
     function addKeystroke(keystroke) {
@@ -449,27 +450,42 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
             .concat(keystrokes)
             .sort((keystroke1, keystroke2) => keystroke1.priority - keystroke2.priority);
     }
-    addKeystroke(cledit.defaultKeystrokes);
+    addKeystroke(defaultKeystrokes);
 
+    // @ts-ignore
     editor.selectionMgr = selectionMgr;
+    // @ts-ignore
     editor.undoMgr = undoMgr;
+    // @ts-ignore
     editor.highlighter = highlighter;
+    // @ts-ignore
     editor.watcher = watcher;
+    // @ts-ignore
     editor.adjustCursorPosition = adjustCursorPosition;
+    // @ts-ignore
     editor.setContent = setContent;
+    // @ts-ignore
     editor.replace = replace;
+    // @ts-ignore
     editor.replaceAll = replaceAll;
+    // @ts-ignore
     editor.getContent = getTextContent;
+    // @ts-ignore
     editor.focus = focus;
+    // @ts-ignore
     editor.setSelection = setSelection;
+    // @ts-ignore
     editor.addKeystroke = addKeystroke;
+    // @ts-ignore
     editor.addMarker = addMarker;
+    // @ts-ignore
     editor.removeMarker = removeMarker;
 
-    editor.init = (opts = {}) => {
+    // @ts-ignore
+    editor.init = (opts: any = {}) => {
         opts.content = ``;
 
-        const options = ({
+        const options = {
             getCursorFocusRatio() {
                 return 0.1;
             },
@@ -477,7 +493,9 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
                 return section.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\u00a0/g, ' ');
             },
             sectionDelimiter: '',
-        }).cl_extend(opts);
+            ...opts
+        };
+        // @ts-ignore
         editor.options = options;
 
         if (options.content !== undefined) {
@@ -488,9 +506,9 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
         }
 
         const sectionList = highlighter.parseSections(lastTextContent, true);
-        editor.$trigger('contentChanged', lastTextContent, [0, lastTextContent], sectionList);
+        editor['$trigger']('contentChanged', lastTextContent, [0, lastTextContent], sectionList);
         if (options.selectionStart !== undefined && options.selectionEnd !== undefined) {
-            editor.setSelection(options.selectionStart, options.selectionEnd);
+            editor['setSelection'](options.selectionStart, options.selectionEnd);
         }
         else {
             selectionMgr.saveSelectionState();

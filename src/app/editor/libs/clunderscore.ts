@@ -1,7 +1,7 @@
-var arrayProperties = {}
-var liveCollectionProperties = {}
-var functionProperties = {}
-var objectProperties = {}
+var arrayProperties: any = {}
+var liveCollectionProperties: any = {}
+var functionProperties: any = {}
+var objectProperties: any = {}
 var slice = Array.prototype.slice
 
 arrayProperties.cl_each = function (cb) {
@@ -39,6 +39,7 @@ arrayProperties.cl_some = function (cb) {
             return true
         }
     }
+    return false
 }
 
 arrayProperties.cl_filter = function (cb) {
@@ -123,6 +124,7 @@ objectProperties.cl_some = function (cb) {
             return true
         }
     }
+    return false
 }
 
 objectProperties.cl_extend = function (obj) {

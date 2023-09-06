@@ -2,7 +2,6 @@ import Vue from 'vue';
 import DiffMatchPatch from 'diff-match-patch';
 import Prism from 'prismjs';
 import markdownItPandocRenderer from 'markdown-it-pandoc-renderer';
-import cledit from './editor/cledit/index';
 import pagedown from './libs/pagedown';
 import htmlSanitizer from './libs/htmlSanitizer';
 import markdownConversionSvc from './markdownConversionSvc';
@@ -10,8 +9,7 @@ import sectionUtils from './editor/sectionUtils';
 import extensionSvc from './extensionSvc';
 import editorSvcDiscussions from './editor/editorSvcDiscussions';
 import editorSvcUtils from './editor/editorSvcUtils';
-
-
+import { Utils } from 'src/app/editor/editor/cledit/cleditUtils';
 
 import 'prismjs/components/prism-asciidoc';
 import 'prismjs/components/prism-awk';
@@ -71,8 +69,8 @@ import 'prismjs/components/prism-tsx';
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-uri';
 import 'prismjs/components/prism-yaml';
-import './prism-markdown-custom';
-
+import custom from './prism-markdown-custom';
+custom(Prism);
 
 const allowDebounce = (action, wait) => {
     let timeoutId;
@@ -586,7 +584,7 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
                 }) && imgElt;
         };
 
-        const triggerImgCacheGc = cledit['Utils'].debounce(() => {
+        const triggerImgCacheGc = Utils.debounce(() => {
             Object.entries(imgCache).forEach(([src, entries]) => {
                 // Filter entries that are not attached to the DOM
                 const filteredEntries = (entries as any[]).filter(imgElt => this.editorElt.contains(imgElt));
@@ -604,7 +602,7 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
         this.clEditor.highlighter.on('sectionHighlighted', (section) => {
 
             // Render images inline in the editor.
-            section.elt.getElementsByClassName('token img').cl_each((imgTokenElt) => {
+            [...section.elt.getElementsByClassName('token img')].forEach((imgTokenElt) => {
                 const srcElt = imgTokenElt.querySelector('.token.cl-src');
                 if (!srcElt) return;
 
@@ -639,7 +637,7 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
                 imgTokenWrapper.appendChild(imgTokenElt);
             });
 
-            section.elt.querySelectorAll('.injection-fence').cl_each((fenceElement: HTMLElement) => {
+            section.elt.querySelectorAll('.injection-fence').forEach((fenceElement: HTMLElement) => {
                 const insertWrapper = document.createElement('div');
                 insertWrapper.className = 'token injection-portal';
                 insertWrapper.setAttribute("source", '');
