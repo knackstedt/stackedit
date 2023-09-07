@@ -12,7 +12,7 @@
                 <!-- <navigation-bar></navigation-bar> -->
                 <div class="toolbar">
                     <!-- Header -->
-                    <mat-icon [ngx-menu]="textSizeMenu" [class.reflect]="cursorIsInHeading">format_size</mat-icon>
+                    <mat-icon [ngx-menu]="textSizeMenu" [class.reflect]="cursorIsInHeading" matTooltip="Headings">format_size</mat-icon>
                     <!-- Color -->
                     <mat-icon [ngx-tooltip]="colorPopup" [ngx-tooltip-config]="{ triggers: ['click'], position: 'bottom' }">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" style="margin-top: -3px;">
@@ -49,18 +49,24 @@
                     </ng-template>
 
                     <!-- Bold -->
-                    <mat-icon (click)="boldText()" [class.reflect]="cursorIsInBold">format_bold</mat-icon>
+                    <mat-icon (click)="boldText()" [class.reflect]="cursorIsInBold" matTooltip="Bold">format_bold</mat-icon>
                     <!-- Italic -->
-                    <mat-icon (click)="italicizeText()" [class.reflect]="cursorIsInItalic">format_italic</mat-icon>
+                    <mat-icon (click)="italicizeText()" [class.reflect]="cursorIsInItalic" matTooltip="Italic">format_italic</mat-icon>
                     <!-- Strikethrough -->
-                    <mat-icon (click)="strikethroughText()" [class.reflect]="cursorIsInStrikethrough">format_strikethrough</mat-icon>
+                    <mat-icon (click)="strikethroughText()" [class.reflect]="cursorIsInStrikethrough" matTooltip="Strikethrough">format_strikethrough</mat-icon>
                     <!-- Underscore -->
                     <!-- <mat-icon>format_underlined</mat-icon> -->
 
                     <!-- Quote -->
-                    <mat-icon (click)="blockQuoteText()" [class.reflect]="cursorIsInBlockquote">format_quote</mat-icon>
+                    <mat-icon (click)="blockQuoteText()" [class.reflect]="cursorIsInBlockquote" matTooltip="Blockquote">format_quote</mat-icon>
                     <!-- Link -->
-                    <mat-icon [ngx-tooltip]="linkPopup" [ngx-tooltip-config]="{ triggers: ['click'], position: 'bottom' }" [class.reflect]="cursorIsInLink">link</mat-icon>
+                    <mat-icon
+                        [ngx-tooltip]="linkPopup"
+                        [ngx-tooltip-config]="{ triggers: ['click'], position: 'bottom' }"
+                        [class.reflect]="cursorIsInLink"
+                    >
+                        link
+                    </mat-icon>
                     <ng-template #linkPopup let-dialog="dialog">
                         <div
                             *ngFor="let ctx of [{text: editorSvc.clEditor.selectionMgr.getSelectedText()}]"
@@ -87,11 +93,11 @@
                     </ng-template>
 
                     <!-- Ordered list -->
-                    <mat-icon (click)="insertOrderedList()" [class.reflect]="cursorIsInOrderedList">format_list_numbered</mat-icon>
+                    <mat-icon (click)="insertOrderedList()" [class.reflect]="cursorIsInOrderedList" matTooltip="Ordered List">format_list_numbered</mat-icon>
                     <!-- Unordered list -->
-                    <mat-icon (click)="insertList()" [class.reflect]="cursorIsInList">format_list_bulleted</mat-icon>
+                    <mat-icon (click)="insertList()" [class.reflect]="cursorIsInList" matTooltip="Unordered list">format_list_bulleted</mat-icon>
                     <!-- Checklist -->
-                    <mat-icon (click)="insertCheckList()" [class.reflect]="cursorIsInChecklist">rule</mat-icon>
+                    <mat-icon (click)="insertCheckList()" [class.reflect]="cursorIsInChecklist" matTooltip="Checklist">rule</mat-icon>
 
                     <!-- Table -->
                     <mat-icon [ngx-tooltip]="tablePopup" [ngx-tooltip-config]="{ triggers: ['click'], position: 'bottom' }" [class.reflect]="cursorIsInTable">table_chart</mat-icon>
@@ -122,13 +128,13 @@
                             *ngFor="let ctx of [{color: '#000'}]"
                             class="photo-popup"
                         >
-                            <!-- TODO: handle upload -->
+                            <!-- TODO: handle file upload -->
                             <div class="simple-input">
-                                <input type="text" name="" required="">
+                                <input type="text">
                                 <label>URL</label>
                             </div>
                             <div class="simple-input">
-                                <input type="password" name="" required="">
+                                <input type="text">
                                 <label>Alt. Text</label>
                             </div>
 
@@ -137,12 +143,12 @@
                     </ng-template>
 
                     <!-- Inline code -->
-                    <mat-icon (click)="insertInlineCode()" [class.reflect]="cursorIsInInlineCode">code</mat-icon>
+                    <mat-icon (click)="insertInlineCode()" [class.reflect]="cursorIsInInlineCode" matTooltip="Inline highlight">code</mat-icon>
                     <!-- Code Block -->
-                    <mat-icon (click)="insertCodeBlock()" [class.reflect]="cursorIsInCode">data_object</mat-icon>
+                    <mat-icon (click)="insertCodeBlock()" [class.reflect]="cursorIsInCode" matTooltip="Code block">data_object</mat-icon>
 
                     <!-- Mermaid Diagrams... -->
-                    <mat-icon [ngx-menu]="diagramMenu" [ngx-menu-config]="{ customClass: ['medmaid-menu'] }">account_tree</mat-icon>
+                    <mat-icon [ngx-menu]="diagramMenu" [ngx-menu-config]="{ customClass: ['medmaid-menu'] }" matTooltip="Diagrams">account_tree</mat-icon>
                 </div>
             </div>
             <div class="layout__panel flex flex--row"
