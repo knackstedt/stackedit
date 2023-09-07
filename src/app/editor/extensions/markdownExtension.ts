@@ -150,16 +150,12 @@ export default (extensionSvc) => {
 
         // Transform task spans into checkboxes
         elt.querySelectorAll('span.task-list-item-checkbox').forEach((spanElt) => {
-            const checkboxElt = document.createElement('input');
-            checkboxElt.type = 'checkbox';
-            checkboxElt.className = 'task-list-item-checkbox';
-            if (spanElt.classList.contains('checked')) {
-                checkboxElt.setAttribute('checked', 'true');
-            }
-            if (!isEditor) {
-                checkboxElt.disabled = true;
-            }
-            spanElt.parentNode.replaceChild(checkboxElt, spanElt);
+            const target = spanElt.parentElement as HTMLElement;
+            const label = target.textContent.replace(/^[☑☐]\s?/, '');
+            const isChecked = spanElt.classList.contains("checked");
+            target.classList.add("checkbox")
+
+            target.innerHTML = `<input type="checkbox" ${isChecked ? 'checked' : ''}><label> ${label}</label>`;
         });
     });
 };
