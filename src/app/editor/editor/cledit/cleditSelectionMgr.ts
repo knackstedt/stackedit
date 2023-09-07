@@ -64,7 +64,7 @@ export function SelectionMgr(editor) {
             if (typeof adjustScroll === 'number') {
                 scrollEltHeight -= adjustScroll;
             }
-            const adjustment = (scrollEltHeight / 2) * editor.options.getCursorFocusRatio();
+            const adjustment = (scrollEltHeight / 2) * .15;
             let cursorTop = this.cursorCoordinates.top + (this.cursorCoordinates.height / 2);
             // Adjust cursorTop with contentElt position relative to scrollElt
             cursorTop += (contentElt.getBoundingClientRect().top - scrollElt.getBoundingClientRect().top)
@@ -249,71 +249,72 @@ export function SelectionMgr(editor) {
         }
 
         const save = () => {
-            let result;
-            if (this.hasFocus()) {
-                let { selectionStart } = this;
-                let { selectionEnd } = this;
+            if (!this.hasFocus())
+                return;
 
-                const selection = window.getSelection();
-                if (selection.rangeCount > 0) {
-                    const selectionRange = selection.getRangeAt(0);
-                    let node = selectionRange.startContainer;
-                    // eslint-disable-next-line no-bitwise
-                    if ((contentElt.compareDocumentPosition(node)
-                        & window.Node.DOCUMENT_POSITION_CONTAINED_BY)
-                        || contentElt === node
-                    ) {
-                        let offset = selectionRange.startOffset;
-                        if (node.firstChild && offset > 0) {
-                            node = node.childNodes[offset - 1];
-                            offset = node.textContent.length;
-                        }
-                        let container = node;
-                        while (node !== contentElt) {
-                            node = node.previousSibling;
-                            while (node) {
-                                offset += (node.textContent || '').length;
-                                node = node.previousSibling;
-                            }
-                            node = container.parentNode;
-                            container = node;
-                        }
-                        let selectionText = `${selectionRange}`;
-                        // Fix end of line when only br is selected
-                        const brElt = selectionRange.endContainer.firstChild;
-                        if (brElt && brElt['tagName'] === 'BR' && selectionRange.endOffset === 1) {
-                            selectionText += '\n';
-                        }
-                        if (comparePoints(
-                            selection.anchorNode,
-                            selection.anchorOffset,
-                            selection.focusNode,
-                            selection.focusOffset,
-                        ) === 1) {
-                            selectionStart = offset + selectionText.length;
-                            selectionEnd = offset;
-                        }
-                        else {
-                            selectionStart = offset;
-                            selectionEnd = offset + selectionText.length;
-                        }
+            let { selectionStart } = this;
+            let { selectionEnd } = this;
 
-                        if (selectionStart === selectionEnd && selectionStart === editor.getContent().length) {
-                            // If cursor is after the trailingNode
-                            selectionEnd -= 1;
-                            selectionStart = selectionEnd;
-                            result = this.setSelectionStartEnd(selectionStart, selectionEnd);
-                        }
-                        else {
-                            setSelection(selectionStart, selectionEnd);
-                            result = checkSelection(selectionRange);
-                            // selectionRange doesn't change when selection is at the start of a section
-                            result = result || lastSelectionStart !== this.selectionStart;
-                        }
-                    }
-                }
+            const selection = window.getSelection();
+
+            if (selection.rangeCount <= 0)
+                return;
+
+            const selectionRange = selection.getRangeAt(0);
+            let node = selectionRange.startContainer;
+
+            if (!(contentElt.compareDocumentPosition(node) & window.Node.DOCUMENT_POSITION_CONTAINED_BY)
+                && contentElt !== node
+            )
+                return;
+
+            let offset = selectionRange.startOffset;
+            if (node.firstChild && offset > 0) {
+                node = node.childNodes[offset - 1];
+                offset = node.textContent.length;
             }
-            return result;
+
+            let container = node;
+            while (node !== contentElt) {
+                node = node.previousSibling;
+                while (node) {
+                    offset += node.textContent?.length ?? 0;
+                    node = node.previousSibling;
+                }
+                node = container.parentNode;
+                container = node;
+            }
+
+            let selectionText = selectionRange.toString();
+            // Fix end of line when only br is selected
+            const brElt = selectionRange.endContainer.firstChild;
+            if (brElt && brElt['tagName'] === 'BR' && selectionRange.endOffset === 1) {
+                selectionText += '\n';
+            }
+
+            const direction = comparePoints(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset);
+
+            if (direction === 1) {
+                selectionStart = offset + selectionText.length;
+                selectionEnd = offset;
+            }
+            else {
+                selectionStart = offset;
+                selectionEnd = offset + selectionText.length;
+            }
+
+            if (selectionStart === selectionEnd && selectionStart === editor.getContent().length) {
+                // If cursor is after the trailingNode
+                selectionEnd -= 1;
+                selectionStart = selectionEnd;
+                return this.setSelectionStartEnd(selectionStart, selectionEnd);
+            }
+            else {
+                setSelection(selectionStart, selectionEnd);
+                const result = checkSelection(selectionRange);
+                // selectionRange doesn't change when selection is at the start of a section
+                return result || lastSelectionStart !== this.selectionStart;
+            }
         };
 
         const saveCheckChange = () => save() && (
@@ -435,6 +436,7 @@ export function SelectionMgr(editor) {
         let offsetStart = 0;
         let offsetEnd = 0;
         let nextOffset = 0;
+
         editor.getContent().split(/\s/).find((word) => {
             if (word) {
                 offsetStart = nextOffset;
@@ -446,6 +448,7 @@ export function SelectionMgr(editor) {
             nextOffset += word.length + 1;
             return false;
         });
+
         return {
             start: offsetStart,
             end: offsetEnd,
