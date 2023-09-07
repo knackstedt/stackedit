@@ -547,7 +547,7 @@ timeline
         });
 
         // Handle cursor position updates
-        editorSvc.clEditor.selectionMgr.on("cursorCoordinatesChanged", this.onSelectionChange.bind(this))
+        editorSvc.$on("selectionRange", this.onSelectionChange.bind(this))
     }
 
     ngOnDestroy() {
