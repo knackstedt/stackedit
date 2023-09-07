@@ -99,7 +99,6 @@ export const defaultKeystrokes = [
             return false;
         }
 
-        evt.preventDefault();
         const lf = state.before.lastIndexOf('\n') + 1;
         if (clearNewline) {
             state.before = state.before.substring(0, lf);
@@ -115,6 +114,7 @@ export const defaultKeystrokes = [
         }
 
         editor.undoMgr.setCurrentMode('single');
+
         state.before += `\n${indent}`;
         state.selection = '';
         return true;
