@@ -2,14 +2,12 @@ import Vue from 'vue';
 import DiffMatchPatch from 'diff-match-patch';
 import Prism from 'prismjs';
 import markdownItPandocRenderer from 'markdown-it-pandoc-renderer';
-import pagedown from './libs/pagedown';
 import htmlSanitizer from './libs/htmlSanitizer';
 import markdownConversionSvc from './markdownConversionSvc';
 import sectionUtils from './editor/sectionUtils';
 import extensionSvc from './extensionSvc';
 import editorSvcDiscussions from './editor/editorSvcDiscussions';
 import editorSvcUtils from './editor/editorSvcUtils';
-import { Utils } from './editor/cledit/cleditUtils';
 
 import 'prismjs/components/prism-asciidoc';
 import 'prismjs/components/prism-awk';
@@ -103,7 +101,6 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
     tocElt: null,
     // Other objects
     clEditor: null,
-    pagedownEditor: null,
     options: null,
     converter: null,
     parsingCtx: null,
@@ -475,38 +472,15 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
             //     store.commit('layout/setCanRedo', canRedo);
             // }
         });
-        this.pagedownEditor = pagedown({
-            input: Object.create(this.clEditor),
-        });
-        this.pagedownEditor.run();
-        this.pagedownEditor.hooks.set('insertLinkDialog', (callback) => {
-            // TODO: insert link dialog
-            // store.dispatch('modal/open', {
-            //     type: 'link',
-            //     callback,
-            // });
-            return true;
-        });
-        this.pagedownEditor.hooks.set('insertImageDialog', (callback) => {
 
-            // TODO: insert image dialog
-            // store.dispatch('modal/open', {
-            //     type: 'image',
-            //     callback,
-            // });
-            return true;
-        });
-
-        // Aha!...
-        const scrollEditor = allowDebounce(() => {
+        // Manually handle scroll events
+        const onScroll = (e) => {
+            e.preventDefault()
             editorSvc.restoreScrollPosition(editorSvc.getScrollPosition(editorSvc.editorIsActive ? editorElt : previewElt));
-        }, 100);
-        const scrollPreview = allowDebounce(() => {
-            editorSvc.restoreScrollPosition(editorSvc.getScrollPosition(editorSvc.editorIsActive ? editorElt : previewElt));
-        }, 100);
+        };
 
-        editorElt.parentNode.addEventListener('scroll', scrollEditor);
-        previewElt.parentNode.addEventListener('scroll', scrollPreview);
+        editorElt.parentNode.addEventListener('scroll', onScroll);
+        previewElt.parentNode.addEventListener('scroll', onScroll);
 
         const refreshPreview = allowDebounce(() => {
             this.convert();
