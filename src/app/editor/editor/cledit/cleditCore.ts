@@ -275,9 +275,8 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
 
     // Mouseup can happen outside the editor element
     windowMouseListener = () => {
-        if (!tryDestroy()) {
-            selectionMgr.saveSelectionState(true, false);
-        }
+        selectionMgr.saveSelectionState(true, false);
+        selectionMgr.updateCursorCoordinates();
     };
     window.addEventListener('mousedown', windowMouseListener);
     window.addEventListener('mouseup', windowMouseListener);
@@ -486,9 +485,6 @@ function cledit(contentElt, scrollEltOpt, isMarkdown = false) {
         opts.content = ``;
 
         const options = {
-            getCursorFocusRatio() {
-                return 0.1;
-            },
             sectionHighlighter(section) {
                 return section.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\u00a0/g, ' ');
             },
