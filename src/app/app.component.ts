@@ -6,6 +6,30 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
     styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
+    markdownText = `
+# StackEdit
+
+[![Build Status](https://img.shields.io/travis/benweet/stackedit.svg?style=flat)](https://travis-ci.org/benweet/stackedit) [![NPM version](https://img.shields.io/npm/v/stackedit.svg?style=flat)](https://www.npmjs.org/package/stackedit)
+
+> Full-featured, <span style="color: #33b579">open-source <span style="color: #f4d679">Markdown</span> editor based </span> on PageDown, the Markdown library used by Stack Overflow and the other Stack Exchange sites.
+
+\`\`\`mermaid
+flowchart LR
+    markdown[This ** is ** _Markdown_]
+    newLines["Line1
+    Line 2
+    Line 3"]
+    markdown --> newLines
+\`\`\`
+
+- [x] Finish my changes
+- [ ] Push my commits to GitHub
+- [ ] Open a pull request
+- [x] @mentions, #refs, [links](), **formatting**, and <del>tags</del> supported
+- [x] list syntax required (any unordered or ordered list supported)
+- [ ] this is a complete item
+- [ ] this is an incomplete item
+    `
     constructor(
     ) {
         // this.onResize();

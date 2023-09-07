@@ -11,7 +11,7 @@ import editorSvc from './editorSvc';
 window['editorSvc'] = editorSvc
 
 @Component({
-    selector: 'app-editor',
+    selector: 'ngx-stackedit',
     templateUrl: './editor.component.html',
     styleUrls: [
         './editor.component.scss',
@@ -29,7 +29,7 @@ window['editorSvc'] = editorSvc
     ],
     standalone: true
 })
-export class EditorComponent implements OnInit {
+export class StackEditorComponent implements OnInit {
 
     get $el() { return this.viewContainer.element.nativeElement as HTMLElement }
 

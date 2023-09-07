@@ -14,7 +14,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 // import { NgxAppMenuDirective, NgxContextMenuDirective } from '@dotglitch/ngx-ctx-menu';
 // import { NgxLazyLoaderModule } from '@dotglitch/ngx-lazy-loader';
 // import { RegisteredComponents } from 'src/app/component.registry';
-import { EditorComponent } from './editor/editor.component';
+import { StackEditorComponent } from './editor/editor.component';
 
 
 @NgModule({
@@ -26,7 +26,7 @@ import { EditorComponent } from './editor/editor.component';
         BrowserModule,
         BrowserAnimationsModule,
         HttpClientModule,
-        EditorComponent,
+        StackEditorComponent,
         // NgxAppMenuDirective,
         // NgxContextMenuDirective,
         MatButtonModule,
