@@ -389,7 +389,7 @@ timeline
         gutterWidth: 250,
         sideBarWidth: 280,
         navigationBarHeight: 44,
-        buttonBarWidth: 26,
+        buttonBarWidth: 2,
         statusBarHeight: 20,
     }
 
@@ -488,8 +488,7 @@ timeline
         }
 
         const content = editorSvc.clEditor.getContent();
-        const matches = content.substring(0, editorSvc.clEditor.selectionMgr.selectionStart).split(/\r\n/);
-        const currentLineNo = matches?.length;
+        const matches = content.substring(0, editorSvc.clEditor.selectionMgr.selectionStart).split('\n');
         const currentLine = matches?.slice(-1)?.[0];
 
         if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].some(c => inheritedClasses.includes(c)))
@@ -505,13 +504,16 @@ timeline
         if (inheritedClasses.includes("bold"))
             this.cursorIsInLink = true;
 
+        // TODO: This detection will not work for nested items
         // These need custom markdown highlighting to work properly
         if (currentLine.match(/^\s*\d+\.\s*/))
             this.cursorIsInOrderedList = true;
         if (currentLine.match(/^\s*[\-*]\s*/))
             this.cursorIsInList = true;
-        if (currentLine.match(/^\s*[\-*]\s*\[[ xX*]?\]\s*/))
+        if (currentLine.match(/^\s*[\-*]\s*\[[ xX*]?\]\s*/)) {
+            this.cursorIsInList = false;
             this.cursorIsInChecklist = true;
+        }
 
         // Needs custom highlighting
         if (inheritedClasses.includes("table"))
