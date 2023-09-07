@@ -190,15 +190,7 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
             sectionParser: (text) => {
                 this.parsingCtx = markdownConversionSvc.parseSections(this.converter, text);
                 return this.parsingCtx.sections;
-            },
-            getCursorFocusRatio: () => {
-                // TODO
-                // if (store.getters['data/layoutSettings'].focusMode) {
-                //     return 1;
-                // }
-                return 1;
-                // return 0.15;
-            },
+            }
         };
         this.initClEditorInternal(options);
         this.restoreScrollPosition();
@@ -337,9 +329,11 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
         if (force || editorSvc.previewCtx !== editorSvc.previewCtxMeasured) {
             sectionUtils.measureSectionDimensions(editorSvc);
             editorSvc.previewCtxMeasured = editorSvc.previewCtx;
+
             if (restoreScrollPosition) {
                 editorSvc.restoreScrollPosition();
             }
+
             editorSvc.$emit('previewCtxMeasured', editorSvc.previewCtxMeasured);
         }
     }, 500),
@@ -400,7 +394,8 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
         //     scrollPosition: editorSvc.getScrollPosition()
         // };
 
-        editorSvc.restoreScrollPosition(editorSvc.getScrollPosition(editorSvc.editorElt));
+        // console.log("adjust scroll state")
+        // editorSvc.restoreScrollPosition(editorSvc.getScrollPosition(editorSvc.editorElt));
     }, 100),
 
     /**
@@ -549,54 +544,7 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
             onEditorChanged(!instantPreview);
         });
 
-        /* -----------------------------
-         * Inline images
-         */
 
-        const imgCache = Object.create(null);
-
-        const hashImgElt = imgElt => `${imgElt.src}:${imgElt.width || -1}:${imgElt.height || -1}`;
-
-        const addToImgCache = (imgElt) => {
-            const hash = hashImgElt(imgElt);
-            let entries = imgCache[hash];
-            if (!entries) {
-                entries = [];
-                imgCache[hash] = entries;
-            }
-            entries.push(imgElt);
-        };
-
-        const getFromImgCache = (imgEltsToCache) => {
-            const hash = hashImgElt(imgEltsToCache);
-            const entries = imgCache[hash];
-            if (!entries) {
-                return null;
-            }
-            let imgElt;
-            return entries
-                .some((entry) => {
-                    if (this.editorElt.contains(entry)) {
-                        return false;
-                    }
-                    imgElt = entry;
-                    return true;
-                }) && imgElt;
-        };
-
-        const triggerImgCacheGc = Utils.debounce(() => {
-            Object.entries(imgCache).forEach(([src, entries]) => {
-                // Filter entries that are not attached to the DOM
-                const filteredEntries = (entries as any[]).filter(imgElt => this.editorElt.contains(imgElt));
-                if (filteredEntries.length) {
-                    imgCache[src] = filteredEntries;
-                } else {
-                    delete imgCache[src];
-                }
-            });
-        }, 100);
-
-        let imgEltsToCache = [];
         // TODO: inline images config
         // if (store.getters['data/computedSettings'].editor.inlineImages) {
         this.clEditor.highlighter.on('sectionHighlighted', (section) => {
@@ -627,7 +575,6 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
                             imgElt.height = parseInt(match[2], 10);
                         }
                     }
-                    imgEltsToCache.push(imgElt);
                 }
 
                 const imgTokenWrapper = document.createElement('span');
@@ -651,29 +598,12 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
             });
         });
 
-        // this.clEditor.highlighter.on('highlighted', () => {
-        //     imgEltsToCache.forEach((imgElt) => {
-        //         const cachedImgElt = getFromImgCache(imgElt);
-        //         if (cachedImgElt) {
-        //             // Found a previously loaded image that has just been released
-        //             imgElt.parentNode.replaceChild(cachedImgElt, imgElt);
-        //         } else {
-        //             addToImgCache(imgElt);
-        //         }
-        //     });
-        //     imgEltsToCache = [];
-        //     // Eject released images from cache
-        //     triggerImgCacheGc();
-        // });
-
-
         this.measureSectionDimensions(false, true, true)
 
         this.initPrism();
         this.initConverter();
 
         this.initClEditor();
-        this.applyContent();
 
         this.clEditor.toggleEditable(true);
 
