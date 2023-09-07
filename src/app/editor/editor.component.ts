@@ -471,6 +471,11 @@ timeline
         this.cursorIsInInlineCode = false;
         this.cursorIsInCode = false;
 
+        // Large selection -- don't perform evaluations
+        if (editorSvc.clEditor.selectionMgr.selectionStart != editorSvc.clEditor.selectionMgr.selectionEnd) {
+            return;
+        }
+
         const { parentElement } = this.editorSvc?.selectionRange?.commonAncestorContainer as Node || {};
 
         if (!parentElement) return;
@@ -482,6 +487,11 @@ timeline
             currentElement = currentElement.parentElement;
         }
 
+        const content = editorSvc.clEditor.getContent();
+        const matches = content.substring(0, editorSvc.clEditor.selectionMgr.selectionStart).split(/\r\n/);
+        const currentLineNo = matches?.length;
+        const currentLine = matches?.slice(-1)?.[0];
+
         if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].some(c => inheritedClasses.includes(c)))
             this.cursorIsInHeading = true;
         if (inheritedClasses.includes("bold"))
@@ -490,17 +500,17 @@ timeline
             this.cursorIsInItalic = true;
         if (inheritedClasses.includes("strike"))
             this.cursorIsInStrikethrough = true;
-        if (inheritedClasses.includes("blockquote"))
+        if (inheritedClasses.includes("blockquote") || currentLine.match(/^\s*>\s*/))
             this.cursorIsInBlockquote = true;
         if (inheritedClasses.includes("bold"))
             this.cursorIsInLink = true;
 
         // These need custom markdown highlighting to work properly
-        if (inheritedClasses.includes("1"))
+        if (currentLine.match(/^\s*\d+\.\s*/))
             this.cursorIsInOrderedList = true;
-        if (inheritedClasses.includes("1"))
+        if (currentLine.match(/^\s*[\-*]\s*/))
             this.cursorIsInList = true;
-        if (inheritedClasses.includes("1"))
+        if (currentLine.match(/^\s*[\-*]\s*\[[ xX*]?\]\s*/))
             this.cursorIsInChecklist = true;
 
         // Needs custom highlighting
