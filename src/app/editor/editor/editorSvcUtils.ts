@@ -56,6 +56,7 @@ export default {
 
     /**
      * Get the offset in the preview corresponding to the offset of the markdown in the editor
+     * @unused
      */
     getPreviewOffset(
         editorOffset,
@@ -84,6 +85,7 @@ export default {
 
     /**
      * Get the offset of the markdown in the editor corresponding to the offset in the preview
+     * @unused
      */
     getEditorOffset(
         previewOffset,
@@ -114,6 +116,7 @@ export default {
 
     /**
      * Get the coordinates of an offset in the preview
+     * @unused
      */
     getPreviewOffsetCoordinates(offset) {
         const start = Utils.findContainer(this.previewElt, offset && offset - 1);
@@ -132,6 +135,7 @@ export default {
 
     /**
      * Scroll the preview (or the editor if preview is hidden) to the specified anchor
+     * @unused
      */
     scrollToAnchor(anchor) {
         let scrollTop = 0;

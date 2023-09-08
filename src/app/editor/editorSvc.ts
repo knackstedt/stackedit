@@ -440,8 +440,6 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
         this.initClEditor();
 
         this.clEditor.toggleEditable(true);
-
-        this.initHighlighters();
         this.$emit('inited');
     },
 });

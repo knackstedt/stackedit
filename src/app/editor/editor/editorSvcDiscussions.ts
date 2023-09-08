@@ -2,36 +2,14 @@ import DiffMatchPatch from 'diff-match-patch';
 import cledit from './cledit';
 import utils from '../utils';
 import diffUtils from '../diffUtils';
-import { Marker } from './cledit/cleditMarker';
 
 let clEditor;
-// let discussionIds = {};
-let discussionMarkers = {};
 let markerKeys;
 let markerIdxMap;
 let previousPatchableText;
 let currentPatchableText;
 let isChangePatch;
 let contentId;
-let editorClassAppliers = {};
-let previewClassAppliers = {};
-
-function getDiscussionMarkers(discussion, discussionId, onMarker) {
-    const getMarker = (offsetName) => {
-        const markerKey = `${discussionId}:${offsetName}`;
-        let marker = discussionMarkers[markerKey];
-        if (!marker) {
-            marker = new Marker(discussion[offsetName], offsetName === 'end');
-            marker.discussionId = discussionId;
-            marker.offsetName = offsetName;
-            clEditor.addMarker(marker);
-            discussionMarkers[markerKey] = marker;
-        }
-        onMarker(marker);
-    };
-    getMarker('start');
-    getMarker('end');
-}
 
 const diffMatchPatch = new DiffMatchPatch();
 
@@ -137,83 +115,6 @@ export default {
 
             clEditor.init(options);
         }
-    },
-    getTrimmedSelection() {
-        const { selectionMgr } = clEditor;
-        let start = Math.min(selectionMgr.selectionStart, selectionMgr.selectionEnd);
-        let end = Math.max(selectionMgr.selectionStart, selectionMgr.selectionEnd);
-        const text = clEditor.getContent();
-        while ((text[start] || '').match(/\s/)) {
-            start += 1;
-        }
-        while ((text[end - 1] || '').match(/\s/)) {
-            end -= 1;
-        }
-        return start < end && { start, end };
-    },
-    initHighlighters() {
-        // TODO:
-        // store.watch(
-        //     () => store.getters['discussion/newDiscussion'],
-        //     () => syncDiscussionMarkers(store.getters['content/current'], false),
-        // );
-
-        // store.watch(
-        //     () => store.getters['discussion/currentFileDiscussions'],
-        //     (discussions) => {
-        //         const classGetter = (type, discussionId) => () => {
-        //             const classes = [`discussion-${type}-highlighting--${discussionId}`, `discussion-${type}-highlighting`];
-        //             if (store.state.discussion.currentDiscussionId === discussionId) {
-        //                 classes.push(`discussion-${type}-highlighting--selected`);
-        //             }
-        //             return classes;
-        //         };
-        //         const offsetGetter = discussionId => () => {
-        //             const startMarker = discussionMarkers[`${discussionId}:start`];
-        //             const endMarker = discussionMarkers[`${discussionId}:end`];
-        //             return startMarker && endMarker && {
-        //                 start: startMarker.offset,
-        //                 end: endMarker.offset,
-        //             };
-        //         };
-
-        //         // Editor class appliers
-        //         const oldEditorClassAppliers = editorClassAppliers;
-        //         editorClassAppliers = {};
-        //         Object.keys(discussions).forEach((discussionId) => {
-        //             const classApplier = oldEditorClassAppliers[discussionId] || new EditorClassApplier(
-        //                 classGetter('editor', discussionId),
-        //                 offsetGetter(discussionId),
-        //                 { discussionId },
-        //             );
-        //             editorClassAppliers[discussionId] = classApplier;
-        //         });
-        //         // Clean unused class appliers
-        //         Object.entries(oldEditorClassAppliers).forEach(([discussionId, classApplier]) => {
-        //             if (!editorClassAppliers[discussionId]) {
-        //                 classApplier.stop();
-        //             }
-        //         });
-
-        //         // Preview class appliers
-        //         const oldPreviewClassAppliers = previewClassAppliers;
-        //         previewClassAppliers = {};
-        //         Object.keys(discussions).forEach((discussionId) => {
-        //             const classApplier = oldPreviewClassAppliers[discussionId] || new PreviewClassApplier(
-        //                 classGetter('preview', discussionId),
-        //                 offsetGetter(discussionId),
-        //                 { discussionId },
-        //             );
-        //             previewClassAppliers[discussionId] = classApplier;
-        //         });
-        //         // Clean unused class appliers
-        //         Object.entries(oldPreviewClassAppliers).forEach(([discussionId, classApplier]) => {
-        //             if (!previewClassAppliers[discussionId]) {
-        //                 classApplier.stop();
-        //             }
-        //         });
-        //     },
-        // );
     },
 };
 
