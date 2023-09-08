@@ -1,0 +1,141 @@
+::ng-deep .light {
+    --toolbar-background-color: #c4c4c4;
+    --toolbar-icon-color: var(--text-color);
+    --toolbar-icon-hover-color: var(--text-color);
+    --toolbar-icon-hover-background-color: #fffc;
+    --toolbar-table-border-color: #dee2e6;
+    --toolbar-table-border-hover-color: var(--primary-color);
+    --toolbar-table-background-color: #0000;
+    --toolbar-table-background-hover-color: #d7e0ff;
+}
+
+::ng-deep .dark {
+    --toolbar-background-color: #2c2c2c;
+    --toolbar-icon-color: var(--text-color);
+    --toolbar-icon-hover-color: var(--text-color);
+    --toolbar-icon-hover-background-color: #555c;
+    --toolbar-table-border-color: #003468;
+    --toolbar-table-border-hover-color: var(--primary-color);
+    --toolbar-table-background-color: #0000;
+    --toolbar-table-background-hover-color: #00f6;
+}
+
+:host {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    gap: 4px;
+    color: var(--toolbar-icon-color);
+    background-color: var(--toolbar-background-color);
+
+    mat-icon {
+        cursor: pointer;
+        line-height: 24px;
+        padding: 6px;
+        width: 36px;
+        height: 36px;
+
+        // border-radius: 50%;
+        transition: background-color 200ms ease;
+        position: relative;
+
+        &:hover {
+            background-color: var(--toolbar-icon-hover-background-color);
+            color: var(--toolbar-icon-hover-color);
+        }
+
+        &::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            height: 2px;
+            width: 0px;
+            transition: width 200ms ease;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #007acc;
+        }
+
+        &.reflect {
+
+            &::after {
+                width: 100%;
+            }
+        }
+    }
+}
+
+
+/**
+    Tooltip styles
+*/
+.link-popup,
+.photo-popup,
+.table-popup {
+    background-color: var(--background-color);
+    padding: 12px;
+    border-radius: 6px;
+}
+
+.table-popup {
+
+    .table-row,
+    .table-col {
+        display: flex;
+        gap: 2px;
+    }
+
+    .col-cell {
+        width: 16px;
+        height: 16px;
+        border: 1px solid var(--toolbar-table-border-color);
+        background-color: var(--toolbar-table-background-color);
+        cursor: pointer;
+
+        transition: background-color 200ms ease, border-color 200ms ease;
+
+        &.selected {
+            background-color: var(--toolbar-table-background-hover-color);
+            border-color: var(--toolbar-table-border-hover-color);
+        }
+    }
+}
+
+.link-popup,
+.photo-popup {
+
+    .simple-input {
+        position: relative;
+    }
+
+    .simple-input input {
+        width: 100%;
+        padding: 10px 0;
+        font-size: 16px;
+        color: var(--text-color);
+        margin-bottom: 30px;
+        border: none;
+        border-bottom: 1px solid var(--text-color);
+        outline: none;
+        background: transparent;
+    }
+
+    .simple-input label {
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 10px 0;
+        font-size: 16px;
+        color: var(--text-color);
+        pointer-events: none;
+        transition: .5s;
+    }
+
+    .simple-input input:focus~label,
+    .simple-input input:valid~label {
+        top: -20px;
+        left: 0;
+        color: var(--primary-color);
+        font-size: 12px;
+    }
+}
