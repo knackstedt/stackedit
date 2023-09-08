@@ -59,12 +59,6 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
     editorIsActive: false,
 
     /**
-     * Initialize the Prism grammar with the options
-     */
-    initPrism() {
-    },
-
-    /**
      * Initialize the markdown-it converter with the options
      */
     initConverter() {
@@ -313,78 +307,6 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
     },
 
     /**
-     * Save editor selection/scroll state into the store.
-     */
-    saveContentState: allowDebounce(() => {
-        // TODO: Save state
-        // const scrollPosition = editorSvc.getScrollPosition() ||
-        //     store.getters['contentState/current'].scrollPosition;
-        //
-        //     store.dispatch('contentState/patchCurrent', {
-        //         selectionStart: editorSvc.clEditor.selectionMgr.selectionStart,
-        //         selectionEnd: editorSvc.clEditor.selectionMgr.selectionEnd,
-        //         scrollPosition,
-        //     });
-
-        // const opts = {
-        //     selectionStart: editorSvc.clEditor.selectionMgr.selectionStart,
-        //     selectionEnd: editorSvc.clEditor.selectionMgr.selectionEnd,
-        //     scrollPosition: editorSvc.getScrollPosition()
-        // };
-
-        // console.log("adjust scroll state")
-        // editorSvc.restoreScrollPosition(editorSvc.getScrollPosition(editorSvc.editorElt));
-    }, 100),
-
-    /**
-     * Report selection from the preview to the editor.
-     */
-    saveSelection: allowDebounce(() => {
-        const selection = window.getSelection();
-        let range = selection.rangeCount && selection.getRangeAt(0);
-        if (range) {
-            if (
-                /* eslint-disable no-bitwise */
-                !(editorSvc.previewElt.compareDocumentPosition(range.startContainer) &
-                    window.Node.DOCUMENT_POSITION_CONTAINED_BY) ||
-                !(editorSvc.previewElt.compareDocumentPosition(range.endContainer) &
-                    window.Node.DOCUMENT_POSITION_CONTAINED_BY)
-                /* eslint-enable no-bitwise */
-            ) {
-                range = null;
-            }
-        }
-        if (editorSvc.previewSelectionRange !== range) {
-            let previewSelectionStartOffset;
-            let previewSelectionEndOffset;
-            if (range) {
-                const startRange = document.createRange();
-                startRange.setStart(editorSvc.previewElt, 0);
-                startRange.setEnd(range.startContainer, range.startOffset);
-                previewSelectionStartOffset = `${startRange}`.length;
-                previewSelectionEndOffset = previewSelectionStartOffset + `${range}`.length;
-                const editorStartOffset = editorSvc.getEditorOffset(previewSelectionStartOffset);
-                const editorEndOffset = editorSvc.getEditorOffset(previewSelectionEndOffset);
-                if (editorStartOffset != null && editorEndOffset != null) {
-                    editorSvc.clEditor.selectionMgr.setSelectionStartEnd(
-                        editorStartOffset,
-                        editorEndOffset,
-                    );
-                }
-            }
-            editorSvc.previewSelectionRange = range;
-            editorSvc.$emit('previewSelectionRange', editorSvc.previewSelectionRange);
-        }
-    }, 50),
-
-    /**
-     * Returns the pandoc AST generated from the file tokens and the converter options
-     */
-    getPandocAst() {
-        return tokens && markdownItPandocRenderer(tokens, this.converter.options);
-    },
-
-    /**
      * Pass the elements to the store and initialize the editor.
      */
     init(editorElt, previewElt, tocElt) {
@@ -447,7 +369,6 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
                 this.selectionRange = newSelectionRange;
                 this.$emit('selectionRange', this.selectionRange);
             }
-            this.saveContentState();
         }, 10);
 
         this.clEditor.selectionMgr.on('selectionChanged', (start, end, selectionRange) => {
@@ -515,9 +436,7 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
 
         this.measureSectionDimensions(false, true, true)
 
-        this.initPrism();
         this.initConverter();
-
         this.initClEditor();
 
         this.clEditor.toggleEditable(true);
