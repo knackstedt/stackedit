@@ -3,8 +3,7 @@ import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { TooltipDirective, MenuDirective, MenuItem, KeyboardService } from '@dotglitch/ngx-common';
-import { Subscription } from 'rxjs';
+import { TooltipDirective, MenuDirective } from '@dotglitch/ngx-common';
 
 import editorSvc from './editorSvc';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
@@ -14,10 +13,7 @@ window['editorSvc'] = editorSvc
 @Component({
     selector: 'ngx-stackedit',
     templateUrl: './editor.component.html',
-    styleUrls: [
-        './editor.component.scss',
-        './palette.scss'
-    ],
+    styleUrls: ['./editor.component.scss'],
     imports: [
         NgIf,
         NgFor,
@@ -75,49 +71,11 @@ export class StackEditorComponent implements OnInit {
         statusBarHeight: 20,
     }
 
-    private keybindings: Subscription[] = [];
 
     constructor(
         private readonly viewContainer: ViewContainerRef,
-        private readonly keyboard: KeyboardService
     ) {
-        // this.keybindings = [
-        //     this.keyboard.onKeyCommand({
-        //         label: "Comment",
-        //         key: "/",
-        //         ctrl: true
-        //     }).subscribe(this.insertComment.bind(this)),
-        //     this.keyboard.onKeyCommand({
-        //         label: "Bold",
-        //         key: "b",
-        //         ctrl: true
-        //     }).subscribe(this.boldText.bind(this)),
-        //     this.keyboard.onKeyCommand({
-        //         label: "Italic",
-        //         key: "i",
-        //         ctrl: true
-        //     }).subscribe(this.italicizeText.bind(this)),
-        //     // this.keyboard.onKeyCommand({
-        //     //     label: "Select All",
-        //     //     key: "/",
-        //     //     ctrl: true
-        //     // }).subscribe(this.insertComment.bind(this)),
-        //     this.keyboard.onKeyCommand({
-        //         label: "Delete Line",
-        //         key: "l",
-        //         ctrl: true
-        //     }).subscribe(this.insertComment.bind(this)),
-        //     this.keyboard.onKeyCommand({
-        //         label: "Duplicate Current Line",
-        //         key: "d",
-        //         ctrl: true,
-        //         shift: true
-        //     }).subscribe(this.insertComment.bind(this)),
-        //     this.keyboard.onKeyCommand({
-        //         label: "BREAKPOINT",
-        //         key: "pause"
-        //     }).subscribe(() => {debugger})
-        // ];
+
     }
 
 
@@ -152,7 +110,5 @@ export class StackEditorComponent implements OnInit {
 
     }
 
-    ngOnDestroy() {
-        this.keybindings.forEach(k => k.unsubscribe());
-    }
+
 }
