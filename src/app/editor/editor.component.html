@@ -1,84 +1,35 @@
-<div class="layout dark">
-    <div class="layout__panel flex flex--row" [ngClass]="{'flex--end': styles.showSideBar}" style="display: flex;">
-        <!-- <div class="layout__panel layout__panel--explorer" v-show="styles.showExplorer"
-            [attr.aria-hidden]="!styles.showExplorer"
-            [ngStyle]="{width: styles.layoutOverflow ? '100%' : constants.explorerWidth + 'px'}">
-            <explorer></explorer>
-        </div> -->
-        <div class="layout__panel flex flex--column"
-            style="flex-direction: column; width: 100%"
-        >
-            <div class="layout__panel layout__panel--navigation-bar" [ngStyle]="{height: constants.navigationBarHeight + 'px'}">
-                <!-- <navigation-bar></navigation-bar> -->
-                <app-toolbar [editorSvc]="editorSvc"></app-toolbar>
-            </div>
-            <div class="layout__panel flex flex--row"
-                style="flex: 1"
-            >
-                <div class="layout__panel layout__panel--editor" v-show="styles.showEditor"
-                    [ngStyle]="{ fontSize: styles.fontSize + 'px'}"
-                    style="flex: 1"
-                >
-                    <div
-                        class="editor"
-                        (click)="editorSvc.clEditor.focus()"
-                        (pointerenter)="editorSvc.editorIsActive = true"
-                        (pointerleave)="editorSvc.editorIsActive = false"
-                    >
-                        <div class="editor__inner markdown-highlighting"></div>
-                    </div>
-                </div>
-                <div class="layout__panel layout__panel--button-bar" *ngIf="styles.showEditor"
-                    [ngStyle]="{width: constants.buttonBarWidth + 'px', flex: '0 0' + constants.buttonBarWidth + 'px'}"
+<app-toolbar [style.flex]="'0 0 ' + (mode == 'edit' ? 44 : 0) + 'px'" [editorSvc]="editorSvc"></app-toolbar>
 
-                >
-                    <!-- <button-bar></button-bar> -->
-                    <div>
-                            <!-- Toddle preview panel on/off -->
-                            <mat-icon></mat-icon>
-                            <!-- Toggle view mode on -->
-                            <mat-icon></mat-icon>
-
-                            <span style="flex: 1"></span>
-
-                            <!-- What is focus mode? -->
-                            <mat-icon></mat-icon>
-
-                            <!-- Toggle scroll sync -->
-                            <mat-icon></mat-icon>
-                            <!-- Toggle status bar (blue bar at bottom with stats) -->
-                            <mat-icon></mat-icon>
-                    </div>
-                </div>
-                <div class="layout__panel layout__panel--preview" v-show="styles.showPreview"
-                    [ngStyle]="{fontSize: styles.fontSize + 'px'}"
-                    style="flex: 1"
-                >
-
-                    <div class="preview">
-                        <div class="preview__inner-1">
-                            <div class="preview__inner-2"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="layout__panel layout__panel--status-bar" *ngIf="styles.showStatusBar"
-                [ngStyle]="{height: constants.statusBarHeight + 'px'}">
-                <!-- <status-bar></status-bar> -->
-                <div>
-                    <span></span>
-                </div>
-            </div>
-        </div>
-        <div class="layout__panel layout__panel--side-bar" v-show="styles.showSideBar"
-            [ngStyle]="{width: styles.layoutOverflow ? '100%' : constants.sideBarWidth + 'px'}">
-            <div class="toc">
-                <div class="toc__mask"></div>
-                <div class="toc__inner"></div>
-            </div>
+<div class="contents">
+    <div
+        class="editor"
+        [style.flex]="'1 1 50%'"
+        [style.display]="mode == 'view' ? 'none' : 'flex'"
+        (click)="editorSvc.clEditor.focus()"
+        (pointerenter)="editorSvc.editorIsActive = true"
+        (pointerleave)="editorSvc.editorIsActive = false"
+    >
+        <div class="editor__inner markdown-highlighting"></div>
+    </div>
+    <div
+        [style.display]="mode == 'view' ? 'none' : 'flex'"
+        [style.flex]="'0 0 ' + 2 + 'px'"
+    >
+    </div>
+    <div class="preview"
+        [style.flex]="'1 1 50%'"
+    >
+        <div class="preview__inner-1">
+            <div class="preview__inner-2"></div>
         </div>
     </div>
+    <!-- TODO: -->
+    <div
+        class="toc"
+        [style.display]="mode == 'view' ? 'none' : 'none'"
+        [style.width]="false ? '0px' : '240px'"
+    >
+        <div class="toc__inner"></div>
+    </div>
 </div>
-
-
 

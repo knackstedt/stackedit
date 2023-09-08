@@ -27,6 +27,7 @@
     gap: 4px;
     color: var(--toolbar-icon-color);
     background-color: var(--toolbar-background-color);
+    overflow: hidden;
 
     mat-icon {
         cursor: pointer;

@@ -31,8 +31,33 @@ export class StackEditorComponent implements OnInit {
 
     get $el() { return this.viewContainer.element.nativeElement as HTMLElement }
 
+    /**
+     * What mode should the editor be in.
+     * - Possible values are `edit` | `view`
+     * - Default `edit`
+     */
+    @Input() mode: "edit" | "view" = "edit";
+
+    /**
+     * Initial value of the editor.
+     * 2-way binding capable.
+     */
     @Input() value: string = '';
+    /**
+     * Emits when the value of the editor changed.
+     * Can be used standalone or in 2-way binding.
+     */
     @Output() valueChange = new EventEmitter<string>();
+
+    /**
+     * Emits when a file is pasted and needs to be uploaded.
+     */
+    @Output() onFileUpload = new EventEmitter<string>();
+
+    /**
+     * Emits when the user uploads an image via the toolbar dialog.
+     */
+    @Output() onImageUpload = new EventEmitter<string>();
 
     editorSvc = editorSvc;
 
