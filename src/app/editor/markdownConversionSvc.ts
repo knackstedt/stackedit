@@ -108,38 +108,7 @@ export default {
     defaultConverter: null,
     defaultPrismGrammars: null,
 
-    init() {
-        const defaultProperties = {
-            extensions: utils.computedPresets['default']
-        };
 
-        // Default options for the markdown converter and the grammar
-        this.defaultOptions = {
-            "emoji": true,
-            "emojiShortcuts": false,
-            "abc": true,
-            "math": true,
-            "abbr": true,
-            "breaks": true,
-            "deflist": true,
-            "del": true,
-            "fence": true,
-            "footnote": true,
-            "imgsize": true,
-            "linkify": true,
-            "mark": true,
-            "sub": true,
-            "sup": true,
-            "table": true,
-            "tasklist": true,
-            "typographer": true,
-            "mermaid": true,
-            ...extensionSvc.getOptions(defaultProperties),
-            insideFences,
-        };
-
-        this.defaultConverter = this.createConverter(this.defaultOptions);
-    },
 
     /**
      * Creates a converter and init it with extensions.
