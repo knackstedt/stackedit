@@ -1,10 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MenuDirective, MenuItem, TooltipDirective } from '@dotglitch/ngx-common';
+import { KeyboardService, MenuDirective, MenuItem, TooltipDirective } from '@dotglitch/ngx-common';
 
 import mermaidLayouts from './mermaid-layouts';
 import { NgForOf, NgIf } from '@angular/common';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-toolbar',
@@ -155,13 +156,57 @@ export class ToolbarComponent {
         this.wrapText('', '\n' + table, null, true);
     }
 
+    private keybindings: Subscription[] = [];
 
-
-    constructor() { }
+    constructor(
+        private readonly keyboard: KeyboardService
+    ) { }
 
     ngOnInit() {
         // Handle cursor position updates
         this.editorSvc.$on("selectionRange", this.onSelectionChange.bind(this))
+
+        this.keybindings = [
+            this.keyboard.onKeyCommand({
+                label: "Comment",
+                key: "/",
+                ctrl: true
+            }).subscribe(this.insertComment.bind(this)),
+            this.keyboard.onKeyCommand({
+                label: "Bold",
+                key: "b",
+                ctrl: true
+            }).subscribe(this.boldText.bind(this)),
+            this.keyboard.onKeyCommand({
+                label: "Italic",
+                key: "i",
+                ctrl: true
+            }).subscribe(this.italicizeText.bind(this)),
+            // this.keyboard.onKeyCommand({
+            //     label: "Select All",
+            //     key: "/",
+            //     ctrl: true
+            // }).subscribe(this.insertComment.bind(this)),
+            this.keyboard.onKeyCommand({
+                label: "Delete Line",
+                key: "l",
+                ctrl: true
+            }).subscribe(this.insertComment.bind(this)),
+            this.keyboard.onKeyCommand({
+                label: "Duplicate Current Line",
+                key: "d",
+                ctrl: true,
+                shift: true
+            }).subscribe(this.insertComment.bind(this)),
+            this.keyboard.onKeyCommand({
+                label: "BREAKPOINT",
+                key: "pause"
+            }).subscribe(() => {debugger})
+        ];
+    }
+
+    ngOnDestroy() {
+        this.keybindings.forEach(k => k.unsubscribe());
     }
 
     async onSelectionChange() {
