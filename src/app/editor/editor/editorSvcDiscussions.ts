@@ -21,10 +21,10 @@ function makePatches() {
 function applyPatches(patches) {
     const newPatchableText = diffMatchPatch.patch_apply(patches, currentPatchableText)[0];
     let result = newPatchableText;
-    if (markerKeys.length) {
-        // Strip text markers
-        result = result.replace(new RegExp(`[\ue000-${String.fromCharCode((0xe000 + markerKeys.length) - 1)}]`, 'g'), '');
-    }
+    // if (markerKeys.length) {
+    //     // Strip text markers
+    //     result = result.replace(new RegExp(`[\ue000-${String.fromCharCode((0xe000 + markerKeys.length) - 1)}]`, 'g'), '');
+    // }
     // Expect a `contentChanged` event
     if (result !== clEditor.getContent()) {
         previousPatchableText = currentPatchableText;
