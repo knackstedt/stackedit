@@ -6,6 +6,8 @@ import { KeyboardService, MenuDirective, MenuItem, TooltipDirective } from '@dot
 import mermaidLayouts from './mermaid-layouts';
 import { NgForOf, NgIf } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { MatButtonModule } from '@angular/material/button';
+import { StackEditorComponent } from '../../editor.component';
 
 @Component({
     selector: 'app-toolbar',
@@ -16,6 +18,7 @@ import { Subscription } from 'rxjs';
         NgForOf,
         MatIconModule,
         MatTooltipModule,
+        MatButtonModule,
         TooltipDirective,
         MenuDirective
     ],
@@ -93,7 +96,7 @@ export class ToolbarComponent {
     }
 
     blockQuoteText() {
-        this.wrapText("> ", '\n', 2, true);
+        this.wrapText("> ", '', 2, true);
     }
 
     insertLink(url, label) {
@@ -101,7 +104,7 @@ export class ToolbarComponent {
     }
 
     insertOrderedList() {
-        this.wrapText("1. ", '', 3, true);
+        this.wrapText(" 1. ", '', 4, true);
     }
 
     insertList() {
@@ -159,7 +162,8 @@ export class ToolbarComponent {
     private keybindings: Subscription[] = [];
 
     constructor(
-        private readonly keyboard: KeyboardService
+        private readonly keyboard: KeyboardService,
+        private readonly stackEditor: StackEditorComponent
     ) { }
 
     ngOnInit() {
@@ -278,14 +282,30 @@ export class ToolbarComponent {
     }
 
 
+    getLine(text: string, index: number) {
+        const lines = text.split(/[\r\n]/g);
+        const number = text.slice(0, index).match(/[\r\n]/g).length;
+        const line = lines[number];
+        const lineStart = lines.slice(0, number).map(l => l.length).reduce((a, b) => a+b, 0) + (number);
+        const lineEnd = lineStart + line.length;
+
+        return {
+            lineStart,
+            lineEnd,
+            line
+        };
+    }
+
     wrapText(before = '', after = '', indent?: number, insertNewline = false) {
         const { selectionStart, selectionEnd } = this.editorSvc.clEditor.selectionMgr;
-        let text = this.editorSvc.clEditor.getContent() as string;
+        const text = this.editorSvc.clEditor.getContent() as string;
 
-        const startIndex = Math.min(selectionStart, selectionEnd);
-        const endIndex = Math.max(selectionStart, selectionEnd);
+        const { lineStart, lineEnd, line } = selectionStart == selectionEnd ? this.getLine(text, selectionStart) : {} as any;
 
-        const selectionText = text.slice(startIndex, endIndex);
+        const startIndex = lineStart ?? Math.min(selectionStart, selectionEnd);
+        const endIndex   = lineEnd ?? Math.max(selectionStart, selectionEnd);
+
+        const selectionText = line ?? text.slice(startIndex, endIndex);
         let preString = text.slice(0, startIndex);
         let postString = text.slice(endIndex);
 
@@ -332,7 +352,7 @@ export class ToolbarComponent {
             postString;
 
         this.editorSvc.clEditor.setContent(patchedText);
-        this.editorSvc.clEditor.selectionMgr.setSelectionStartEnd(selectionStart + before, selectionEnd + after);
+        this.editorSvc.clEditor.selectionMgr.setSelectionStartEnd(startIndex + before, endIndex + after);
     }
 
     /**
@@ -359,6 +379,10 @@ export class ToolbarComponent {
     injectHeading(size: number) {
         const headerString = ''.padStart(size, '#') + ' ';
         this.wrapText(headerString, '', null, true);
+    }
+
+    onUploadImage() {
+        this.stackEditor.onImageUpload.next('123');
     }
 
 }
