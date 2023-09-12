@@ -98,6 +98,7 @@ export const defaultKeystrokes = [
             clearNewline = false;
             return false;
         }
+        evt.preventDefault();
 
         const lf = state.before.lastIndexOf('\n') + 1;
         if (clearNewline) {
@@ -106,16 +107,34 @@ export const defaultKeystrokes = [
             clearNewline = false;
             return true;
         }
+
         clearNewline = false;
         const previousLine = state.before.slice(lf);
         const indent = previousLine.match(/^\s*/)[0];
+
+        const isList        = /^\s*[-*]\s*\S/.test(previousLine);
+        const isOrderedList = /^\s*\d+\.\s*\S/.test(previousLine);
+        const isCheckList   = /^\s*-\s*\[[ xX]?\]\s*\S/.test(previousLine);
+
         if (indent.length) {
             clearNewline = true;
         }
 
         editor.undoMgr.setCurrentMode('single');
 
-        state.before += `\n${indent}`;
+        let prefix = '';
+        if (isList) prefix = '- ';
+        if (isOrderedList) {
+            const prevNumber = previousLine.match(/^\s*(?<num>\d+)\.\s*\S/)?.groups?.num;
+
+            let num = parseInt(prevNumber);
+            if (Number.isNaN(num))
+                num = 1;
+            prefix = num + '. ';
+        }
+        if (isCheckList) prefix = '- [ ] ';
+
+        state.before += `\n${indent}${prefix}`;
         state.selection = '';
         return true;
     }),
