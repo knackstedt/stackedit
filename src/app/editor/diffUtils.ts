@@ -4,7 +4,7 @@ import utils from './utils';
 const diffMatchPatch = new DiffMatchPatch();
 diffMatchPatch.Match_Distance = 10000;
 
-function makePatchableText(content, markerKeys, markerIdxMap) {
+export function makePatchableText(content, markerKeys, markerIdxMap) {
     if (!content || !content.discussions) {
         return null;
     }
@@ -63,7 +63,7 @@ function stripDiscussionOffsets(objectMap) {
     return result;
 }
 
-function restoreDiscussionOffsets(content, markerKeys) {
+export function restoreDiscussionOffsets(content, markerKeys) {
     if (markerKeys.length) {
         // Go through markers
         let count = 0;
@@ -138,7 +138,7 @@ function mergeValues(serverValue, clientValue, lastMergedValue) {
     return serverValue; // Take the server value
 }
 
-function mergeObjects(serverObject, clientObject, lastMergedObject = {}) {
+export function mergeObjects(serverObject, clientObject, lastMergedObject = {}) {
     const mergedObject = {};
     Object.keys({
         ...clientObject,
@@ -152,7 +152,7 @@ function mergeObjects(serverObject, clientObject, lastMergedObject = {}) {
     return utils.deepCopy(mergedObject);
 }
 
-function mergeContent(serverContent, clientContent, lastMergedContent = {}) {
+export function mergeContent(serverContent, clientContent, lastMergedContent = {}) {
     const markerKeys = [];
     const markerIdxMap = Object.create(null);
     const lastMergedText = makePatchableText(lastMergedContent, markerKeys, markerIdxMap);
@@ -190,10 +190,3 @@ function mergeContent(serverContent, clientContent, lastMergedContent = {}) {
     restoreDiscussionOffsets(result, markerKeys);
     return result;
 }
-
-export default {
-    makePatchableText,
-    restoreDiscussionOffsets,
-    mergeObjects,
-    mergeContent,
-};

@@ -1,13 +1,14 @@
-import Vue from 'vue';
 import DiffMatchPatch from 'diff-match-patch';
 import markdownItPandocRenderer from 'markdown-it-pandoc-renderer';
 import htmlSanitizer from './libs/htmlSanitizer';
 import markdownConversionSvc from './markdownConversionSvc';
 import sectionUtils from './editor/sectionUtils';
 import extensionSvc from './extensionSvc';
-import editorSvcDiscussions from './editor/editorSvcDiscussions';
-import editorSvcUtils from './editor/editorSvcUtils';
 import Prism from './prism';
+import { VanillaMirror } from './editor/vanilla-mirror';
+import { EventEmittingClass, findContainer } from './editor/utils';
+import { makePatchableText } from './diffUtils';
+import utils from './utils';
 
 
 
@@ -23,9 +24,6 @@ const allowDebounce = (action, wait) => {
     };
 };
 
-const diffMatchPatch = new DiffMatchPatch();
-let instantPreview = true;
-let tokens;
 
 class SectionDesc {
     public editorElt;
@@ -35,66 +33,326 @@ class SectionDesc {
 }
 
 // Use a vue instance as an event bus
-const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils, {
-    // Elements
-    editorElt: null,
-    previewElt: null,
-    tocElt: null,
-    // Other objects
-    clEditor: null,
-    options: null,
-    converter: null,
-    parsingCtx: null,
-    conversionCtx: null,
-    previewCtx: {
-        sectionDescList: [],
-    },
-    previewCtxMeasured: null,
-    previewCtxWithDiffs: null,
-    sectionList: null,
-    selectionRange: null,
-    previewSelectionRange: null,
-    previewSelectionStartOffset: null,
+export class Editor extends EventEmittingClass {
 
-    editorIsActive: false,
+    public clEditor: VanillaMirror;
+
+    diffMatchPatch = new DiffMatchPatch();
+    instantPreview = true;
+    tokens;
+
+    markerKeys;
+    markerIdxMap;
+    previousPatchableText;
+    currentPatchableText;
+    isChangePatch;
+    contentId;
+
+
+    // Elements
+    editorElt: any;
+    previewElt: any;
+    tocElt: any;
+    // Other object;
+    options: any;
+    parsingCtx: any;
+    conversionCtx: any;
+    previewCtx =  {
+        sectionDescList: []
+    };
+    previewCtxMeasured: any;
+    previewCtxWithDiffs: any;
+    sectionList: any;
+    selectionRange: any;
+    previewSelectionRange: any;
+    previewSelectionStartOffset: any;
+    editorIsActive = false;
+
+    converter = markdownConversionSvc.createConverter({
+        "emoji": true,
+        "emojiShortcuts": false,
+        "abc": true,
+        "math": true,
+        "abbr": true,
+        "breaks": true,
+        "deflist": true,
+        "del": true,
+        "fence": true,
+        "footnote": true,
+        "imgsize": true,
+        "linkify": true,
+        "mark": true,
+        "sub": true,
+        "sup": true,
+        "table": true,
+        "tasklist": true,
+        "typographer": true,
+        "mermaid": true,
+    });
+
+    makePatches() {
+        const diffs = this.diffMatchPatch.diff_main(this.previousPatchableText, this.currentPatchableText);
+        return this.diffMatchPatch.patch_make(this.previousPatchableText, diffs);
+    }
+
+    applyPatches(patches) {
+        const newPatchableText = this.diffMatchPatch.patch_apply(patches, this.currentPatchableText)[0];
+        let result = newPatchableText;
+        // if (markerKeys.length) {
+        //     // Strip text markers
+        //     result = result.replace(new RegExp(`[\ue000-${String.fromCharCode((0xe000 + markerKeys.length) - 1)}]`, 'g'), '');
+        // }
+        // Expect a `contentChanged` event
+        if (result !== this.clEditor.getContent()) {
+            this.previousPatchableText = this.currentPatchableText;
+            this.currentPatchableText = newPatchableText;
+            this.isChangePatch = true;
+        }
+        return result;
+    }
+
+    reversePatches(patches) {
+        const result = this.diffMatchPatch.patch_deepCopy(patches).reverse();
+        result.forEach((patch) => {
+            patch.diffs.forEach((diff) => {
+                diff[0] = -diff[0];
+            });
+        });
+        return result;
+    }
+
+    createClEditor(editorElt) {
+        this.clEditor = new VanillaMirror(editorElt, editorElt.parentNode, true);
+        this.clEditor.on('contentChanged', (text) => {
+            const oldContent = {
+                comments: {},
+                discussions: {},
+                hash: 0,
+                id: null,
+                properties: "\n",
+                text: "\n",
+                type: "content"
+            };//store.getters['content/current'];
+
+            const newContent = {
+                ...utils.deepCopy(oldContent),
+                text: utils.sanitizeText(text),
+            };
+            if (!this.isChangePatch) {
+                this.previousPatchableText = this.currentPatchableText;
+                this.currentPatchableText = makePatchableText(newContent, this.markerKeys, this.markerIdxMap);
+            } else {
+                // Take a chance to restore discussion offsets on undo/redo
+                newContent.text = this.currentPatchableText;
+            }
+            // TODO:
+            // store.dispatch('content/patchCurrent', newContent);
+            this.isChangePatch = false;
+        });
+        // TODO:
+        // clEditor.on('focus', () => store.commit('discussion/setNewCommentFocus', false));
+
+    }
+
+    initClEditorInternal(opts) {
+        const content = {
+            comments: {},
+            discussions: {},
+            hash: 0,
+            id: null,
+            properties: "\n",
+            text: "\n",
+            type: "content"
+        };//store.getters['content/current'];
+
+        if (content) {
+            const contentState = {
+                hash: 0,
+                id: null,
+                scrollPosition: null,
+                selectionEnd: 0,
+                selectionStart: 0,
+                type: "contentState"
+            };//store.getters['contentState/current'];
+            const options = Object.assign({
+                selectionStart: contentState.selectionStart,
+                selectionEnd: contentState.selectionEnd,
+                patchHandler: {
+                    makePatches: this.makePatches.bind(this),
+                    applyPatches: this.applyPatches.bind(this),
+                    reversePatches: this.reversePatches.bind(this),
+                },
+            }, opts);
+
+            if (this.contentId !== content.id) {
+                this.contentId = content.id;
+                this.currentPatchableText = makePatchableText(content, this.markerKeys, this.markerIdxMap);
+                this.previousPatchableText = this.currentPatchableText;
+                options.content = content.text;
+            }
+
+            this.clEditor.init(options);
+        }
+    }
 
     /**
-     * Initialize the markdown-it converter with the options
+     * Get an object describing the position of the scroll bar in the file.
      */
-    initConverter() {
-        // TODO: Move these to proper home.
+    getScrollPosition(elt) {
 
-        this.converter = markdownConversionSvc.createConverter({
-            "emoji": true,
-            "emojiShortcuts": false,
-            "abc": true,
-            "math": true,
-            "abbr": true,
-            "breaks": true,
-            "deflist": true,
-            "del": true,
-            "fence": true,
-            "footnote": true,
-            "imgsize": true,
-            "linkify": true,
-            "mark": true,
-            "sub": true,
-            "sup": true,
-            "table": true,
-            "tasklist": true,
-            "typographer": true,
-            "mermaid": true,
+        const dimensionKey = elt === this.editorElt
+            ? 'editorDimension'
+            : 'previewDimension';
+
+        const { scrollTop } = elt.parentNode;
+
+        let result;
+
+        this.previewCtxMeasured?.sectionDescList.some((sectionDesc, sectionIdx) => {
+            if (scrollTop >= sectionDesc[dimensionKey].endOffset) {
+                return false;
+            }
+            const posInSection = (scrollTop - sectionDesc[dimensionKey].startOffset) /
+                (sectionDesc[dimensionKey].height || 1);
+            result = {
+                sectionIdx,
+                posInSection,
+            };
+            return true;
         });
-    },
+
+        return result;
+    }
+
+    /**
+     * Restore the scroll position from the current file content state.
+     */
+    restoreScrollPosition(scrollPosition?) {
+
+        if (!scrollPosition || !this.previewCtxMeasured)
+            return;
+
+        const sectionDesc = this.previewCtxMeasured.sectionDescList[scrollPosition.sectionIdx];
+        if (sectionDesc) {
+            const editorScrollTop = sectionDesc.editorDimension.startOffset +
+                (sectionDesc.editorDimension.height * scrollPosition.posInSection);
+
+            this.editorElt.parentNode.scrollTop = Math.floor(editorScrollTop);
+
+            const previewScrollTop = sectionDesc.previewDimension.startOffset +
+                (sectionDesc.previewDimension.height * scrollPosition.posInSection);
+
+            this.previewElt.parentNode.scrollTop = Math.floor(previewScrollTop);
+        }
+    }
+
+    /**
+     * Get the offset in the preview corresponding to the offset of the markdown in the editor
+     * @unused
+     */
+    getPreviewOffset(
+        editorOffset,
+        sectionDescList = (this.previewCtxWithDiffs || {} as any).sectionDescList,
+    ) {
+        if (!sectionDescList) {
+            return null;
+        }
+        let offset = editorOffset;
+        let previewOffset = 0;
+        sectionDescList.some((sectionDesc) => {
+            if (!sectionDesc.textToPreviewDiffs) {
+                previewOffset = null;
+                return true;
+            }
+            if (sectionDesc.section.text.length >= offset) {
+                previewOffset += this.diffMatchPatch.diff_xIndex(sectionDesc.textToPreviewDiffs, offset);
+                return true;
+            }
+            offset -= sectionDesc.section.text.length;
+            previewOffset += sectionDesc.previewText.length;
+            return false;
+        });
+        return previewOffset;
+    }
+
+    /**
+     * Get the offset of the markdown in the editor corresponding to the offset in the preview
+     * @unused
+     */
+    getEditorOffset(
+        previewOffset,
+        sectionDescList = (this.previewCtxWithDiffs || {}).sectionDescList,
+    ) {
+        if (!sectionDescList) {
+            return null;
+        }
+        let offset = previewOffset;
+        let editorOffset = 0;
+        sectionDescList.some((sectionDesc) => {
+            if (!sectionDesc.textToPreviewDiffs) {
+                editorOffset = null;
+                return true;
+            }
+            if (sectionDesc.previewText.length >= offset) {
+                const previewToTextDiffs = sectionDesc.textToPreviewDiffs
+                    .map(diff => [-diff[0], diff[1]]);
+                editorOffset += this.diffMatchPatch.diff_xIndex(previewToTextDiffs, offset);
+                return true;
+            }
+            offset -= sectionDesc.previewText.length;
+            editorOffset += sectionDesc.section.text.length;
+            return false;
+        });
+        return editorOffset;
+    }
+
+    /**
+     * Get the coordinates of an offset in the preview
+     * @unused
+     */
+    getPreviewOffsetCoordinates(offset) {
+        const start = findContainer(this.previewElt, offset && offset - 1);
+        const end = findContainer(this.previewElt, offset || offset + 1);
+        const range = document.createRange();
+        range.setStart(start.container, start.offsetInContainer);
+        range.setEnd(end.container, end.offsetInContainer);
+        const rect = range.getBoundingClientRect();
+        const contentRect = this.previewElt.getBoundingClientRect();
+        return {
+            top: Math.round((rect.top - contentRect.top) + this.previewElt.scrollTop),
+            height: Math.round(rect.height),
+            left: Math.round((rect.right - contentRect.left) + this.previewElt.scrollLeft),
+        };
+    }
+
+    /**
+     * Scroll the preview (or the editor if preview is hidden) to the specified anchor
+     * @unused
+     */
+    scrollToAnchor(anchor) {
+        let scrollTop = 0;
+        const scrollerElt = this.previewElt.parentNode;
+        const elt = document.getElementById(anchor);
+        if (elt) {
+            scrollTop = elt.offsetTop;
+        }
+        const maxScrollTop = scrollerElt.scrollHeight - scrollerElt.offsetHeight;
+        if (scrollTop < 0) {
+            scrollTop = 0;
+        } else if (scrollTop > maxScrollTop) {
+            scrollTop = maxScrollTop;
+        }
+    }
+
 
     /**
      * Initialize the cledit editor with markdown-it section parser and Prism highlighter
      */
     initClEditor() {
         this.previewCtxMeasured = null;
-        editorSvc.$emit('previewCtxMeasured', null);
+        this.$trigger('previewCtxMeasured', null);
         this.previewCtxWithDiffs = null;
-        editorSvc.$emit('previewCtxWithDiffs', null);
+        this.$trigger('previewCtxWithDiffs', null);
 
         // This is the CL Editor for the text input
         const options = {
@@ -126,16 +384,16 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
         };
         this.initClEditorInternal(options);
         this.restoreScrollPosition();
-    },
+    }
 
     /**
      * Finish the conversion initiated by the section parser
      */
     convert() {
         this.conversionCtx = markdownConversionSvc.convert(this.parsingCtx, this.conversionCtx);
-        this.$emit('conversionCtx', this.conversionCtx);
-        ({ tokens } = this.parsingCtx.markdownState);
-    },
+        this.$trigger('conversionCtx', this.conversionCtx);
+        this.tokens = this.parsingCtx.markdownState?.tokens;
+    }
 
     /**
      * Refresh the preview with the result of `convert()`
@@ -155,7 +413,7 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
             for (let i = 0; i < item[1].length; i += 1) {
                 const section = this.conversionCtx.sectionList[sectionIdx];
                 if (item[0] === 0) {
-                    let sectionDesc = this.previewCtx.sectionDescList[sectionDescIdx];
+                    let sectionDesc = this.previewCtx.sectionDescList[sectionDescIdx] as any;
                     sectionDescIdx += 1;
                     if (sectionDesc.editorElt !== section.elt) {
                         // Force textToPreviewDiffs computation
@@ -231,10 +489,10 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
             markdown: this.conversionCtx.text,
             html: previewHtml.replace(/^\s+|\s+$/g, ''),
             text: this.previewElt.textContent,
-            sectionDescList,
-        };
+            sectionDescList: sectionDescList as any,
+        } as any;
 
-        this.$emit('previewCtx', this.previewCtx);
+        this.$trigger('previewCtx', this.previewCtx);
         this.makeTextToPreviewDiffs();
 
         // Wait for images to load
@@ -252,34 +510,34 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
 
         // Debounce if sections have already been measured
         this.measureSectionDimensions(!!this.previewCtxMeasured);
-    },
+    }
 
     /**
      * Measure the height of each section in editor, preview and toc.
      */
-    measureSectionDimensions: allowDebounce((restoreScrollPosition = false, force = false) => {
-        if (force || editorSvc.previewCtx !== editorSvc.previewCtxMeasured) {
-            sectionUtils.measureSectionDimensions(editorSvc);
-            editorSvc.previewCtxMeasured = editorSvc.previewCtx;
+    measureSectionDimensions = allowDebounce((restoreScrollPosition = false, force = false) => {
+        if (force || this.previewCtx !== this.previewCtxMeasured) {
+            sectionUtils.measureSectionDimensions(this);
+            this.previewCtxMeasured = this.previewCtx;
 
             if (restoreScrollPosition) {
-                editorSvc.restoreScrollPosition();
+                this.restoreScrollPosition();
             }
 
-            editorSvc.$emit('previewCtxMeasured', editorSvc.previewCtxMeasured);
+            this.$trigger('previewCtxMeasured', this.previewCtxMeasured);
         }
-    }, 500),
+    }, 500)
 
     /**
      * Compute the diffs between editor's markdown and preview's html
      * asynchronously unless there is only one section to compute.
      */
     makeTextToPreviewDiffs() {
-        if (editorSvc.previewCtx !== editorSvc.previewCtxWithDiffs) {
+        if (this.previewCtx !== this.previewCtxWithDiffs) {
             const makeOne = () => {
                 let hasOne = false;
-                const hasMore = editorSvc.previewCtx.sectionDescList
-                    .some((sectionDesc) => {
+                const hasMore = this.previewCtx.sectionDescList
+                    .some((sectionDesc: any) => {
                         if (!sectionDesc.textToPreviewDiffs) {
                             if (hasOne) {
                                 return true;
@@ -287,7 +545,7 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
                             if (!sectionDesc.previewText) {
                                 sectionDesc.previewText = sectionDesc.previewElt.textContent;
                             }
-                            sectionDesc.textToPreviewDiffs = diffMatchPatch.diff_main(
+                            sectionDesc.textToPreviewDiffs = this.diffMatchPatch.diff_main(
                                 sectionDesc.section.text,
                                 sectionDesc.previewText,
                             );
@@ -298,13 +556,13 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
                 if (hasMore) {
                     setTimeout(() => makeOne(), 10);
                 } else {
-                    editorSvc.previewCtxWithDiffs = editorSvc.previewCtx;
-                    editorSvc.$emit('previewCtxWithDiffs', editorSvc.previewCtxWithDiffs);
+                    this.previewCtxWithDiffs = this.previewCtx;
+                    this.$trigger('previewCtxWithDiffs', this.previewCtxWithDiffs);
                 }
             };
             makeOne();
         }
-    },
+    }
 
     /**
      * Pass the elements to the store and initialize the editor.
@@ -339,7 +597,7 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
         // Manually handle scroll events
         const onScroll = (e) => {
             e.preventDefault()
-            editorSvc.restoreScrollPosition(editorSvc.getScrollPosition(editorSvc.editorIsActive ? editorElt : previewElt));
+            this.restoreScrollPosition(this.getScrollPosition(this.editorIsActive ? editorElt : previewElt));
         };
 
         editorElt.parentNode.addEventListener('scroll', onScroll);
@@ -347,14 +605,14 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
 
         const refreshPreview = allowDebounce(() => {
             this.convert();
-            if (instantPreview) {
+            if (this.instantPreview) {
                 this.refreshPreview();
                 this.measureSectionDimensions(false, true);
             }
             else {
                 setTimeout(() => this.refreshPreview(), 10);
             }
-            instantPreview = false;
+            this.instantPreview = false;
         }, 25);
 
         let newSectionList;
@@ -362,22 +620,22 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
         const onEditorChanged = allowDebounce(() => {
             if (this.sectionList !== newSectionList) {
                 this.sectionList = newSectionList;
-                this.$emit('sectionList', this.sectionList);
-                refreshPreview(!instantPreview);
+                this.$trigger('sectionList', this.sectionList);
+                refreshPreview(!this.instantPreview);
             }
             if (this.selectionRange !== newSelectionRange) {
                 this.selectionRange = newSelectionRange;
-                this.$emit('selectionRange', this.selectionRange);
+                this.$trigger('selectionRange', this.selectionRange);
             }
         }, 10);
 
         this.clEditor.selectionMgr.on('selectionChanged', (start, end, selectionRange) => {
             newSelectionRange = selectionRange;
-            onEditorChanged(!instantPreview);
+            onEditorChanged(!this.instantPreview);
         });
         this.clEditor.on('contentChanged', (content, diffs, sectionList) => {
             newSectionList = sectionList;
-            onEditorChanged(!instantPreview);
+            onEditorChanged(!this.instantPreview);
         });
 
 
@@ -435,14 +693,9 @@ const editorSvc = Object.assign(new Vue(), editorSvcDiscussions, editorSvcUtils,
         });
 
         this.measureSectionDimensions(false, true, true)
-
-        this.initConverter();
         this.initClEditor();
 
         this.clEditor.toggleEditable(true);
-        this.$emit('inited');
-    },
-});
-
-
-export default editorSvc;
+        this.$trigger('inited');
+    }
+}

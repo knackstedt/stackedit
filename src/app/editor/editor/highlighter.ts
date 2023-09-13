@@ -1,4 +1,5 @@
-import { Utils } from './cleditUtils';
+import { EventEmittingClass, isWebkit } from './utils';
+import { VanillaMirror } from './vanilla-mirror';
 
 const styleElts = [];
 
@@ -11,29 +12,50 @@ function createStyleSheet(document) {
     styleElts.push(styleElt);
 }
 
-export function Highlighter(editor) {
-    Utils.createEventHooks(this);
+class Section {
+    text;
+    data;
+    elt;
 
-    if (!styleElts.find(styleElt => document.head.contains(styleElt))) {
-        createStyleSheet(document);
+    constructor(text) {
+        this.text = text.text === undefined ? text : text.text;
+        this.data = text.data;
+    }
+    setElement(elt) {
+        this.elt = elt;
+        elt.section = this;
+    }
+}
+
+export class Highlighter extends EventEmittingClass {
+    isComposing = 0;
+    trailingNode: HTMLElement;
+    get contentElt() { return this.editor.$contentElt };
+    cancelComposition: any;
+
+    sectionList = [];
+    insertBeforeSection;
+    useBr = isWebkit;
+
+    readonly trailingNodeTag = 'div';
+    readonly hiddenLfInnerHtml = '<br><span class="hd-lf" style="display: none">\n</span>';
+
+    readonly lfHtml = `<span class="lf">${this.useBr ? this.hiddenLfInnerHtml : '\n'}</span>`;
+
+
+    constructor(private editor: VanillaMirror) {
+        super();
+
+        if (!styleElts.find(styleElt => document.head.contains(styleElt))) {
+            createStyleSheet(document);
+        }
     }
 
-    const contentElt = editor.$contentElt;
-    this.isComposing = 0;
-
-    let sectionList = [];
-    let insertBeforeSection;
-    const useBr = Utils.isWebkit;
-    const trailingNodeTag = 'div';
-    const hiddenLfInnerHtml = '<br><span class="hd-lf" style="display: none">\n</span>';
-
-    const lfHtml = `<span class="lf">${useBr ? hiddenLfInnerHtml : '\n'}</span>`;
-
-    this.fixContent = (modifiedSections, removedSections, noContentFix) => {
+    fixContent = (modifiedSections, removedSections, noContentFix) => {
         modifiedSections.forEach((section) => {
             section.forceHighlighting = true;
             if (!noContentFix) {
-                if (useBr) {
+                if (this.useBr) {
                     [...section.elt.getElementsByClassName('hd-lf')]
                         .forEach(lfElt => lfElt.parentNode.removeChild(lfElt));
                     [...section.elt.getElementsByTagName('br')]
@@ -46,58 +68,43 @@ export function Highlighter(editor) {
         });
     };
 
-    this.addTrailingNode = () => {
-        this.trailingNode = document.createElement(trailingNodeTag);
-        contentElt.appendChild(this.trailingNode);
+    addTrailingNode() {
+        this.trailingNode = document.createElement(this.trailingNodeTag);
+        this.contentElt.appendChild(this.trailingNode);
     };
 
-    class Section {
-        text;
-        data;
-        elt;
-
-        constructor(text) {
-            this.text = text.text === undefined ? text : text.text;
-            this.data = text.data;
-        }
-        setElement(elt) {
-            this.elt = elt;
-            elt.section = this;
-        }
-    }
-
-    this.parseSections = (content, isInit) => {
+    parseSections(content, isInit = false) {
         if (this.isComposing && !this.cancelComposition) {
-            return sectionList;
+            return this.sectionList;
         }
 
         this.cancelComposition = false;
-        const newSectionList = (editor.options.sectionParser
-            ? editor.options.sectionParser(content)
+        const newSectionList = (this.editor.options.sectionParser
+            ? this.editor.options.sectionParser(content)
             : [content])
             .map(sectionText => new Section(sectionText));
 
         let modifiedSections = [];
         let sectionsToRemove = [];
-        insertBeforeSection = undefined;
+        this.insertBeforeSection = undefined;
 
         if (isInit) {
             // Render everything if isInit
-            sectionsToRemove = sectionList;
-            sectionList = newSectionList;
+            sectionsToRemove = this.sectionList;
+            this.sectionList = newSectionList;
             modifiedSections = newSectionList;
         }
         else {
             // Find modified section starting from top
-            let leftIndex = sectionList.length;
-            sectionList.find((section, index) => {
+            let leftIndex = this.sectionList.length;
+            this.sectionList.find((section, index) => {
                 const newSection = newSectionList[index];
                 if (index >= newSectionList.length ||
                     section.forceHighlighting ||
                     // Check text modification
                     section.text !== newSection.text ||
                     // Check that section has not been detached or moved
-                    section.elt.parentNode !== contentElt ||
+                    section.elt.parentNode !== this.contentElt ||
                     // Check also the content since nodes can be injected in sections via copy/paste
                     section.elt.textContent !== newSection.text
                 ) {
@@ -108,15 +115,15 @@ export function Highlighter(editor) {
             });
 
             // Find modified section starting from bottom
-            let rightIndex = -sectionList.length;
-            sectionList.slice().reverse().find((section, index) => {
+            let rightIndex = -this.sectionList.length;
+            this.sectionList.slice().reverse().find((section, index) => {
                 const newSection = newSectionList[newSectionList.length - index - 1];
                 if (index >= newSectionList.length ||
                     section.forceHighlighting ||
                     // Check modified
                     section.text !== newSection.text ||
                     // Check that section has not been detached or moved
-                    section.elt.parentNode !== contentElt ||
+                    section.elt.parentNode !== this.contentElt ||
                     // Check also the content since nodes can be injected in sections via copy/paste
                     section.elt.textContent !== newSection.text
                 ) {
@@ -126,21 +133,21 @@ export function Highlighter(editor) {
                 return false;
             });
 
-            if (leftIndex - rightIndex > sectionList.length) {
+            if (leftIndex - rightIndex > this.sectionList.length) {
                 // Prevent overlap
-                rightIndex = leftIndex - sectionList.length;
+                rightIndex = leftIndex - this.sectionList.length;
             }
 
-            const leftSections = sectionList.slice(0, leftIndex);
+            const leftSections = this.sectionList.slice(0, leftIndex);
             modifiedSections = newSectionList.slice(leftIndex, newSectionList.length + rightIndex);
-            const rightSections = sectionList.slice(sectionList.length + rightIndex, sectionList.length);
-            [insertBeforeSection] = rightSections;
-            sectionsToRemove = sectionList.slice(leftIndex, sectionList.length + rightIndex);
-            sectionList = leftSections.concat(modifiedSections).concat(rightSections);
+            const rightSections = this.sectionList.slice(this.sectionList.length + rightIndex, this.sectionList.length);
+            [this.insertBeforeSection] = rightSections;
+            sectionsToRemove = this.sectionList.slice(leftIndex, this.sectionList.length + rightIndex);
+            this.sectionList = leftSections.concat(modifiedSections).concat(rightSections);
         }
 
         const highlight = (section) => {
-            const html = editor.options.sectionHighlighter(section).replace(/\n/g, lfHtml);
+            const html = this.editor.options.sectionHighlighter(section).replace(/\n/g, this.lfHtml);
             const sectionElt = document.createElement('div');
             sectionElt.className = 'cledit-section';
             sectionElt.innerHTML = html;
@@ -154,10 +161,10 @@ export function Highlighter(editor) {
             highlight(section);
             newSectionEltList.appendChild(section.elt);
         });
-        editor.watcher.noWatch(() => {
+        this.editor.watcher.noWatch(() => {
             if (isInit) {
-                contentElt.innerHTML = '';
-                contentElt.appendChild(newSectionEltList);
+                this.contentElt.innerHTML = '';
+                this.contentElt.appendChild(newSectionEltList);
                 this.addTrailingNode();
                 return;
             }
@@ -165,39 +172,40 @@ export function Highlighter(editor) {
             // Remove outdated sections
             sectionsToRemove.forEach((section) => {
                 // section may be already removed
-                if (section.elt.parentNode === contentElt) {
-                    contentElt.removeChild(section.elt);
+                if (section.elt.parentNode === this.contentElt) {
+                    this.contentElt.removeChild(section.elt);
                 }
                 // To detect sections that come back with built-in undo
                 section.elt.section = undefined;
             });
 
-            if (insertBeforeSection !== undefined) {
-                contentElt.insertBefore(newSectionEltList, insertBeforeSection.elt);
-            } else {
-                contentElt.appendChild(newSectionEltList);
+            if (this.insertBeforeSection !== undefined) {
+                this.contentElt.insertBefore(newSectionEltList, this.insertBeforeSection.elt);
+            }
+            else {
+                this.contentElt.appendChild(newSectionEltList);
             }
 
             // Remove unauthorized nodes (text nodes outside of sections or
             // duplicated sections via copy/paste)
-            let childNode = contentElt.firstChild;
+            let childNode = this.contentElt.firstChild;
             while (childNode) {
                 const nextNode = childNode.nextSibling;
-                if (!childNode.section) {
-                    contentElt.removeChild(childNode);
+                if (!childNode['section']) {
+                    this.contentElt.removeChild(childNode);
                 }
                 childNode = nextNode;
             }
             this.addTrailingNode();
             this.$trigger('highlighted');
 
-            if (editor.selectionMgr.hasFocus()) {
-                editor.selectionMgr.restoreSelection();
-                editor.selectionMgr.updateCursorCoordinates();
+            if (this.editor.selectionMgr.hasFocus) {
+                this.editor.selectionMgr.restoreSelection();
+                this.editor.selectionMgr.updateCursorCoordinates();
             }
         });
 
-        return sectionList;
+        return this.sectionList;
     };
 }
 

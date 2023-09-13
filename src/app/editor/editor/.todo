@@ -3,3 +3,8 @@ Issues:
     - [x] typing and pressing enter causes strange scolling behavior
     - [ ] cursor is sometimes invisible
     - [ ] pressing up/down arrow keys doesn't move the cursor near inline images
+
+
+Inserts need to create a newline
+heading
+lists

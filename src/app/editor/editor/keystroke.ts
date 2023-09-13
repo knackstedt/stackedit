@@ -1,4 +1,4 @@
-import { Utils } from './cleditUtils';
+import { isMac } from './utils';
 
 export function Keystroke(handler, priority?) {
     this.handler = handler;
@@ -147,7 +147,7 @@ export const defaultKeystrokes = [
 
         editor.undoMgr.setCurrentMode('delete');
         if (!state.selection) {
-            const isJump = (Utils.isMac && evt.altKey) || (!Utils.isMac && evt.ctrlKey);
+            const isJump = (isMac && evt.altKey) || (!isMac && evt.ctrlKey);
             if (isJump) {
                 // Custom kill word behavior
                 const text = state.before + state.after;
@@ -185,7 +185,7 @@ export const defaultKeystrokes = [
         if (evt.which !== 37 /* left arrow */ && evt.which !== 39 /* right arrow */) {
             return false;
         }
-        const isJump = (Utils.isMac && evt.altKey) || (!Utils.isMac && evt.ctrlKey);
+        const isJump = (isMac && evt.altKey) || (!isMac && evt.ctrlKey);
         if (!isJump) {
             return false;
         }

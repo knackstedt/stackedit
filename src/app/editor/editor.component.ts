@@ -5,10 +5,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { TooltipDirective, MenuDirective } from '@dotglitch/ngx-common';
 
-import editorSvc from './editorSvc';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
+import { Subscription } from 'rxjs';
+import { Editor } from './editor';
 
-window['editorSvc'] = editorSvc
 
 @Component({
     selector: 'ngx-stackedit',
@@ -57,9 +57,11 @@ export class StackEditorComponent implements OnInit {
     /**
      * Emits when the user uploads an image via the toolbar dialog.
      */
-    @Output() onImageUpload = new EventEmitter<string>();
+    // @Output() onImageUpload = new DuplexEventEmitter<string, string>((data) => {
+    //     console.log(data, 'WERE HERE', this)
+    // });
 
-    editorSvc = editorSvc;
+    editorSvc = new Editor();
 
     styles = {
         showNavigationBar: true,
@@ -103,37 +105,31 @@ export class StackEditorComponent implements OnInit {
 
     }
 
-
-
     ngOnInit() {
         // markdownConversionSvc.init(); // Needs to be inited before mount
     }
-
 
     ngAfterViewInit() {
         const editorElt = this.$el.querySelector('.editor__inner');
         const previewElt = this.$el.querySelector('.preview__inner-2');
         const tocElt = this.$el.querySelector('.toc__inner');
-        editorSvc.init(editorElt, previewElt, tocElt);
+        this.editorSvc.init(editorElt, previewElt, tocElt);
 
         // Focus on the editor every time reader mode is disabled
         const focus = () => {
             if (this.styles.showEditor) {
-                editorSvc.clEditor.focus();
+                this.editorSvc.clEditor.focus();
             }
         };
         setTimeout(focus, 100);
         // this.$watch(() => this.styles.showEditor, focus);
 
-        editorSvc.clEditor.focus();
+        this.editorSvc.clEditor.focus();
 
         // Bind the 'value' property
-        editorSvc.clEditor.setContent(this.value);
-        editorSvc.clEditor.on('contentChanged', (content, diffs, sectionList) => {
+        this.editorSvc.clEditor.setContent(this.value);
+        this.editorSvc.clEditor.on('contentChanged', (content, diffs, sectionList) => {
             this.valueChange.next(content);
         });
-
     }
-
-
 }
