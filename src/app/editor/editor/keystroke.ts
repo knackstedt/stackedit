@@ -1,6 +1,7 @@
 import { isMac } from './utils';
+import { VanillaMirror } from './vanilla-mirror';
 
-export function Keystroke(handler, priority?) {
+export function Keystroke(handler: (evt: KeyboardEvent, state: any, editor: VanillaMirror) => boolean, priority?) {
     this.handler = handler;
     this.priority = priority || 100;
 }
@@ -38,7 +39,6 @@ function getNextWordOffset(text, offset, isBackward) {
 }
 
 export const defaultKeystrokes = [
-
     // CTRL+Z, CTRL+Y
     new Keystroke((evt, state, editor) => {
         if ((!evt.ctrlKey && !evt.metaKey) || evt.altKey) {
@@ -136,6 +136,9 @@ export const defaultKeystrokes = [
 
         state.before += `\n${indent}${prefix}`;
         state.selection = '';
+
+        // Trigger scroll update after things have settled
+        setTimeout(() => editor.adjustCursorPosition(), 1);
         return true;
     }),
 
@@ -144,6 +147,7 @@ export const defaultKeystrokes = [
         if (evt.which !== 8 /* backspace */ && evt.which !== 46 /* delete */) {
             return false;
         }
+        evt.preventDefault();
 
         editor.undoMgr.setCurrentMode('delete');
         if (!state.selection) {
@@ -154,30 +158,27 @@ export const defaultKeystrokes = [
                 const offset = getNextWordOffset(text, state.before.length, evt.which === 8);
                 if (evt.which === 8) {
                     state.before = state.before.slice(0, offset);
-                } else {
+                }
+                else {
                     state.after = state.after.slice(offset - text.length);
                 }
-                evt.preventDefault();
                 return true;
             }
             else if (evt.which === 8 && state.before.slice(-1) === '\n') {
                 // Special treatment for end of lines
                 state.before = state.before.slice(0, -1);
-                evt.preventDefault();
                 return true;
             }
             else if (evt.which === 46 && state.after.slice(0, 1) === '\n') {
                 state.after = state.after.slice(1);
-                evt.preventDefault();
                 return true;
             }
+            return false;
         }
         else {
             state.selection = '';
-            evt.preventDefault();
             return true;
         }
-        return false;
     }),
 
     // LEFT_ARROW, RIGHT_ARROW
