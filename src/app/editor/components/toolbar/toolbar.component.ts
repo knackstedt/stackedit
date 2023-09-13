@@ -168,7 +168,7 @@ export class ToolbarComponent {
 
     ngOnInit() {
         // Handle cursor position updates
-        this.editorSvc.$on("selectionRange", this.onSelectionChange.bind(this))
+        this.editorSvc.on("selectionRange", this.onSelectionChange.bind(this))
 
         this.keybindings = [
             this.keyboard.onKeyCommand({
@@ -352,7 +352,7 @@ export class ToolbarComponent {
             postString;
 
         this.editorSvc.clEditor.setContent(patchedText);
-        this.editorSvc.clEditor.selectionMgr.setSelectionStartEnd(startIndex + before, endIndex + after);
+        this.editorSvc.clEditor.selectionMgr.setSelectionStartEnd(startIndex + before.length, endIndex + after.length);
     }
 
     /**
@@ -382,7 +382,7 @@ export class ToolbarComponent {
     }
 
     onUploadImage() {
-        this.stackEditor.onImageUpload.next('123');
+        // this.stackEditor.onImageUpload.next('123');
     }
 
 }
