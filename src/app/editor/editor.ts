@@ -9,6 +9,7 @@ import { VanillaMirror } from './editor/vanilla-mirror';
 import { EventEmittingClass, findContainer } from './editor/utils';
 import { makePatchableText } from './diffUtils';
 import utils from './utils';
+import { StackEditorComponent } from './editor.component';
 
 
 
@@ -48,11 +49,6 @@ export class Editor extends EventEmittingClass {
     isChangePatch;
     contentId;
 
-
-    // Elements
-    editorElt: any;
-    previewElt: any;
-    tocElt: any;
     // Other object;
     options: any;
     parsingCtx: any;
@@ -90,6 +86,145 @@ export class Editor extends EventEmittingClass {
         "mermaid": true,
     });
 
+    /**
+     * Pass the elements to the store and initialize the editor.
+     */
+    constructor(
+        private ngEditor: StackEditorComponent,
+        private editorElt: HTMLElement,
+        private previewElt: HTMLElement,
+        private tocElt: HTMLElement
+    ) {
+        super();
+
+        this.createClEditor(editorElt);
+
+        this.clEditor.on('contentChanged', (content, diffs, sectionList) => {
+            this.parsingCtx = {
+                ...this.parsingCtx,
+                sectionList,
+            };
+        });
+
+        this.clEditor.undoMgr.on('undoStateChange', () => {
+            // TODO: Handle
+
+            // const canUndo = this.clEditor.undoMgr.canUndo();
+            // if (canUndo !== store.state.layout.canUndo) {
+            //     store.commit('layout/setCanUndo', canUndo);
+            // }
+            // const canRedo = this.clEditor.undoMgr.canRedo();
+            // if (canRedo !== store.state.layout.canRedo) {
+            //     store.commit('layout/setCanRedo', canRedo);
+            // }
+        });
+
+        // Manually handle scroll events
+        const onScroll = (e) => {
+            e.preventDefault();
+            this.restoreScrollPosition(this.getScrollPosition(this.editorIsActive ? editorElt : previewElt));
+        };
+
+        editorElt.parentNode.addEventListener('scroll', onScroll);
+        previewElt.parentNode.addEventListener('scroll', onScroll);
+
+        const refreshPreview = allowDebounce(() => {
+            this.convert();
+            if (this.instantPreview) {
+                this.refreshPreview();
+                this.measureSectionDimensions(false, true);
+            }
+            else {
+                setTimeout(() => this.refreshPreview(), 10);
+            }
+            this.instantPreview = false;
+        }, 25);
+
+        let newSectionList;
+        let newSelectionRange;
+        const onEditorChanged = allowDebounce(() => {
+            if (this.sectionList !== newSectionList) {
+                this.sectionList = newSectionList;
+                this.$trigger('sectionList', this.sectionList);
+                refreshPreview(!this.instantPreview);
+            }
+            if (this.selectionRange !== newSelectionRange) {
+                this.selectionRange = newSelectionRange;
+                this.$trigger('selectionRange', this.selectionRange);
+            }
+        }, 10);
+
+        this.clEditor.selectionMgr.on('selectionChanged', (start, end, selectionRange) => {
+            newSelectionRange = selectionRange;
+            onEditorChanged(!this.instantPreview);
+        });
+
+        this.clEditor.on('contentChanged', (content, diffs, sectionList) => {
+            newSectionList = sectionList;
+            onEditorChanged(!this.instantPreview);
+        });
+
+
+        // TODO: inline images config
+        // if (store.getters['data/computedSettings'].editor.inlineImages) {
+        this.clEditor.highlighter.on('sectionHighlighted', (section) => {
+
+            // Render images inline in the editor.
+            [...section.elt.getElementsByClassName('token img')].forEach((imgTokenElt) => {
+                const srcElt = imgTokenElt.querySelector('.token.cl-src');
+                if (!srcElt) return;
+
+                // Create an img element before the .img.token and wrap both elements
+                // into a .token.img-wrapper
+                const imgElt = document.createElement('img');
+                imgElt.style.display = 'none';
+                const uri = srcElt.textContent;
+                if (true || !/^unsafe/.test(htmlSanitizer.sanitizeUri(uri, true))) {
+                    imgElt.onload = () => {
+                        imgElt.style.display = '';
+                    };
+                    imgElt.src = uri;
+                    // Take img size into account
+                    const sizeElt = imgTokenElt.querySelector('.token.cl-size');
+                    if (sizeElt) {
+                        const match = sizeElt.textContent.match(/=(\d*)x(\d*)/);
+                        if (match[1]) {
+                            imgElt.width = parseInt(match[1], 10);
+                        }
+                        if (match[2]) {
+                            imgElt.height = parseInt(match[2], 10);
+                        }
+                    }
+                }
+
+                const imgTokenWrapper = document.createElement('span');
+                imgTokenWrapper.className = 'token img-wrapper';
+                imgTokenElt.parentNode.insertBefore(imgTokenWrapper, imgTokenElt);
+                imgTokenWrapper.appendChild(imgElt);
+                imgTokenWrapper.appendChild(imgTokenElt);
+            });
+
+            section.elt.querySelectorAll('.injection-fence').forEach((fenceElement: HTMLElement) => {
+                const insertWrapper = document.createElement('div');
+                insertWrapper.className = 'token injection-portal';
+                insertWrapper.setAttribute("source", '');
+
+                // fenceElement.setAttribute('source', fenceElement.textContent);
+                const insertion = fenceElement.textContent.replace(/^```<injected>\n?|<\/injected>\s*```$/g, '');
+
+                insertWrapper.innerHTML = insertion;//htmlSanitizer.sanitizeHtml(insertion);
+                fenceElement.insertAdjacentElement('beforebegin', insertWrapper);
+                // insertWrapper.appendChild(fenceElement);
+            });
+        });
+
+        this.measureSectionDimensions(false, true, true);
+        this.initClEditor();
+
+        this.clEditor.toggleEditable(true);
+        this.$trigger('inited');
+    }
+
     makePatches() {
         const diffs = this.diffMatchPatch.diff_main(this.previousPatchableText, this.currentPatchableText);
         return this.diffMatchPatch.patch_make(this.previousPatchableText, diffs);
@@ -122,7 +257,7 @@ export class Editor extends EventEmittingClass {
     }
 
     createClEditor(editorElt) {
-        this.clEditor = new VanillaMirror(editorElt, editorElt.parentNode, true);
+        this.clEditor = new VanillaMirror(this.ngEditor, editorElt, editorElt.parentNode);
         this.clEditor.on('contentChanged', (text) => {
             const oldContent = {
                 comments: {},
@@ -237,12 +372,12 @@ export class Editor extends EventEmittingClass {
             const editorScrollTop = sectionDesc.editorDimension.startOffset +
                 (sectionDesc.editorDimension.height * scrollPosition.posInSection);
 
-            this.editorElt.parentNode.scrollTop = Math.floor(editorScrollTop);
+            (this.editorElt.parentNode as HTMLElement).scrollTop = Math.floor(editorScrollTop);
 
             const previewScrollTop = sectionDesc.previewDimension.startOffset +
                 (sectionDesc.previewDimension.height * scrollPosition.posInSection);
 
-            this.previewElt.parentNode.scrollTop = Math.floor(previewScrollTop);
+            (this.previewElt.parentNode as HTMLElement).scrollTop = Math.floor(previewScrollTop);
         }
     }
 
@@ -331,7 +466,7 @@ export class Editor extends EventEmittingClass {
      */
     scrollToAnchor(anchor) {
         let scrollTop = 0;
-        const scrollerElt = this.previewElt.parentNode;
+        const scrollerElt = this.previewElt.parentNode as HTMLElement;
         const elt = document.getElementById(anchor);
         if (elt) {
             scrollTop = elt.offsetTop;
@@ -562,140 +697,5 @@ export class Editor extends EventEmittingClass {
             };
             makeOne();
         }
-    }
-
-    /**
-     * Pass the elements to the store and initialize the editor.
-     */
-    init(editorElt, previewElt, tocElt) {
-        this.editorElt = editorElt;
-        this.previewElt = previewElt;
-        this.tocElt = tocElt;
-
-        this.createClEditor(editorElt);
-
-        this.clEditor.on('contentChanged', (content, diffs, sectionList) => {
-            this.parsingCtx = {
-                ...this.parsingCtx,
-                sectionList,
-            };
-        });
-        this.clEditor.undoMgr.on('undoStateChange', () => {
-
-            // TODO: Handle
-
-            // const canUndo = this.clEditor.undoMgr.canUndo();
-            // if (canUndo !== store.state.layout.canUndo) {
-            //     store.commit('layout/setCanUndo', canUndo);
-            // }
-            // const canRedo = this.clEditor.undoMgr.canRedo();
-            // if (canRedo !== store.state.layout.canRedo) {
-            //     store.commit('layout/setCanRedo', canRedo);
-            // }
-        });
-
-        // Manually handle scroll events
-        const onScroll = (e) => {
-            e.preventDefault()
-            this.restoreScrollPosition(this.getScrollPosition(this.editorIsActive ? editorElt : previewElt));
-        };
-
-        editorElt.parentNode.addEventListener('scroll', onScroll);
-        previewElt.parentNode.addEventListener('scroll', onScroll);
-
-        const refreshPreview = allowDebounce(() => {
-            this.convert();
-            if (this.instantPreview) {
-                this.refreshPreview();
-                this.measureSectionDimensions(false, true);
-            }
-            else {
-                setTimeout(() => this.refreshPreview(), 10);
-            }
-            this.instantPreview = false;
-        }, 25);
-
-        let newSectionList;
-        let newSelectionRange;
-        const onEditorChanged = allowDebounce(() => {
-            if (this.sectionList !== newSectionList) {
-                this.sectionList = newSectionList;
-                this.$trigger('sectionList', this.sectionList);
-                refreshPreview(!this.instantPreview);
-            }
-            if (this.selectionRange !== newSelectionRange) {
-                this.selectionRange = newSelectionRange;
-                this.$trigger('selectionRange', this.selectionRange);
-            }
-        }, 10);
-
-        this.clEditor.selectionMgr.on('selectionChanged', (start, end, selectionRange) => {
-            newSelectionRange = selectionRange;
-            onEditorChanged(!this.instantPreview);
-        });
-        this.clEditor.on('contentChanged', (content, diffs, sectionList) => {
-            newSectionList = sectionList;
-            onEditorChanged(!this.instantPreview);
-        });
-
-
-        // TODO: inline images config
-        // if (store.getters['data/computedSettings'].editor.inlineImages) {
-        this.clEditor.highlighter.on('sectionHighlighted', (section) => {
-
-            // Render images inline in the editor.
-            [...section.elt.getElementsByClassName('token img')].forEach((imgTokenElt) => {
-                const srcElt = imgTokenElt.querySelector('.token.cl-src');
-                if (!srcElt) return;
-
-                // Create an img element before the .img.token and wrap both elements
-                // into a .token.img-wrapper
-                const imgElt = document.createElement('img');
-                imgElt.style.display = 'none';
-                const uri = srcElt.textContent;
-                if (true || !/^unsafe/.test(htmlSanitizer.sanitizeUri(uri, true))) {
-                    imgElt.onload = () => {
-                        imgElt.style.display = '';
-                    };
-                    imgElt.src = uri;
-                    // Take img size into account
-                    const sizeElt = imgTokenElt.querySelector('.token.cl-size');
-                    if (sizeElt) {
-                        const match = sizeElt.textContent.match(/=(\d*)x(\d*)/);
-                        if (match[1]) {
-                            imgElt.width = parseInt(match[1], 10);
-                        }
-                        if (match[2]) {
-                            imgElt.height = parseInt(match[2], 10);
-                        }
-                    }
-                }
-
-                const imgTokenWrapper = document.createElement('span');
-                imgTokenWrapper.className = 'token img-wrapper';
-                imgTokenElt.parentNode.insertBefore(imgTokenWrapper, imgTokenElt);
-                imgTokenWrapper.appendChild(imgElt);
-                imgTokenWrapper.appendChild(imgTokenElt);
-            });
-
-            section.elt.querySelectorAll('.injection-fence').forEach((fenceElement: HTMLElement) => {
-                const insertWrapper = document.createElement('div');
-                insertWrapper.className = 'token injection-portal';
-                insertWrapper.setAttribute("source", '');
-
-                // fenceElement.setAttribute('source', fenceElement.textContent);
-                const insertion = fenceElement.textContent.replace(/^```<injected>\n?|<\/injected>\s*```$/g, '');
-
-                insertWrapper.innerHTML = insertion;//htmlSanitizer.sanitizeHtml(insertion);
-                fenceElement.insertAdjacentElement('beforebegin', insertWrapper);
-                // insertWrapper.appendChild(fenceElement);
-            });
-        });
-
-        this.measureSectionDimensions(false, true, true)
-        this.initClEditor();
-
-        this.clEditor.toggleEditable(true);
-        this.$trigger('inited');
     }
 }

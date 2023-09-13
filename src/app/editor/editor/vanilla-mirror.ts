@@ -6,6 +6,7 @@ import { EventEmittingClass, debounce } from './utils';
 import { Highlighter } from './highlighter';
 import { SelectionMgr } from './selection-manager';
 import { defaultKeystrokes } from './keystroke';
+import { StackEditorComponent } from '../editor.component';
 
 export class VanillaMirror extends EventEmittingClass {
 
@@ -19,8 +20,8 @@ export class VanillaMirror extends EventEmittingClass {
     $keystrokes = [];
     value = '';
     lastTextContent = '';
-    get $contentElt() { return this.contentElt }
-    get $scrollElt() { return this.scrollElt }
+    get $contentElt() { return this.contentElt };
+    get $scrollElt() { return this.scrollElt };
 
     watcher = new Watcher(this, this.checkContentChange.bind(this));
     highlighter = new Highlighter(this);
@@ -38,7 +39,7 @@ export class VanillaMirror extends EventEmittingClass {
         "strongDelimiter": "**",
         "linkStyle": "inlined",
         "linkReferenceStyle": "full"
-    })
+    });
 
     private windowKeydownListener;
     private windowMouseListener;
@@ -46,7 +47,11 @@ export class VanillaMirror extends EventEmittingClass {
 
     private scrollElt: HTMLElement
 
-    constructor(private contentElt: HTMLElement, private scrollEltOpt: HTMLElement, isMarkdown = false) {
+    constructor(
+        private ngEditor: StackEditorComponent,
+        private contentElt: HTMLElement,
+        private scrollEltOpt: HTMLElement
+    ) {
         super();
 
         this.scrollElt = scrollEltOpt || contentElt;
@@ -85,6 +90,7 @@ export class VanillaMirror extends EventEmittingClass {
         this.selectionMgr.saveSelectionState(true, false);
         this.selectionMgr.updateCursorCoordinates();
     }
+
     onWindowResize() {
         if (!this.tryDestroy()) {
             this.selectionMgr.updateCursorCoordinates();
@@ -129,15 +135,17 @@ export class VanillaMirror extends EventEmittingClass {
         if (document.contains(this.contentElt)) {
             return false;
         }
+
         this.watcher.stopWatching();
+
         window.removeEventListener('keydown', this.windowKeydownListener);
         window.removeEventListener('mousedown', this.windowMouseListener);
         window.removeEventListener('mouseup', this.windowMouseListener);
         window.removeEventListener('resize', this.windowResizeListener);
+
         this.$trigger('destroy');
         return true;
     }
-
 
     getContent() {
         const recursivelyCollectChildrenText = (el) => {
@@ -177,7 +185,6 @@ export class VanillaMirror extends EventEmittingClass {
         }
         return this.value = textContent;
     }
-
 
     // Primarily invoked by mutation observer
     checkContentChange(mutations: any[]) {
@@ -231,7 +238,6 @@ export class VanillaMirror extends EventEmittingClass {
         this.triggerSpellCheck();
     }
 
-
     triggerSpellCheck = debounce(() => {
         // Hack for Chrome to trigger the spell checker
         const selection = window.getSelection();
@@ -258,12 +264,7 @@ export class VanillaMirror extends EventEmittingClass {
 
     keydownHandler(handler) {
         return (evt) => {
-            if (
-                evt.which !== 17 && // Ctrl
-                evt.which !== 91 && // Cmd
-                evt.which !== 18 && // Alt
-                evt.which !== 16 // Shift
-            ) {
+            if (!['Control', 'Alt', 'Shift', 'Cmd'].includes(evt.key)) {
                 handler(evt);
             }
         };
@@ -294,7 +295,6 @@ export class VanillaMirror extends EventEmittingClass {
             .sort((keystroke1, keystroke2) => keystroke1.priority - keystroke2.priority);
     }
 
-
     setContent(value, noUndo?, maxStartOffsetOpt?) {
         this.value = value;
 
@@ -323,7 +323,6 @@ export class VanillaMirror extends EventEmittingClass {
             range,
         };
     }
-
 
     replace(selectionStart, selectionEnd, replacement) {
         this.undoMgr.setDefaultMode('single');
@@ -379,6 +378,7 @@ export class VanillaMirror extends EventEmittingClass {
             if (!keystroke.handler(evt, state, this)) {
                 return false;
             }
+
             const newContent = state.before + state.selection + state.after;
             if (newContent !== this.getContent()) {
                 this.setContent(newContent, false, min);
@@ -386,6 +386,7 @@ export class VanillaMirror extends EventEmittingClass {
                 this.skipSaveSelection = true;
                 this.highlighter.cancelComposition = true;
             }
+
             min = state.before.length;
             max = min + state.selection.length;
             this.selectionMgr.setSelectionStartEnd(
@@ -393,6 +394,7 @@ export class VanillaMirror extends EventEmittingClass {
                 state.isBackwardSelection ? min : max,
                 !contentChanging, // Expect a restore selection on mutation event
             );
+
             return true;
         });
 
@@ -422,44 +424,44 @@ export class VanillaMirror extends EventEmittingClass {
         evt.preventDefault();
 
         let data;
-        let { clipboardData } = evt;
-        if (clipboardData) {
-            data = clipboardData.getData('text/plain');
-            // TODO: Re-enable after paste dialog is added.
-            if (false && this.turndownService) {
-                try {
-                    const html = clipboardData.getData('text/html');
-                    if (html) {
-                        // TODO: Add a popup dialog to choose using whatever we
-                        // end up with, after using Turndown, or raw HTML propagation
-                        // Inject a custom fence around pasted content
-                        // data = `\n\`\`\`<injected>\n${html}\n</injected>\n\`\`\`\n`;
+        const clipboardData = evt.clipboardData;
+        debugger;
+        data = clipboardData.getData('text/plain');
 
-                        // const sanitizedHtml = htmlSanitizer.sanitizeHtml(html)
-                        //     .replace(/&#160;/g, ' '); // Replace non-breaking spaces with classic spaces
-                        // if (sanitizedHtml) {
-                        //     data = this.turndownService.turndown(sanitizedHtml);
-                        //     // Handle double newlines added on HTML paste.
-                        //     // TODO: Check if this needs to be placed elsewhere.
+        const files = [...clipboardData.files] as File[];
 
-                        //     data = data
-                        //         // Fix duplicate newlines that are inserted
-                        //         .replace(/\n\n/g, '\n')
-                        //         // Fix duplicate spaces that get inserted
-                        //         .replace(/(?<!^)  /gm, ' ');
-                        // }
-                    }
-                }
-                catch (e) {
-                    // Ignore
+        this.ngEditor
+
+        // TODO: Re-enable after paste dialog is added.
+        if (false && this.turndownService) {
+            try {
+                const html = clipboardData.getData('text/html');
+                if (html) {
+                    // TODO: Add a popup dialog to choose using whatever we
+                    // end up with, after using Turndown, or raw HTML propagation
+                    // Inject a custom fence around pasted content
+                    // data = `\n\`\`\`<injected>\n${html}\n</injected>\n\`\`\`\n`;
+
+                    // const sanitizedHtml = htmlSanitizer.sanitizeHtml(html)
+                    //     .replace(/&#160;/g, ' '); // Replace non-breaking spaces with classic spaces
+                    // if (sanitizedHtml) {
+                    //     data = this.turndownService.turndown(sanitizedHtml);
+                    //     // Handle double newlines added on HTML paste.
+                    //     // TODO: Check if this needs to be placed elsewhere.
+
+                    //     data = data
+                    //         // Fix duplicate newlines that are inserted
+                    //         .replace(/\n\n/g, '\n')
+                    //         // Fix duplicate spaces that get inserted
+                    //         .replace(/(?<!^)  /gm, ' ');
+                    // }
                 }
             }
+            catch (e) {
+                // Ignore
+            }
         }
-        else {
-            // TODO: This API might be deprecated.
-            ({ clipboardData } = window['clipboardData']);
-            data = clipboardData && clipboardData.getData('Text');
-        }
+
         if (!data) {
             return;
         }

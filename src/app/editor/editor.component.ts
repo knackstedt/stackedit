@@ -61,7 +61,7 @@ export class StackEditorComponent implements OnInit {
     //     console.log(data, 'WERE HERE', this)
     // });
 
-    editorSvc = new Editor();
+    editorSvc: Editor;
 
     styles = {
         showNavigationBar: true,
@@ -110,10 +110,10 @@ export class StackEditorComponent implements OnInit {
     }
 
     ngAfterViewInit() {
-        const editorElt = this.$el.querySelector('.editor__inner');
-        const previewElt = this.$el.querySelector('.preview__inner-2');
-        const tocElt = this.$el.querySelector('.toc__inner');
-        this.editorSvc.init(editorElt, previewElt, tocElt);
+        const editorElt = this.$el.querySelector('.editor__inner') as HTMLElement;
+        const previewElt = this.$el.querySelector('.preview__inner-2') as HTMLElement;
+        const tocElt = this.$el.querySelector('.toc__inner') as HTMLElement;
+        this.editorSvc = new Editor(this, editorElt, previewElt, tocElt);
 
         // Focus on the editor every time reader mode is disabled
         const focus = () => {
