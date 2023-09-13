@@ -2,12 +2,11 @@
  *
  * Disclaimer: The Apache 2.0 license applies to the following files:
  *     - all files under `./data`, `./editor` `./extensions` `./libs`
- *     - editorSvc.ts
+ *     - editor.ts
  *     - extensionSvc.ts
  *     - markdownConversionSvc.ts
  *     - diffUtils.js
  *     - utils.ts
- *     - variables.scss
  *
  * All other files fall under the MIT license referenced in the package.json, unless
  * otherwise specified.
