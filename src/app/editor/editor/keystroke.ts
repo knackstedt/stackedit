@@ -66,7 +66,7 @@ export const defaultKeystrokes = [
 
     // TAB
     new Keystroke((evt, state) => {
-        if (evt.which !== 9 /* tab */ || evt.metaKey || evt.ctrlKey) {
+        if (evt.code !== 'Tab' || evt.metaKey || evt.ctrlKey) {
             return false;
         }
 
@@ -94,7 +94,7 @@ export const defaultKeystrokes = [
 
     // ENTER
     new Keystroke((evt, state, editor) => {
-        if (evt.which !== 13 /* enter */) {
+        if (evt.code !== 'Enter') {
             clearNewline = false;
             return false;
         }
@@ -144,10 +144,10 @@ export const defaultKeystrokes = [
 
     // BACKSPACE, DELETE
     new Keystroke((evt, state, editor) => {
-        if (evt.which !== 8 /* backspace */ && evt.which !== 46 /* delete */) {
+        if (evt.code !== 'Backspace' && evt.code !== 'Delete') {
             return false;
         }
-        evt.preventDefault();
+        // evt.preventDefault();
 
         editor.undoMgr.setCurrentMode('delete');
         if (!state.selection) {
@@ -155,8 +155,8 @@ export const defaultKeystrokes = [
             if (isJump) {
                 // Custom kill word behavior
                 const text = state.before + state.after;
-                const offset = getNextWordOffset(text, state.before.length, evt.which === 8);
-                if (evt.which === 8) {
+                const offset = getNextWordOffset(text, state.before.length, evt.code === 'Backspace');
+                if (evt.code === 'Backspace') {
                     state.before = state.before.slice(0, offset);
                 }
                 else {
@@ -164,12 +164,12 @@ export const defaultKeystrokes = [
                 }
                 return true;
             }
-            else if (evt.which === 8 && state.before.slice(-1) === '\n') {
+            else if (evt.code == 'Backspace' && state.before.slice(-1) === '\n') {
                 // Special treatment for end of lines
                 state.before = state.before.slice(0, -1);
                 return true;
             }
-            else if (evt.which === 46 && state.after.slice(0, 1) === '\n') {
+            else if (evt.code == 'Delete' && state.after.slice(0, 1) === '\n') {
                 state.after = state.after.slice(1);
                 return true;
             }
@@ -183,7 +183,7 @@ export const defaultKeystrokes = [
 
     // LEFT_ARROW, RIGHT_ARROW
     new Keystroke((evt, state, editor) => {
-        if (evt.which !== 37 /* left arrow */ && evt.which !== 39 /* right arrow */) {
+        if (evt.code !== 'ArrowLeft' && evt.code !== 'ArrowRight') {
             return false;
         }
         const isJump = (isMac && evt.altKey) || (!isMac && evt.ctrlKey);
@@ -196,7 +196,7 @@ export const defaultKeystrokes = [
         const offset = getNextWordOffset(
             textContent,
             editor.selectionMgr.selectionEnd,
-            evt.which === 37,
+            evt.code == 'ArrowLeft',
         );
 
         if (evt.shiftKey) {
