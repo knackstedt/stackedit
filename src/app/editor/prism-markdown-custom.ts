@@ -87,7 +87,7 @@ export default (Prism) => {
 
     Prism.languages.insertBefore('markdown', 'comment', {
         'color': {
-            pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*<\/span>/g,
+            pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*?<\/span>/g,
             lookbehind: true,
             greedy: false,
             inside: {
@@ -115,6 +115,14 @@ export default (Prism) => {
         }
     });
     Prism.languages.markdown.color.inside.content.inside.color = Prism.languages.markdown.color;
+
+    // Add inside highlighting to the header levels
+    for (let i = 1; i <= 6; i++) {
+        Prism.languages.markdown['h' + i].inside.color = Prism.languages.markdown.color;
+        Prism.languages.markdown['h' + i].inside.bold = Prism.languages.markdown.bold;
+        Prism.languages.markdown['h' + i].inside.italic = Prism.languages.markdown.italic;
+        Prism.languages.markdown['h' + i].inside.strike = Prism.languages.markdown.strike;
+    }
 
     const tableCell = /(?:\\.|``(?:[^`\r\n]|`(?!`))+``|`[^`\r\n]+`|[^\\|\r\n`])+/.source;
     const tableRow = /\|?__(?:\|__)+\|?(?:(?:\n|\r\n?)|(?![\s\S]))/.source.replace(/__/g, function () { return tableCell; });
