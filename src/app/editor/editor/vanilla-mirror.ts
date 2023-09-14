@@ -147,7 +147,7 @@ export class VanillaMirror extends EventEmittingClass {
         return true;
     }
 
-    getContent() {
+    getContent(): string {
         const recursivelyCollectChildrenText = (el) => {
             // This element has a content override, so we'll read that instead.
             if (el.nodeType == 1 && el.getAttribute('source') != null) {
@@ -295,7 +295,7 @@ export class VanillaMirror extends EventEmittingClass {
             .sort((keystroke1, keystroke2) => keystroke1.priority - keystroke2.priority);
     }
 
-    setContent(value, noUndo?, maxStartOffsetOpt?) {
+    setContent(value: string, noUndo?: boolean, maxStartOffsetOpt?: number) {
         this.value = value;
 
         const textContent = this.getContent();
@@ -324,7 +324,23 @@ export class VanillaMirror extends EventEmittingClass {
         };
     }
 
-    replace(selectionStart, selectionEnd, replacement) {
+    insertTextAtCarat(text: string) {
+        const { selectionStart, selectionEnd } = this.selectionMgr;
+
+        const content = this.getContent();
+
+        const before = content.slice(0, selectionStart);
+        const selection = content.slice(selectionStart, selectionEnd);
+        const after = content.slice(selectionEnd);
+
+        const patchedText = before + text + after;
+
+        this.setContent(patchedText);
+        const afterPoint = before.length + text.length;
+        this.selectionMgr.setSelectionStartEnd(afterPoint, afterPoint);
+    }
+
+    replace(selectionStart: number, selectionEnd: number, replacement: string) {
         this.undoMgr.setDefaultMode('single');
         this.replaceContent(selectionStart, selectionEnd, replacement);
         const startOffset = Math.min(selectionStart, selectionEnd);
@@ -333,11 +349,15 @@ export class VanillaMirror extends EventEmittingClass {
         this.selectionMgr.updateCursorCoordinates(true);
     }
 
-    replaceAll(search, replacement, startOffset = 0) {
+    replaceAll(search: string | RegExp, replacement: string, startOffset = 0) {
+        if (typeof search == 'string')
+            search = new RegExp(search, 'gm');
+
         this.undoMgr.setDefaultMode('single');
         const text = this.getContent();
-        const subtext = this.getContent().slice(startOffset);
+        const subtext = text.slice(startOffset);
         const value = subtext.replace(search, replacement);
+
         if (value !== subtext) {
             const offset = this.setContent(text.slice(0, startOffset) + value);
             this.selectionMgr.setSelectionStartEnd(offset.end, offset.end);
@@ -423,14 +443,17 @@ export class VanillaMirror extends EventEmittingClass {
         this.undoMgr.setCurrentMode('single');
         evt.preventDefault();
 
-        let data;
         const clipboardData = evt.clipboardData;
-        debugger;
-        data = clipboardData.getData('text/plain');
+        let data = clipboardData.getData('text/plain');
 
         const files = [...clipboardData.files] as File[];
 
-        this.ngEditor
+        // TODO: should this be interleaved with text paste?
+        if (files.length > 0) {
+            this.insertTextAtCarat("```img-spinner```");
+            this.ngEditor.onImageUpload.next({ data: files, ...this.selectionMgr, stackEditor: this.ngEditor });
+            return;
+        }
 
         // TODO: Re-enable after paste dialog is added.
         if (false && this.turndownService) {

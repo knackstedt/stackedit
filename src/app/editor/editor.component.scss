@@ -143,9 +143,14 @@
         color: #6a9955
     }
 
+    .prism .token.image-spinner {
+        color: #0000;
+        // background-image: url();
+    }
+
     .prism .token.punctuation,
     .token.pre.gfm .token.punctuation {
-        color: #999
+        color: #808080
     }
 
     .prism .namespace,
@@ -167,7 +172,7 @@
     .token.pre.gfm .token.property,
     .token.pre.gfm .token.symbol,
     .token.pre.gfm .token.tag {
-        color: #905
+        color: #569cd6
     }
 
     .prism .token.attr-name,
@@ -234,6 +239,60 @@
     .prism .token.italic,
     .token.pre.gfm .token.italic {
         font-style: italic
+    }
+
+    .prism .img-spinner {
+        align-items: center;
+        background: #222;
+        border-radius: 50%;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        display: inline-flex !important;
+        justify-content: center;
+
+        * {
+            display: flex;
+        }
+        span {
+            display: none;
+        }
+    }
+
+    .spinnerMax, .spinnerMid, .spinnerMin {
+        align-items: center;
+        border: .3em solid transparent;
+        border-top: .3em solid var(--primary-color);
+        border-right: .3em solid var(--primary-color);
+        border-radius: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    .spinnerMax {
+        animation: spinnerOne 3s linear infinite;
+        height: 3em;
+        width: 3em;
+    }
+
+    .spinnerMid {
+        animation: spinnerOne 5s linear infinite;
+        height: 2.4em;
+        width: 2.4em;
+    }
+
+    .spinnerMin {
+        animation: spinnerOne 5s linear infinite;
+        height: 1.8em;
+        width: 1.8em;
+    }
+
+    @keyframes spinnerOne {
+        0% {
+            transform: rotate(0deg)
+        }
+
+        100% {
+            transform: rotate(360deg)
+        }
     }
 
     .preview {

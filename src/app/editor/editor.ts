@@ -106,19 +106,6 @@ export class Editor extends EventEmittingClass {
             };
         });
 
-        this.clEditor.undoMgr.on('undoStateChange', () => {
-            // TODO: Handle
-
-            // const canUndo = this.clEditor.undoMgr.canUndo();
-            // if (canUndo !== store.state.layout.canUndo) {
-            //     store.commit('layout/setCanUndo', canUndo);
-            // }
-            // const canRedo = this.clEditor.undoMgr.canRedo();
-            // if (canRedo !== store.state.layout.canRedo) {
-            //     store.commit('layout/setCanRedo', canRedo);
-            // }
-        });
-
         // Manually handle scroll events
         const onScroll = (e) => {
             e.preventDefault();
@@ -164,65 +151,73 @@ export class Editor extends EventEmittingClass {
             onEditorChanged(!this.instantPreview);
         });
 
-
-        // TODO: inline images config
-        // if (store.getters['data/computedSettings'].editor.inlineImages) {
-        this.clEditor.highlighter.on('sectionHighlighted', (section) => {
-
-            // Render images inline in the editor.
-            [...section.elt.getElementsByClassName('token img')].forEach((imgTokenElt) => {
-                const srcElt = imgTokenElt.querySelector('.token.cl-src');
-                if (!srcElt) return;
-
-                // Create an img element before the .img.token and wrap both elements
-                // into a .token.img-wrapper
-                const imgElt = document.createElement('img');
-                imgElt.style.display = 'none';
-                const uri = srcElt.textContent;
-                if (true || !/^unsafe/.test(htmlSanitizer.sanitizeUri(uri, true))) {
-                    imgElt.onload = () => {
-                        imgElt.style.display = '';
-                    };
-                    imgElt.src = uri;
-                    // Take img size into account
-                    const sizeElt = imgTokenElt.querySelector('.token.cl-size');
-                    if (sizeElt) {
-                        const match = sizeElt.textContent.match(/=(\d*)x(\d*)/);
-                        if (match[1]) {
-                            imgElt.width = parseInt(match[1], 10);
-                        }
-                        if (match[2]) {
-                            imgElt.height = parseInt(match[2], 10);
-                        }
-                    }
-                }
-
-                const imgTokenWrapper = document.createElement('span');
-                imgTokenWrapper.className = 'token img-wrapper';
-                imgTokenElt.parentNode.insertBefore(imgTokenWrapper, imgTokenElt);
-                imgTokenWrapper.appendChild(imgElt);
-                imgTokenWrapper.appendChild(imgTokenElt);
-            });
-
-            section.elt.querySelectorAll('.injection-fence').forEach((fenceElement: HTMLElement) => {
-                const insertWrapper = document.createElement('div');
-                insertWrapper.className = 'token injection-portal';
-                insertWrapper.setAttribute("source", '');
-
-                // fenceElement.setAttribute('source', fenceElement.textContent);
-                const insertion = fenceElement.textContent.replace(/^```<injected>\n?|<\/injected>\s*```$/g, '');
-
-                insertWrapper.innerHTML = insertion;//htmlSanitizer.sanitizeHtml(insertion);
-                fenceElement.insertAdjacentElement('beforebegin', insertWrapper);
-                // insertWrapper.appendChild(fenceElement);
-            });
-        });
+        this.clEditor.highlighter.on('sectionHighlighted', (section) => this.onEditorRenderSection(section));
 
         this.measureSectionDimensions(false, true, true);
         this.initClEditor();
 
         this.clEditor.toggleEditable(true);
         this.$trigger('inited');
+    }
+
+
+    onEditorRenderSection(section) {
+        // Render images inline in the editor.
+        [...section.elt.getElementsByClassName('token img')].forEach((imgTokenElt) => {
+            const srcElt = imgTokenElt.querySelector('.token.cl-src');
+            if (!srcElt) return;
+
+            // Create an img element before the .img.token and wrap both elements
+            // into a .token.img-wrapper
+            const imgElt = document.createElement('img');
+            imgElt.style.display = 'none';
+            const uri = srcElt.textContent;
+            if (true || !/^unsafe/.test(htmlSanitizer.sanitizeUri(uri, true))) {
+                imgElt.onload = () => {
+                    imgElt.style.display = '';
+                };
+                imgElt.src = uri;
+                // Take img size into account
+                const sizeElt = imgTokenElt.querySelector('.token.cl-size');
+                if (sizeElt) {
+                    const match = sizeElt.textContent.match(/=(\d*)x(\d*)/);
+                    if (match[1]) {
+                        imgElt.width = parseInt(match[1], 10);
+                    }
+                    if (match[2]) {
+                        imgElt.height = parseInt(match[2], 10);
+                    }
+                }
+            }
+
+            const imgTokenWrapper = document.createElement('span');
+            imgTokenWrapper.className = 'token img-wrapper';
+            imgTokenElt.parentNode.insertBefore(imgTokenWrapper, imgTokenElt);
+            imgTokenWrapper.appendChild(imgElt);
+            imgTokenWrapper.appendChild(imgTokenElt);
+        });
+
+        section.elt.querySelectorAll('.injection-fence').forEach((fenceElement: HTMLElement) => {
+            const insertWrapper = document.createElement('div');
+            insertWrapper.className = 'token injection-portal';
+            insertWrapper.setAttribute("source", '');
+
+            // fenceElement.setAttribute('source', fenceElement.textContent);
+            const insertion = fenceElement.textContent.replace(/^```<injected>\n?|<\/injected>\s*```$/g, '');
+
+            insertWrapper.innerHTML = insertion;//htmlSanitizer.sanitizeHtml(insertion);
+            fenceElement.insertAdjacentElement('beforebegin', insertWrapper);
+            // insertWrapper.appendChild(fenceElement);
+        });
+
+        section.elt.querySelectorAll('.image-spinner').forEach((fenceElement: HTMLElement) => {
+            const insertWrapper = document.createElement('div');
+            insertWrapper.className = 'img-spinner';
+            insertWrapper.innerHTML = `<div class="spinnerMax"><div class="spinnerMid"><div class="spinnerMin"><span>\`\`\`img-spinner\`\`\`</span></div></div></div>`;
+
+            fenceElement.insertAdjacentElement('beforebegin', insertWrapper);
+            fenceElement.remove();
+        });
     }
 
     makePatches() {

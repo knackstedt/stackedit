@@ -47,3 +47,18 @@ npm run build:analyze
  - [ ] Events need reworked
  - [ ] CL Editor needs to be rewritten into a TS Class
  - [ ] Grammars need to be reviewed
+
+
+## Custom Markdown Syntax
+
+#### External (visible) syntax
+ > This syntax is visible in the editor panel. It can be edited as raw text.
+ - simple styling in `span` tags
+    - <span style="color: #ff00ff">Pretty colors</span>
+#### Internal (hidden) syntax
+ > This syntax is abstracted in the editor. It is non-editable and is used
+for the rich-preview of content in the editor panel
+ - Injected rich text (HTML) content
+    - \`\`\`<injected>{{html content}}</injected>\`\`\`
+ - Image upload spinner
+    - \`\`\`image-spinner\`\`\`

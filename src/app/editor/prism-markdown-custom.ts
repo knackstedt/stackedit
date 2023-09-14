@@ -86,6 +86,11 @@ export default (Prism) => {
 
 
     Prism.languages.insertBefore('markdown', 'comment', {
+        'image-spinner': {
+            pattern: /```img-spinner```/g,
+            lookbehind: true,
+            greedy: true
+        },
         'color': {
             pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*?<\/span>/g,
             lookbehind: true,

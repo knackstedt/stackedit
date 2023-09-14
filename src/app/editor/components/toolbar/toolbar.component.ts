@@ -26,8 +26,6 @@ import { StackEditorComponent } from '../../editor.component';
 })
 export class ToolbarComponent {
 
-    @Input() editorSvc;
-
     // 2D array of color hex codes that show up for the color picker.
     @Input() colorList = [
         // Gray  red     yellow  green   gcyan   lblue   dblue   violet  puke    brown
@@ -163,12 +161,12 @@ export class ToolbarComponent {
 
     constructor(
         private readonly keyboard: KeyboardService,
-        private readonly stackEditor: StackEditorComponent
+        public readonly stackEditor: StackEditorComponent
     ) { }
 
-    ngOnInit() {
+    bindEditorEvents() {
         // Handle cursor position updates
-        this.editorSvc.on("selectionRange", this.onSelectionChange.bind(this))
+        this.stackEditor.editorSvc.on("selectionRange", this.onSelectionChange.bind(this))
 
         this.keybindings = [
             this.keyboard.onKeyCommand({
@@ -228,23 +226,23 @@ export class ToolbarComponent {
         this.cursorIsInCode = false;
 
         // Large selection -- don't perform evaluations
-        if (this.editorSvc.clEditor.selectionMgr.selectionStart != this.editorSvc.clEditor.selectionMgr.selectionEnd) {
+        if (this.stackEditor.editorSvc.clEditor.selectionMgr.selectionStart != this.stackEditor.editorSvc.clEditor.selectionMgr.selectionEnd) {
             return;
         }
 
-        const { parentElement } = this.editorSvc?.selectionRange?.commonAncestorContainer as Node || {};
+        const { parentElement } = this.stackEditor.editorSvc?.selectionRange?.commonAncestorContainer as Node || {};
 
         if (!parentElement) return;
 
         const inheritedClasses = [];
         let currentElement: HTMLElement = parentElement;
-        for (let i = 0; i < 10 && !currentElement.classList.contains("cledit-section"); i++) {
+        for (let i = 0; i < 10 && currentElement && !currentElement.classList.contains("cledit-section"); i++) {
             currentElement.classList.forEach(c => inheritedClasses.push(c));
             currentElement = currentElement.parentElement;
         }
 
-        const content = this.editorSvc.clEditor.getContent();
-        const matches = content.substring(0, this.editorSvc.clEditor.selectionMgr.selectionStart).split('\n');
+        const content = this.stackEditor.editorSvc.clEditor.getContent();
+        const matches = content.substring(0, this.stackEditor.editorSvc.clEditor.selectionMgr.selectionStart).split('\n');
         const currentLine = matches?.slice(-1)?.[0];
 
         if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].some(c => inheritedClasses.includes(c)))
@@ -297,8 +295,8 @@ export class ToolbarComponent {
     }
 
     wrapText(before = '', after = '', indent?: number, insertNewline = false) {
-        const { selectionStart, selectionEnd } = this.editorSvc.clEditor.selectionMgr;
-        const text = this.editorSvc.clEditor.getContent() as string;
+        const { selectionStart, selectionEnd } = this.stackEditor.editorSvc.clEditor.selectionMgr;
+        const text = this.stackEditor.editorSvc.clEditor.getContent() as string;
 
         const { lineStart, lineEnd, line } = selectionStart == selectionEnd ? this.getLine(text, selectionStart) : {} as any;
 
@@ -316,8 +314,8 @@ export class ToolbarComponent {
             postString = postString.slice(after.length);
 
             // Move the selection to what it will be after removing the text
-            this.editorSvc.clEditor.selectionMgr.selectionStart += before.length;
-            this.editorSvc.clEditor.selectionMgr.selectionEnd += before.length;
+            this.stackEditor.editorSvc.clEditor.selectionMgr.selectionStart += before.length;
+            this.stackEditor.editorSvc.clEditor.selectionMgr.selectionEnd += before.length;
 
             // Clear before and after to re-use the result logic.
             before = '';
@@ -326,8 +324,8 @@ export class ToolbarComponent {
             insertNewline = false;
         }
         else {
-            this.editorSvc.clEditor.selectionMgr.selectionStart += before.length;
-            this.editorSvc.clEditor.selectionMgr.selectionEnd += before.length;
+            this.stackEditor.editorSvc.clEditor.selectionMgr.selectionStart += before.length;
+            this.stackEditor.editorSvc.clEditor.selectionMgr.selectionEnd += before.length;
         }
 
         let updatedSelection = selectionText;
@@ -351,16 +349,16 @@ export class ToolbarComponent {
             after +
             postString;
 
-        this.editorSvc.clEditor.setContent(patchedText);
-        this.editorSvc.clEditor.selectionMgr.setSelectionStartEnd(startIndex + before.length, endIndex + after.length);
+        this.stackEditor.editorSvc.clEditor.setContent(patchedText);
+        this.stackEditor.editorSvc.clEditor.selectionMgr.setSelectionStartEnd(startIndex + before.length, endIndex + after.length);
     }
 
     /**
      * Replace the current selection with the given text.
      */
     replaceText(text: string) {
-        const { selectionStart, selectionEnd } = this.editorSvc.clEditor.selectionMgr;
-        let content = this.editorSvc.clEditor.getContent() as string;
+        const { selectionStart, selectionEnd } = this.stackEditor.editorSvc.clEditor.selectionMgr;
+        let content = this.stackEditor.editorSvc.clEditor.getContent() as string;
 
         const startIndex = Math.min(selectionStart, selectionEnd);
         const endIndex = Math.max(selectionStart, selectionEnd);
@@ -373,7 +371,7 @@ export class ToolbarComponent {
             text +
             postString;
 
-        this.editorSvc.clEditor.setContent(patchedText);
+        this.stackEditor.editorSvc.clEditor.setContent(patchedText);
     }
 
     injectHeading(size: number) {

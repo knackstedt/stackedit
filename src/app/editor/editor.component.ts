@@ -1,14 +1,45 @@
-import { Component, EventEmitter, HostListener, Input, OnInit, Output, ViewContainerRef } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ViewChild, ViewContainerRef } from '@angular/core';
 import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-
 import { TooltipDirective, MenuDirective } from '@dotglitch/ngx-common';
 
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
-import { Subscription } from 'rxjs';
 import { Editor } from './editor';
+import { Subscription } from 'rxjs';
 
+class DuplexEventEmitter<T = any, R = any> extends EventEmitter<T> {
+    constructor(private handleResponse: ((data: R) => void)) {
+        super();
+    }
+
+    override subscribe(next?: (value: any) => void, error?: (error: any) => void, complete?: () => void): Subscription;
+    override subscribe(observerOrNext?: any, error?: any, complete?: any): Subscription;
+    override subscribe(observerOrNext?: unknown, error?: unknown, complete?: unknown): Subscription {
+        let fn: Function = observerOrNext as any;
+        if (typeof observerOrNext == "object" && typeof observerOrNext['next'] == "function") {
+            fn = observerOrNext['next'];
+        }
+
+        if (typeof fn != "function")
+            throw new Error("observer is not valid!");
+
+        return super.subscribe(async (evt) => {
+            const arg = {
+                result: null,
+                evt
+            };
+            debugger;
+            console.time("fick")
+            // This allows for mutations of arg
+            await fn(arg);
+            console.timeEnd("fick")
+
+            // Handle the reponse
+            await this.handleResponse({ ...evt, ...(typeof arg.result == "object" ? arg.result : {result: arg.result}) });
+        }, error, complete);
+    }
+}
 
 @Component({
     selector: 'ngx-stackedit',
@@ -27,7 +58,9 @@ import { Editor } from './editor';
     ],
     standalone: true
 })
-export class StackEditorComponent implements OnInit {
+export class StackEditorComponent {
+
+    @ViewChild(ToolbarComponent) toolbar: ToolbarComponent;
 
     get $el() { return this.viewContainer.element.nativeElement as HTMLElement }
 
@@ -55,11 +88,9 @@ export class StackEditorComponent implements OnInit {
     @Output() onFileUpload = new EventEmitter<string>();
 
     /**
-     * Emits when the user uploads an image via the toolbar dialog.
+     * Emits when the user uploads an image via file upload.
      */
-    // @Output() onImageUpload = new DuplexEventEmitter<string, string>((data) => {
-    //     console.log(data, 'WERE HERE', this)
-    // });
+    @Output() onImageUpload = new EventEmitter<any>();
 
     editorSvc: Editor;
 
@@ -105,15 +136,12 @@ export class StackEditorComponent implements OnInit {
 
     }
 
-    ngOnInit() {
-        // markdownConversionSvc.init(); // Needs to be inited before mount
-    }
-
     ngAfterViewInit() {
         const editorElt = this.$el.querySelector('.editor__inner') as HTMLElement;
         const previewElt = this.$el.querySelector('.preview__inner-2') as HTMLElement;
         const tocElt = this.$el.querySelector('.toc__inner') as HTMLElement;
         this.editorSvc = new Editor(this, editorElt, previewElt, tocElt);
+        this.toolbar.bindEditorEvents();
 
         // Focus on the editor every time reader mode is disabled
         const focus = () => {
@@ -131,5 +159,10 @@ export class StackEditorComponent implements OnInit {
         this.editorSvc.clEditor.on('contentChanged', (content, diffs, sectionList) => {
             this.valueChange.next(content);
         });
+    }
+
+    finalizeImageUpload({ label, link }) {
+        const text = `![${label}](${link})`;
+        this.editorSvc.clEditor.replaceAll(/```img-spinner```/gs, text);
     }
 }
