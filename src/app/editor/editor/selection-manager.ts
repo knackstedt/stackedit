@@ -101,7 +101,10 @@ export class SelectionMgr extends EventEmittingClass {
         this.debouncedUpdateCursorCoordinates();
     };
 
-
+    /**
+     * Check if the selection has been changed,
+     * if so, emit a `selectionChanged` event.
+     */
     checkSelection(selectionRange) {
         if (!this.oldSelectionRange ||
             this.oldSelectionRange.startContainer !== selectionRange.startContainer ||
@@ -144,16 +147,12 @@ export class SelectionMgr extends EventEmittingClass {
         return selectionRange;
     };
 
-    saveLastSelection = debounce(() => {
-        this.lastSelectionStart = this.selectionStart;
-        this.lastSelectionEnd = this.selectionEnd;
-    }, 50);
-
     setSelection(start: number = this.selectionStart, end: number = this.selectionEnd) {
         this.selectionStart = start < 0 ? 0 : start;
         this.selectionEnd = end < 0 ? 0 : end;
-        this.saveLastSelection();
-    };
+        this.lastSelectionStart = this.selectionStart;
+        this.lastSelectionEnd = this.selectionEnd;
+    }
 
     setSelectionStartEnd(start, end, restoreSelection = true) {
         this.setSelection(start, end);
@@ -161,204 +160,78 @@ export class SelectionMgr extends EventEmittingClass {
             return this.restoreSelection();
         }
         return null;
-    };
+    }
 
-    saveSelectionState = (() => {
-        // Credit: https://github.com/timdown/rangy
-        function arrayContains(arr, val) {
-            let i = arr.length;
-            while (i) {
-                i -= 1;
-                if (arr[i] === val) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        function getClosestAncestorIn(node, ancestor, selfIsAncestor) {
-            let p;
-            let n = selfIsAncestor ? node : node.parentNode;
-            while (n) {
-                p = n.parentNode;
-                if (p === ancestor) {
-                    return n;
-                }
-                n = p;
-            }
+    saveSelectionState(direction: boolean = true, selection?: Selection) {
+        if (!this.hasFocus) {
             return null;
         }
 
-        function getNodeIndex(node) {
-            let i = 0;
-            let { previousSibling } = node;
-            while (previousSibling) {
-                i += 1;
-                ({ previousSibling } = previousSibling);
-            }
-            return i;
-        }
+        let { selectionStart } = this;
+        let { selectionEnd } = this;
 
-        function getCommonAncestor(node1, node2) {
-            const ancestors = [];
-            let n;
-            for (n = node1; n; n = n.parentNode) {
-                ancestors.push(n);
-            }
+        if (!selection)
+            selection = window.getSelection();
 
-            for (n = node2; n; n = n.parentNode) {
-                if (arrayContains(ancestors, n)) {
-                    return n;
-                }
-            }
-
+        if (selection.rangeCount <= 0) {
             return null;
         }
 
-        function comparePoints(nodeA, offsetA, nodeB, offsetB) {
-            // See http://www.w3.org/TR/DOM-Level-2-Traversal-Range/ranges.html#Level-2-Range-Comparing
-            let n;
-            if (nodeA === nodeB) {
-                // Case 1: nodes are the same
-                if (offsetA === offsetB) {
-                    return 0;
-                }
-                return offsetA < offsetB ? -1 : 1;
-            }
-            let nodeC = getClosestAncestorIn(nodeB, nodeA, true);
-            if (nodeC) {
-                // Case 2: node C (container B or an ancestor) is a child node of A
-                return offsetA <= getNodeIndex(nodeC) ? -1 : 1;
-            }
-            nodeC = getClosestAncestorIn(nodeA, nodeB, true);
-            if (nodeC) {
-                // Case 3: node C (container A or an ancestor) is a child node of B
-                return getNodeIndex(nodeC) < offsetB ? -1 : 1;
-            }
-            const root = getCommonAncestor(nodeA, nodeB);
-            if (!root) {
-                throw new Error('comparePoints error: nodes have no common ancestor');
-            }
+        const selectionRange = selection.getRangeAt(0);
+        let node = selectionRange.startContainer;
 
-            // Case 4: containers are siblings or descendants of siblings
-            const childA = (nodeA === root) ? root : getClosestAncestorIn(nodeA, root, true);
-            const childB = (nodeB === root) ? root : getClosestAncestorIn(nodeB, root, true);
-
-            if (childA === childB) {
-                // This shouldn't be possible
-                throw new Error('comparePoints got to case 4 and childA and childB are the same!');
-            }
-            n = root.firstChild;
-            while (n) {
-                if (n === childA) {
-                    return -1;
-                } else if (n === childB) {
-                    return 1;
-                }
-                n = n.nextSibling;
-            }
-            return 0;
+        if (!(this.contentElt.compareDocumentPosition(node) & window.Node.DOCUMENT_POSITION_CONTAINED_BY)
+            && this.contentElt !== node
+        ) {
+            return null;
         }
 
-        const save = () => {
-            if (!this.hasFocus)
-                return null;
+        let offset = selectionRange.startOffset;
+        if (node.firstChild && offset > 0) {
+            node = node.childNodes[offset - 1];
+            offset = node.textContent.length;
+        }
 
-            let { selectionStart } = this;
-            let { selectionEnd } = this;
-
-            const selection = window.getSelection();
-
-            if (selection.rangeCount <= 0)
-                return null;
-
-            const selectionRange = selection.getRangeAt(0);
-            let node = selectionRange.startContainer;
-
-            if (!(this.contentElt.compareDocumentPosition(node) & window.Node.DOCUMENT_POSITION_CONTAINED_BY)
-                && this.contentElt !== node
-            )
-                return null;
-
-            let offset = selectionRange.startOffset;
-            if (node.firstChild && offset > 0) {
-                node = node.childNodes[offset - 1];
-                offset = node.textContent.length;
-            }
-
-            let container = node;
-            while (node !== this.contentElt) {
+        let container = node;
+        while (node !== this.contentElt) {
+            node = node.previousSibling;
+            while (node) {
+                offset += node.textContent?.length ?? 0;
                 node = node.previousSibling;
-                while (node) {
-                    offset += node.textContent?.length ?? 0;
-                    node = node.previousSibling;
-                }
-                node = container.parentNode;
-                container = node;
             }
+            node = container.parentNode;
+            container = node;
+        }
 
-            let selectionText = selectionRange.toString();
-            // Fix end of line when only br is selected
-            const brElt = selectionRange.endContainer.firstChild;
-            if (brElt && brElt['tagName'] === 'BR' && selectionRange.endOffset === 1) {
-                selectionText += '\n';
-            }
+        let selectionText = selectionRange.toString();
+        // Fix end of line when only br is selected
+        const brElt = selectionRange.endContainer.firstChild;
+        if (brElt && brElt['tagName'] === 'BR' && selectionRange.endOffset === 1) {
+            selectionText += '\n';
+        }
 
-            const direction = comparePoints(selection.anchorNode, selection.anchorOffset, selection.focusNode, selection.focusOffset);
+        if (direction) {
+            selectionStart = offset + selectionText.length;
+            selectionEnd = offset;
+        }
+        else {
+            selectionStart = offset;
+            selectionEnd = offset + selectionText.length;
+        }
 
-            if (direction === 1) {
-                selectionStart = offset + selectionText.length;
-                selectionEnd = offset;
-            }
-            else {
-                selectionStart = offset;
-                selectionEnd = offset + selectionText.length;
-            }
-
-            if (selectionStart === selectionEnd && selectionStart === this.editor.getContent().length) {
-                // If cursor is after the trailingNode
-                selectionEnd -= 1;
-                selectionStart = selectionEnd;
-                return this.setSelectionStartEnd(selectionStart, selectionEnd);
-            }
-            else {
-                this.setSelection(selectionStart, selectionEnd);
-                const result = this.checkSelection(selectionRange);
-                // selectionRange doesn't change when selection is at the start of a section
-                return result || this.lastSelectionStart !== this.selectionStart;
-            }
-        };
-
-        const saveCheckChange = () => save() && (
-            this.lastSelectionStart !== this.selectionStart || this.lastSelectionEnd !== this.selectionEnd);
-
-        let nextTickAdjustScroll = false;
-        const longerDebouncedSave = debounce(() => {
-            this.updateCursorCoordinates(saveCheckChange() && nextTickAdjustScroll);
-            nextTickAdjustScroll = false;
-        }, 10);
-
-        const debouncedSave = debounce(() => {
-            this.updateCursorCoordinates(saveCheckChange() && nextTickAdjustScroll);
-            // In some cases we have to wait a little longer to see the
-            // selection change (Cmd+A on Chrome OSX)
-            longerDebouncedSave();
-        });
-
-        return (debounced?, adjustScrollParam?, forceAdjustScroll?) => {
-            if (forceAdjustScroll) {
-                this.lastSelectionStart = undefined;
-                this.lastSelectionEnd = undefined;
-            }
-            if (debounced) {
-                nextTickAdjustScroll = nextTickAdjustScroll || adjustScrollParam;
-                debouncedSave();
-            }
-            else {
-                save();
-            }
-        };
-    })();
+        if (selectionStart >= this.editor.value.length) {
+            // If cursor is after the trailingNode
+            selectionEnd -= 1;
+            selectionStart = selectionEnd;
+            return this.setSelectionStartEnd(selectionStart, selectionEnd);
+        }
+        else {
+            this.setSelection(selectionStart, selectionEnd);
+            const result = this.checkSelection(selectionRange);
+            // selectionRange doesn't change when selection is at the start of a section
+            return result || this.lastSelectionStart !== this.selectionStart;
+        }
+    }
 
     getSelectedText() {
         const min = Math.min(this.selectionStart, this.selectionEnd);
@@ -445,7 +318,7 @@ export class SelectionMgr extends EventEmittingClass {
         };
     };
 
-    getClosestWordOffset(offset) {
+    getClosestWordOffset(offset: number) {
         let offsetStart = 0;
         let offsetEnd = 0;
         let nextOffset = 0;

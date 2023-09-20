@@ -70,8 +70,7 @@ export class VanillaMirror extends EventEmittingClass {
         contentElt.addEventListener('blur', () => this.$trigger('blur'));
 
         // Mouseup can happen outside the editor element
-        window.addEventListener('mousedown', this.onWindowMouse.bind(this));
-        window.addEventListener('mouseup', this.onWindowMouse.bind(this));
+        contentElt.addEventListener('mouseup', this.onMouseUp.bind(this));
 
         // Resize provokes cursor coordinate changes
         window.addEventListener('resize', this.onWindowResize.bind(this));
@@ -86,9 +85,30 @@ export class VanillaMirror extends EventEmittingClass {
         this.contentElt.spellcheck = false;
     }
 
-    onWindowMouse() {
-        this.selectionMgr.saveSelectionState(true, false);
-        this.selectionMgr.updateCursorCoordinates();
+    onMouseUp(evt: MouseEvent) {
+        const {selectionStart, selectionEnd} = this.selectionMgr;
+        this.selectionMgr.saveSelectionState();
+
+        // If selection is unchanged, deselect the text.
+        if (
+            selectionStart == this.selectionMgr.lastSelectionStart &&
+            selectionEnd == this.selectionMgr.lastSelectionEnd
+        ) {
+            // console.log("delete my asshole")
+            let selection = window.getSelection();
+
+            // Apparently Firefox didn't ever implement this. Morons.
+            if (typeof document.caretRangeFromPoint == "function") {
+                const range = document.caretRangeFromPoint(evt.clientX, evt.clientY);
+                selection.collapse(range.startContainer, range.startOffset);
+            }
+            else {
+                // Firefox gets bad implementation because they refuse to implement
+                selection.collapse(selection.focusNode, selection.focusOffset);
+            }
+
+            this.selectionMgr.saveSelectionState();
+        }
     }
 
     onWindowResize() {
@@ -271,7 +291,7 @@ export class VanillaMirror extends EventEmittingClass {
     }
 
     adjustCursorPosition(force?) {
-        this.selectionMgr.saveSelectionState(true, true, force);
+        this.selectionMgr.saveSelectionState();
     }
 
     replaceContent(selectionStart, selectionEnd, replacement) {
