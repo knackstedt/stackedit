@@ -8,39 +8,6 @@ import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { Editor } from './editor';
 import { Subscription } from 'rxjs';
 
-class DuplexEventEmitter<T = any, R = any> extends EventEmitter<T> {
-    constructor(private handleResponse: ((data: R) => void)) {
-        super();
-    }
-
-    override subscribe(next?: (value: any) => void, error?: (error: any) => void, complete?: () => void): Subscription;
-    override subscribe(observerOrNext?: any, error?: any, complete?: any): Subscription;
-    override subscribe(observerOrNext?: unknown, error?: unknown, complete?: unknown): Subscription {
-        let fn: Function = observerOrNext as any;
-        if (typeof observerOrNext == "object" && typeof observerOrNext['next'] == "function") {
-            fn = observerOrNext['next'];
-        }
-
-        if (typeof fn != "function")
-            throw new Error("observer is not valid!");
-
-        return super.subscribe(async (evt) => {
-            const arg = {
-                result: null,
-                evt
-            };
-            debugger;
-            console.time("fick")
-            // This allows for mutations of arg
-            await fn(arg);
-            console.timeEnd("fick")
-
-            // Handle the reponse
-            await this.handleResponse({ ...evt, ...(typeof arg.result == "object" ? arg.result : {result: arg.result}) });
-        }, error, complete);
-    }
-}
-
 @Component({
     selector: 'ngx-stackedit',
     templateUrl: './editor.component.html',
