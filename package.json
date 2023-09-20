@@ -1,63 +1,63 @@
 {
-    "name": "stackedit",
-    "version": "6.0.0",
-    "description": "Free, open-source, full-featured Markdown editor",
-    "author": "Benoit Schweblin",
-    "license": "Apache-2.0",
-    "bugs": {
-        "url": "https://github.com/knackstedt/stackedit/issues"
-    },
-    "main": "index.js",
-    "scripts": {
-        "dev": "ng serve --port 8080 --ssl",
-        "build": "ng build --project package"
-    },
-    "dependencies": {
-        "@angular-builders/custom-webpack": "^15.0.0",
-        "@angular/animations": "^15.2.4",
-        "@angular/cdk": "^15.2.4",
-        "@angular/common": "^15.2.4",
-        "@angular/compiler": "^15.2.4",
-        "@angular/core": "^15.2.4",
-        "@angular/forms": "^15.2.4",
-        "@angular/material": "^15.2.4",
-        "@angular/platform-browser": "^15.2.4",
-        "@angular/platform-browser-dynamic": "^15.2.4",
-        "@angular/service-worker": "^15.2.4",
-        "@dotglitch/ngx-common": "^1.0.15",
-        "@fontsource/fira-mono": "^4.5.10",
-        "@fontsource/fira-sans": "^4.5.10",
-        "@fontsource/material-icons": "^4.5.4",
-        "@fontsource/material-icons-outlined": "^5.0.3",
-        "diff-match-patch": "^1.0.0",
-        "dompurify": "^3.0.5",
-        "markdown-it": "^13.0.1",
-        "markdown-it-abbr": "^1.0.4",
-        "markdown-it-deflist": "^2.1.0",
-        "markdown-it-emoji": "^2.0.2",
-        "markdown-it-footnote": "^3.0.3",
-        "markdown-it-imsize": "^2.0.1",
-        "markdown-it-mark": "^3.0.1",
-        "markdown-it-pandoc-renderer": "1.2.0",
-        "markdown-it-sub": "^1.0.0",
-        "markdown-it-sup": "^1.0.0",
-        "mermaid": "^9.4.3",
-        "prismjs": "^1.29.0",
-        "tslib": "^2.3.0",
-        "turndown": "^7.1.2",
-        "zone.js": "~0.11.4"
-    },
-    "devDependencies": {
-        "@angular-devkit/build-angular": "^15.2.4",
-        "@angular/cli": "^15.2.4",
-        "@angular/compiler-cli": "^15.2.4",
-        "@types/node": "^12.11.1",
-        "ng-packagr": "^15.1.0",
-        "ts-node": "^10.9.1",
-        "typescript": "~4.9.5"
-    },
-    "engines": {
-        "node": ">= 16.0.0",
-        "npm": ">= 8.0.0"
-    }
+  "name": "stackedit",
+  "version": "6.0.0",
+  "description": "Free, open-source, full-featured Markdown editor",
+  "author": "Benoit Schweblin",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/knackstedt/stackedit/issues"
+  },
+  "main": "index.js",
+  "scripts": {
+    "dev": "ng serve --port 8080 --ssl",
+    "build": "ng build --project package"
+  },
+  "dependencies": {
+    "@angular-builders/custom-webpack": "^15.0.0",
+    "@angular/animations": "^16.2.5",
+    "@angular/cdk": "^15.2.4",
+    "@angular/common": "^16.2.5",
+    "@angular/compiler": "^16.2.5",
+    "@angular/core": "^16.2.5",
+    "@angular/forms": "^16.2.5",
+    "@angular/material": "^15.2.4",
+    "@angular/platform-browser": "^16.2.5",
+    "@angular/platform-browser-dynamic": "^16.2.5",
+    "@angular/service-worker": "^16.2.5",
+    "@dotglitch/ngx-common": "^1.0.15",
+    "@fontsource/fira-mono": "^4.5.10",
+    "@fontsource/fira-sans": "^4.5.10",
+    "@fontsource/material-icons": "^4.5.4",
+    "@fontsource/material-icons-outlined": "^5.0.3",
+    "diff-match-patch": "^1.0.0",
+    "dompurify": "^3.0.5",
+    "markdown-it": "^13.0.1",
+    "markdown-it-abbr": "^1.0.4",
+    "markdown-it-deflist": "^2.1.0",
+    "markdown-it-emoji": "^2.0.2",
+    "markdown-it-footnote": "^3.0.3",
+    "markdown-it-imsize": "^2.0.1",
+    "markdown-it-mark": "^3.0.1",
+    "markdown-it-pandoc-renderer": "1.2.0",
+    "markdown-it-sub": "^1.0.0",
+    "markdown-it-sup": "^1.0.0",
+    "mermaid": "^9.4.3",
+    "prismjs": "^1.29.0",
+    "tslib": "^2.3.0",
+    "turndown": "^7.1.2",
+    "zone.js": "~0.13.3"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^16.2.2",
+    "@angular/cli": "^16.2.2",
+    "@angular/compiler-cli": "^16.2.5",
+    "@types/node": "^12.11.1",
+    "ng-packagr": "^16.2.3",
+    "ts-node": "^10.9.1",
+    "typescript": "~4.9.5"
+  },
+  "engines": {
+    "node": ">= 16.0.0",
+    "npm": ">= 8.0.0"
+  }
 }
