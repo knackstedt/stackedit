@@ -2,7 +2,6 @@ import DiffMatchPatch from 'diff-match-patch';
 import Prism from './prism';
 import MarkdownIt from 'markdown-it';
 import extensionSvc from './extensionSvc';
-import utils from './utils';
 
 const htmlSectionMarker = '\uF111\uF222\uF333\uF444';
 const diffMatchPatch = new DiffMatchPatch();

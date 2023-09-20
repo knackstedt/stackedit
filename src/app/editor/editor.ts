@@ -583,7 +583,19 @@ export class Editor extends EventEmittingClass {
                     else {
                         this.previewElt.appendChild(sectionPreviewElt);
                     }
+
+                    // Go through all extensions and render their HTML for the section
                     extensionSvc.sectionPreview(sectionPreviewElt, this.options, true);
+
+                    // Make some anchors external links
+                    [...sectionPreviewElt.querySelectorAll('a')].forEach(el => {
+                        const url = el.getAttribute('href');
+
+                        // Make external links open in a new tab.
+                        if (/^((https?|ftps?|ssh|wss?):\/\/|mailto:)/.test(url))
+                            el.setAttribute("target", '_blank');
+                    });
+
                     loadingImages = [
                         ...loadingImages,
                         ...Array.prototype.slice.call(sectionPreviewElt.getElementsByTagName('img')),
