@@ -1,3 +1,5 @@
 <!-- <app-menu [isMobile]="isMobile"></app-menu> -->
 
-<ngx-stackedit [value]="markdownText"></ngx-stackedit>
+<ngx-stackedit [value]="markdownText"
+    (onImageUpload)="onImageUpload($event)"
+></ngx-stackedit>

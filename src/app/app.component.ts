@@ -1,5 +1,7 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 
+export const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
@@ -11,7 +13,7 @@ export class AppComponent {
 
 [![Build Status](https://img.shields.io/travis/benweet/stackedit.svg?style=flat)](https://travis-ci.org/benweet/stackedit) [![NPM version](https://img.shields.io/npm/v/stackedit.svg?style=flat)](https://www.npmjs.org/package/stackedit)
 
-> Full-featured, <span style="color: #33b579">open-source <span style="color: #f4d679">Markdown</span> editor based </span> on PageDown, the Markdown library used by Stack Overflow and the other Stack Exchange sites.
+> Full-featured, <span style="color: #33b579">open-source <span style="color: #f4d679">Markdown</span> editor based </span> on PageDown, the <span style="color: #11b3a5">Markdown</span> library used by Stack Overflow and the other Stack <span style="color: #eaa100">Exchange</span> sites.
 
 \`\`\`mermaid
 flowchart LR
@@ -35,11 +37,6 @@ flowchart LR
         // this.onResize();
     }
 
-    // openInfo() {
-    //     this.dialog.open(AboutComponent);
-    // }
-
-
     // @HostListener("window:resize", ["$event"])
     // onResize() {
     //     this.isMobile = (window.innerHeight / window.innerWidth > 1.5) || window.innerWidth < 900;
@@ -49,4 +46,12 @@ flowchart LR
     //     this.isMobile && document.body.classList.add("mobile");
     //     !this.isMobile && document.body.classList.add("desktop");
     // }
+
+    async onImageUpload(evt) {
+        await sleep(10000);
+        evt.stackEditor.finalizeImageUpload({
+            label: "image text",
+            link: "https://img.shields.io/travis/benweet/stackedit.svg?style=flat"
+        });
+    }
 }
