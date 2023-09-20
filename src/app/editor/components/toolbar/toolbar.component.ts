@@ -330,16 +330,15 @@ export class ToolbarComponent {
 
         let updatedSelection = selectionText;
 
-        if (insertNewline) {
-            // Insert a newline at the start if we're in the middle of a selection.
-            if (!updatedSelection.startsWith('\n'))
-                updatedSelection = "\n" + updatedSelection;
-        }
-
-
         if (indent) {
             // Indent all lines in the selection
             updatedSelection = selectionText.split('\n').map(l => ''.padStart(indent, ' ') + l).join('\n');
+        }
+
+        if (insertNewline && before) {
+            // Insert a newline at the start if we're in the middle of a selection.
+            if (!preString.endsWith('\n'))
+                before = "\n" + before;
         }
 
         const patchedText =
