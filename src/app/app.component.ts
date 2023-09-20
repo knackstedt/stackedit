@@ -1,11 +1,14 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
+import { StackEditorComponent } from './editor/editor.component';
 
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    styleUrls: ['./app.component.scss']
+    styleUrls: ['./app.component.scss'],
+    standalone: true,
+    imports: [StackEditorComponent]
 })
 export class AppComponent {
     markdownText = `

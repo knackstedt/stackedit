@@ -11,8 +11,8 @@ describe('EditorComponent', () => {
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ EditorComponent ]
-    })
+    imports: [EditorComponent]
+})
     .compileComponents();
   }));
 
