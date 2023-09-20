@@ -50,11 +50,12 @@ export class ToolbarComponent {
 
     diagramMenu: MenuItem[] = [
         { label: "Mermaid Diagrams:" },
+        { label: "Live Editor", link: "https://mermaid.live/edit", linkTarget: "_blank" },
         { label: "Examples", link: "https://mermaid.js.org/syntax/examples.html", linkTarget: "_blank" },
         "separator",
         ...mermaidLayouts.map(l => ({
             label: l.label,
-            action: () => this.wrapText(l.value, null, null, true)
+            action: () => this.wrapText(l.value, '', null, true)
         }))
     ];
 
