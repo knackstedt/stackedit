@@ -296,6 +296,9 @@ export class VanillaMirror extends EventEmittingClass {
     }
 
     setContent(value: string, noUndo?: boolean, maxStartOffsetOpt?: number) {
+        if (value === null || value === undefined)
+            value = '\n';
+
         this.value = value;
 
         const textContent = this.getContent();
