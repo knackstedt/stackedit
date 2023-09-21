@@ -97,13 +97,12 @@ export class VanillaMirror extends EventEmittingClass {
             // console.log("delete my asshole")
             let selection = window.getSelection();
 
-            // Apparently Firefox didn't ever implement this. Morons.
+            // TODO: Figure out a solution.
             if (typeof document.caretRangeFromPoint == "function") {
                 const range = document.caretRangeFromPoint(evt.clientX, evt.clientY);
                 selection.collapse(range.startContainer, range.startOffset);
             }
             else {
-                // Firefox gets bad implementation because they refuse to implement
                 selection.collapse(selection.focusNode, selection.focusOffset);
             }
 
