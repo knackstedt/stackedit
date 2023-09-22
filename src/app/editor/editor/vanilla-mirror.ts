@@ -53,6 +53,7 @@ export class VanillaMirror extends EventEmittingClass {
         private scrollEltOpt: HTMLElement
     ) {
         super();
+        window['editor'] = this;
 
         this.scrollElt = scrollEltOpt || contentElt;
 
@@ -108,6 +109,7 @@ export class VanillaMirror extends EventEmittingClass {
 
             this.selectionMgr.saveSelectionState();
         }
+        this.selectionMgr.updateCursorCoordinates(true);
     }
 
     onWindowResize() {
@@ -164,6 +166,45 @@ export class VanillaMirror extends EventEmittingClass {
 
         this.$trigger('destroy');
         return true;
+    }
+
+    getNodeAtIndex(index: number): Node {
+        let i = 0;
+        const recursivelyFindNode = (el: HTMLElement) => {
+            // This element has a content override, so we'll read that instead.
+            if (el.nodeType == 1 && el.getAttribute('source') != null) {
+                const text = el.getAttribute('source')
+                    .replace(/\\n/gm, '\n')
+                    .replace(/\\"/gm, '"');
+                i += text.length;
+                if (i > index) {
+                    return el;
+                }
+                return null;
+            }
+
+            // This doesn't have children, so we can simply read the textContent
+            else if (el.nodeType != 1 || el.childNodes.length == 0) {
+                i += el.textContent.length;
+                if (i > index) {
+                    return el;
+                }
+                return null;
+            }
+
+            // This has childNodes, and no content override
+            else {
+                // @ts-ignore
+                const children = [...el.childNodes];
+                for (let i = 0; i < children.length; i++) {
+                    const el = recursivelyFindNode(children[i]);
+                    if (el) return el;
+                }
+            }
+            return null;
+        };
+
+        return recursivelyFindNode(this.contentElt);
     }
 
     getContent(): string {
@@ -279,6 +320,17 @@ export class VanillaMirror extends EventEmittingClass {
     setSelection(start, end) {
         this.selectionMgr.setSelectionStartEnd(start, end == null ? start : end);
         this.selectionMgr.updateCursorCoordinates();
+    }
+
+    scrollCursorIntoView() {
+        const { top, height } = this.selectionMgr.cursorCoordinates;
+        const caretTop = top + height*3;
+
+        if (caretTop > (this.$contentElt.parentElement.scrollTop + this.$contentElt.clientHeight)) {
+            this.$contentElt.parentElement.scrollTo({
+                top: Math.max(0, caretTop - this.$contentElt.clientHeight)
+            });
+        }
     }
 
     keydownHandler(handler) {

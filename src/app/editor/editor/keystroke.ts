@@ -136,11 +136,11 @@ export const defaultKeystrokes = [
         state.before += `\n${indent}${prefix}`;
         state.selection = '';
         evt.preventDefault();
-        // editor
 
+        setTimeout(() => {
+            editor.scrollCursorIntoView();
+        }, 1);
 
-        // Trigger scroll update after things have settled
-        setTimeout(() => editor.adjustCursorPosition(), 20);
         return true;
     }),
 
