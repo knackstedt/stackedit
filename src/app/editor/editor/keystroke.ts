@@ -44,18 +44,14 @@ export const defaultKeystrokes = [
         if ((!evt.ctrlKey && !evt.metaKey) || evt.altKey) {
             return false;
         }
-        const keyCode = evt.charCode || evt.keyCode;
-        const keyCodeChar = String.fromCharCode(keyCode).toLowerCase();
+
+
         let action;
-        switch (keyCodeChar) {
-            case 'y':
-                action = 'redo';
-                break;
-            case 'z':
-                action = evt.shiftKey ? 'redo' : 'undo';
-                break;
-            default:
-        }
+        if (evt.key.toLowerCase() == "z")
+            action = 'redo';
+        if (evt.key.toLowerCase() == "y")
+            action = evt.shiftKey ? 'redo' : 'undo';
+
         if (action) {
             evt.preventDefault();
             setTimeout(() => editor.undoMgr[action](), 10);
@@ -66,7 +62,7 @@ export const defaultKeystrokes = [
 
     // TAB
     new Keystroke((evt, state) => {
-        if (evt.code !== 'Tab' || evt.metaKey || evt.ctrlKey) {
+        if (evt.key !== 'Tab' || evt.metaKey || evt.ctrlKey) {
             return false;
         }
 
@@ -94,11 +90,10 @@ export const defaultKeystrokes = [
 
     // ENTER
     new Keystroke((evt, state, editor) => {
-        if (evt.code !== 'Enter') {
+        if (evt.key !== 'Enter') {
             clearNewline = false;
             return false;
         }
-        evt.preventDefault();
 
         const lf = state.before.lastIndexOf('\n') + 1;
         if (clearNewline) {
@@ -110,15 +105,16 @@ export const defaultKeystrokes = [
 
         clearNewline = false;
         const previousLine = state.before.slice(lf);
+        const currentLine = state.after.slice(0, state.after.indexOf('\n'));
         const indent = previousLine.match(/^\s*/)[0];
 
-        const isList        = /^\s*[-*]\s*\S/.test(previousLine);
-        const isOrderedList = /^\s*\d+\.\s*\S/.test(previousLine);
-        const isCheckList   = /^\s*-\s*\[[ xX]?\]\s*\S/.test(previousLine);
+        const listRx = /^\s*[-*]\s*\S?/;
+        const orderedListRx = /^\s*\d+\.\s*\S?/;
+        const checkListRx = /^\s*-\s*\[[ xX]?\]\s*\S?/;
 
-        if (indent.length) {
-            clearNewline = true;
-        }
+        const isList        = listRx.test(previousLine) && !listRx.test(currentLine);
+        const isOrderedList = orderedListRx.test(previousLine) && !orderedListRx.test(currentLine);
+        const isCheckList   = checkListRx.test(previousLine) && !checkListRx.test(currentLine);
 
         editor.undoMgr.setCurrentMode('single');
 
@@ -134,20 +130,25 @@ export const defaultKeystrokes = [
         }
         if (isCheckList) prefix = '- [ ] ';
 
+        if (indent.length > 0 || isList || isOrderedList || isCheckList)
+            clearNewline = true;
+
         state.before += `\n${indent}${prefix}`;
         state.selection = '';
+        evt.preventDefault();
+        // editor
+
 
         // Trigger scroll update after things have settled
-        setTimeout(() => editor.adjustCursorPosition(), 1);
+        setTimeout(() => editor.adjustCursorPosition(), 20);
         return true;
     }),
 
     // BACKSPACE, DELETE
     new Keystroke((evt, state, editor) => {
-        if (evt.code !== 'Backspace' && evt.code !== 'Delete') {
+        if (evt.key !== 'Backspace' && evt.key !== 'Delete') {
             return false;
         }
-        // evt.preventDefault();
 
         editor.undoMgr.setCurrentMode('delete');
         if (!state.selection) {
@@ -155,8 +156,8 @@ export const defaultKeystrokes = [
             if (isJump) {
                 // Custom kill word behavior
                 const text = state.before + state.after;
-                const offset = getNextWordOffset(text, state.before.length, evt.code === 'Backspace');
-                if (evt.code === 'Backspace') {
+                const offset = getNextWordOffset(text, state.before.length, evt.key === 'Backspace');
+                if (evt.key === 'Backspace') {
                     state.before = state.before.slice(0, offset);
                 }
                 else {
@@ -164,13 +165,15 @@ export const defaultKeystrokes = [
                 }
                 return true;
             }
-            else if (evt.code == 'Backspace' && state.before.slice(-1) === '\n') {
+            else if (evt.key == 'Backspace' && state.before.slice(-1) === '\n') {
                 // Special treatment for end of lines
                 state.before = state.before.slice(0, -1);
+                evt.preventDefault();
                 return true;
             }
-            else if (evt.code == 'Delete' && state.after.slice(0, 1) === '\n') {
+            else if (evt.key == 'Delete' && state.after.slice(0, 1) === '\n') {
                 state.after = state.after.slice(1);
+                evt.preventDefault();
                 return true;
             }
             return false;
