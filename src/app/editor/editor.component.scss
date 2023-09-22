@@ -96,8 +96,9 @@
     }
 }
 
-.editor__inner, .preview__inner-2 {
-    padding: 10px 25px 200px;
+.editor__inner {
+    padding: 10px 24px 38px;
+    // height: fit-content;
 }
 
 .preview {
@@ -1021,7 +1022,11 @@
     }
 
     .editor__inner .cledit-section {
-        font-family: inherit
+        font-family: inherit;
+    }
+
+    .editor__inner>div:nth-last-of-type(2) {
+        padding-bottom: 38px;
     }
 
     .editor__inner .hide {
@@ -1029,7 +1034,8 @@
     }
 
     .preview__inner-2 {
-        margin: 0
+        margin: 0;
+        padding: 24px;
     }
 
     .preview__inner-2>:first-child>:first-child {

@@ -6,7 +6,6 @@ import { TooltipDirective, MenuDirective } from '@dotglitch/ngx-common';
 
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { Editor } from './editor';
-import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'ngx-stackedit',
