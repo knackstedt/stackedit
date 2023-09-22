@@ -3,6 +3,10 @@ import Prism from './prism';
 import MarkdownIt from 'markdown-it';
 import extensionSvc from './extensionSvc';
 
+/**
+ * This provides the HTML rendering for markdown preview content.
+ */
+
 const htmlSectionMarker = '\uF111\uF222\uF333\uF444';
 const diffMatchPatch = new DiffMatchPatch();
 
@@ -125,7 +129,7 @@ export default {
         Object.keys(startSectionBlockTypeMap).forEach((type) => {
             const rule = converter.renderer.rules[type] || converter.renderer.renderToken;
             converter.renderer.rules[type] = (tokens, idx, opts, env, self) => {
-                if (tokens[idx].sectionDelimiter) {
+                if (tokens[idx]['sectionDelimiter']) {
                     // Add section delimiter
                     return htmlSectionMarker + rule.call(converter.renderer, tokens, idx, opts, env, self);
                 }
