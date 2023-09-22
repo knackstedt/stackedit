@@ -15,7 +15,6 @@ export class SelectionMgr extends EventEmittingClass {
 
     adjustScroll;
     oldSelectionRange;
-    selectionEndContainer;
     selectionEndOffset;
 
     constructor(private editor: VanillaMirror) {
@@ -59,7 +58,7 @@ export class SelectionMgr extends EventEmittingClass {
     debouncedUpdateCursorCoordinates = debounce(() => {
         const coordinates = this.getCoordinates(
             this.selectionEnd,
-            this.selectionEndContainer,
+            null,
             this.selectionEndOffset,
         );
 
@@ -221,7 +220,7 @@ export class SelectionMgr extends EventEmittingClass {
 
         if (selectionStart >= this.editor.value.length) {
             // If cursor is after the trailingNode
-            selectionEnd -= 1;
+            selectionEnd = this.editor.value.length;
             selectionStart = selectionEnd;
             return this.setSelectionStartEnd(selectionStart, selectionEnd);
         }
