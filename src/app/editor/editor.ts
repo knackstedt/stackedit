@@ -1,16 +1,14 @@
 import DiffMatchPatch from 'diff-match-patch';
-import markdownItPandocRenderer from 'markdown-it-pandoc-renderer';
 import htmlSanitizer from './libs/htmlSanitizer';
 import markdownConversionSvc from './markdownConversionSvc';
 import sectionUtils from './editor/sectionUtils';
-import extensionSvc from './extensionSvc';
-import Prism from './prism';
 import { VanillaMirror } from './editor/vanilla-mirror';
-import { EventEmittingClass, findContainer } from './editor/utils';
+import { EventEmittingClass, findContainer, debounce } from './editor/utils';
 import { makePatchableText } from './diffUtils';
 import { StackEditorComponent } from './editor.component';
-
-
+import Prism from './prism';
+import MarkdownIt from 'markdown-it';
+import markdownGFM from './extensions/markdownExtension';
 
 const allowDebounce = (action, wait) => {
     let timeoutId;
@@ -49,7 +47,6 @@ export class Editor extends EventEmittingClass {
     contentId;
 
     // Other object;
-    options: any;
     parsingCtx: any;
     conversionCtx: any;
     previewCtx =  {
@@ -63,27 +60,11 @@ export class Editor extends EventEmittingClass {
     previewSelectionStartOffset: any;
     editorIsActive = false;
 
-    converter = markdownConversionSvc.createConverter({
-        "emoji": true,
-        "emojiShortcuts": false,
-        "abc": true,
-        "math": true,
-        "abbr": true,
-        "breaks": true,
-        "deflist": true,
-        "del": true,
-        "fence": true,
-        "footnote": true,
-        "imgsize": true,
-        "linkify": true,
-        "mark": true,
-        "sub": true,
-        "sup": true,
-        "table": true,
-        "tasklist": true,
-        "typographer": true,
-        "mermaid": true,
-    });
+    converter: MarkdownIt;
+
+    getOptionsListeners = [];
+    initConverterListeners = [];
+    sectionPreviewListeners = [];
 
     /**
      * Pass the elements to the store and initialize the editor.
@@ -96,69 +77,115 @@ export class Editor extends EventEmittingClass {
     ) {
         super();
 
-        this.createClEditor(editorElt);
+        // Enable standard markdown rendering support
+        markdownGFM(this);
 
-        this.clEditor.on('contentChanged', (content, diffs, sectionList) => {
-            this.parsingCtx = {
-                ...this.parsingCtx,
-                sectionList,
+        Promise.all([
+            (!ngEditor.options.disableEmoji)
+                ? import('./extensions/emojiExtension').then((ext) => ext.default(this))
+                : null,
+            (!ngEditor.options.disableMermaid)
+                ? import('./extensions/mermaidExtension').then((ext) => ext.default(this))
+                : null,
+        ].filter(e => !!e)).then((extensions) => {
+            this.converter = markdownConversionSvc.createConverter();
+            this.initConverter(this.converter, ngEditor.options.markdownIt);
+
+            this.createClEditor(editorElt);
+
+            this.clEditor.on('contentChanged', (content, diffs, sectionList) => {
+                this.parsingCtx = {
+                    ...this.parsingCtx,
+                    sectionList,
+                };
+            });
+
+            // Manually handle scroll events
+            const onScroll = (e) => {
+                e.preventDefault();
+                this.restoreScrollPosition(this.getScrollPosition(this.editorIsActive ? editorElt : previewElt));
             };
+
+            editorElt.parentNode.addEventListener('scroll', onScroll);
+            previewElt.parentNode.addEventListener('scroll', onScroll);
+
+            const refreshPreview = allowDebounce(() => {
+                this.convert();
+                if (this.instantPreview) {
+                    this.refreshPreview();
+                    this.measureSectionDimensions(false, true);
+                }
+                else {
+                    setTimeout(() => this.refreshPreview(), 10);
+                }
+                this.instantPreview = false;
+            }, 25);
+
+            let newSectionList;
+            let newSelectionRange;
+            const onEditorChanged = allowDebounce(() => {
+                if (this.sectionList !== newSectionList) {
+                    this.sectionList = newSectionList;
+                    this.$trigger('sectionList', this.sectionList);
+                    refreshPreview(!this.instantPreview);
+                }
+                if (this.selectionRange !== newSelectionRange) {
+                    this.selectionRange = newSelectionRange;
+                    this.$trigger('selectionRange', this.selectionRange);
+                }
+            }, 10);
+
+            this.clEditor.selectionMgr.on('selectionChanged', (start, end, selectionRange) => {
+                newSelectionRange = selectionRange;
+                onEditorChanged(!this.instantPreview);
+            });
+
+            this.clEditor.on('contentChanged', (content, diffs, sectionList) => {
+                newSectionList = sectionList;
+                onEditorChanged(!this.instantPreview);
+            });
+
+            this.clEditor.highlighter.on('sectionHighlighted', (section) => this.onEditorRenderSection(section));
+
+            this.measureSectionDimensions(false, true, true);
+            this.initClEditor();
+
+            this.clEditor.toggleEditable(true);
+            this.$trigger('loaded');
         });
-
-        // Manually handle scroll events
-        const onScroll = (e) => {
-            e.preventDefault();
-            this.restoreScrollPosition(this.getScrollPosition(this.editorIsActive ? editorElt : previewElt));
-        };
-
-        editorElt.parentNode.addEventListener('scroll', onScroll);
-        previewElt.parentNode.addEventListener('scroll', onScroll);
-
-        const refreshPreview = allowDebounce(() => {
-            this.convert();
-            if (this.instantPreview) {
-                this.refreshPreview();
-                this.measureSectionDimensions(false, true);
-            }
-            else {
-                setTimeout(() => this.refreshPreview(), 10);
-            }
-            this.instantPreview = false;
-        }, 25);
-
-        let newSectionList;
-        let newSelectionRange;
-        const onEditorChanged = allowDebounce(() => {
-            if (this.sectionList !== newSectionList) {
-                this.sectionList = newSectionList;
-                this.$trigger('sectionList', this.sectionList);
-                refreshPreview(!this.instantPreview);
-            }
-            if (this.selectionRange !== newSelectionRange) {
-                this.selectionRange = newSelectionRange;
-                this.$trigger('selectionRange', this.selectionRange);
-            }
-        }, 10);
-
-        this.clEditor.selectionMgr.on('selectionChanged', (start, end, selectionRange) => {
-            newSelectionRange = selectionRange;
-            onEditorChanged(!this.instantPreview);
-        });
-
-        this.clEditor.on('contentChanged', (content, diffs, sectionList) => {
-            newSectionList = sectionList;
-            onEditorChanged(!this.instantPreview);
-        });
-
-        this.clEditor.highlighter.on('sectionHighlighted', (section) => this.onEditorRenderSection(section));
-
-        this.measureSectionDimensions(false, true, true);
-        this.initClEditor();
-
-        this.clEditor.toggleEditable(true);
-        this.$trigger('inited');
     }
 
+    onGetOptions(listener: Function) {
+        this.getOptionsListeners.push(listener);
+    }
+
+    onInitConverter(priority: number, listener: Function) {
+        this.initConverterListeners[priority] = listener;
+    }
+
+    onSectionPreview(listener: Function) {
+        this.sectionPreviewListeners.push(listener);
+    }
+
+    getOptions(properties, isCurrentFile?) {
+        return this.getOptionsListeners.reduce((options, listener) => {
+            listener(options, properties, isCurrentFile);
+            return options;
+        }, {});
+    }
+
+    initConverter(markdown: MarkdownIt, options: any) {
+        // Use forEach as it's a sparsed array
+        this.initConverterListeners.forEach((listener) => {
+            listener(markdown, options);
+        });
+    }
+
+    sectionPreview(elt, options, isEditor) {
+        this.sectionPreviewListeners.forEach((listener) => {
+            listener(elt, options, isEditor);
+        });
+    }
 
     onEditorRenderSection(section) {
         // Render images inline in the editor.
@@ -295,7 +322,7 @@ export class Editor extends EventEmittingClass {
             properties: "\n",
             text: "\n",
             type: "content"
-        };//store.getters['content/current'];
+        };
 
         if (content) {
             const contentState = {
@@ -305,8 +332,9 @@ export class Editor extends EventEmittingClass {
                 selectionEnd: 0,
                 selectionStart: 0,
                 type: "contentState"
-            };//store.getters['contentState/current'];
-            const options = Object.assign({
+            };
+
+            const options = {
                 selectionStart: contentState.selectionStart,
                 selectionEnd: contentState.selectionEnd,
                 patchHandler: {
@@ -314,7 +342,8 @@ export class Editor extends EventEmittingClass {
                     applyPatches: this.applyPatches.bind(this),
                     reversePatches: this.reversePatches.bind(this),
                 },
-            }, opts);
+                ...opts
+            };
 
             if (this.contentId !== content.id) {
                 this.contentId = content.id;
@@ -587,7 +616,7 @@ export class Editor extends EventEmittingClass {
                     }
 
                     // Go through all extensions and render their HTML for the section
-                    extensionSvc.sectionPreview(sectionPreviewElt, this.options, true);
+                    this.sectionPreview(sectionPreviewElt, this.ngEditor.options.markdownIt, true);
 
                     // Make some anchors external links
                     [...sectionPreviewElt.querySelectorAll('a')].forEach(el => {

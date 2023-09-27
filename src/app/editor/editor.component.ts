@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, EventEmitter, Inject, InjectionToken, Input, Optional, Output, ViewChild, ViewContainerRef } from '@angular/core';
 import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -6,6 +6,79 @@ import { TooltipDirective, MenuDirective } from '@dotglitch/ngx-common';
 
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { Editor } from './editor';
+import { MermaidConfig } from 'mermaid';
+
+type StackEditConfig = Partial<{
+    /**
+     * Mermaid chart configuration
+     */
+    mermaid: MermaidConfig,
+    /**
+     * Set to `true` to disable loading Mermaid.
+     * Will automatically reduce bundle
+     */
+    disableMermaid: boolean,
+    /**
+     * Markdown-it configuration
+     */
+    markdownIt: {
+        "emoji": boolean,
+        "emojiShortcuts": boolean,
+        "abc": boolean,
+        "math": boolean,
+        "abbr": boolean,
+        "breaks": boolean,
+        "deflist": boolean,
+        "del": boolean,
+        "fence": boolean,
+        "footnote": boolean,
+        "imgsize": boolean,
+        "linkify": boolean,
+        "mark": boolean,
+        "sub": boolean,
+        "sup": boolean,
+        "table": boolean,
+        "tasklist": boolean,
+        "typographer": boolean
+    }
+
+    /**
+     *
+     */
+    emojiConfig: {},
+    /**
+     *
+     */
+    disableEmoji: boolean
+    // mathConfig: {}
+
+}>;
+
+const defaults = {
+    markdownIt: {
+        "emoji": true,
+        "emojiShortcuts": false,
+        "abc": true,
+        "math": true,
+        "abbr": true,
+        "breaks": true,
+        "deflist": true,
+        "del": true,
+        "fence": true,
+        "footnote": true,
+        "imgsize": true,
+        "linkify": true,
+        "mark": true,
+        "sub": true,
+        "sup": true,
+        "table": true,
+        "tasklist": true,
+        "typographer": true,
+        "mermaid": true,
+    }
+}
+
+export const NGX_LAZY_LOADER_CONFIG = new InjectionToken<StackEditConfig>('stackedit-config');
 
 @Component({
     selector: 'ngx-stackedit',
@@ -59,47 +132,16 @@ export class StackEditorComponent {
     @Output() onImageUpload = new EventEmitter<any>();
 
     editorSvc: Editor;
-
-    styles = {
-        showNavigationBar: true,
-        showEditor: true,
-        showSidePreview: true,
-        showStatusBar: true,
-        showSideBar: false,
-        showExplorer: false,
-        scrollSync: true,
-        focusMode: false,
-        findCaseSensitive: false,
-        findUseRegexp: false,
-        sideBarPanel: 'menu',
-        welcomeTourFinished: false,
-        layoutOverflow: false,
-        innerWidth: window.innerWidth - 500,
-        innerHeight: window.innerHeight,
-        editorWidth: 800,
-        editorGutterWidth: 10,
-        editorGutterLeft: 10,
-        fontSize: 16,
-        previewWidth: 800,
-        previewGutterWidth: 10,
-        previewGutterLeft: 10,
-    };
-
-    constants = {
-        editorMinWidth: 320,
-        explorerWidth: 260,
-        gutterWidth: 250,
-        sideBarWidth: 280,
-        navigationBarHeight: 44,
-        buttonBarWidth: 2,
-        statusBarHeight: 20,
-    }
-
+    public options: StackEditConfig = {};
 
     constructor(
         private readonly viewContainer: ViewContainerRef,
+        @Optional() @Inject(NGX_LAZY_LOADER_CONFIG) private config: StackEditConfig = {}
     ) {
-
+        this.options = {
+            ...defaults,
+            ...config
+        };
     }
 
     ngAfterViewInit() {
@@ -111,20 +153,22 @@ export class StackEditorComponent {
 
         // Focus on the editor every time reader mode is disabled
         const focus = () => {
-            if (this.styles.showEditor) {
-                this.editorSvc.clEditor.focus();
-            }
+            // if (this.styles.showEditor) {
+            //     this.editorSvc.clEditor.focus();
+            // }
         };
         setTimeout(focus, 100);
         // this.$watch(() => this.styles.showEditor, focus);
 
-        this.editorSvc.clEditor.focus();
+        // this.editorSvc.clEditor.focus();
 
         // Bind the 'value' property
-        this.editorSvc.clEditor.setContent(this.value);
-        this.editorSvc.clEditor.on('contentChanged', (content, diffs, sectionList) => {
-            this.valueChange.next(content);
-        });
+        this.editorSvc.on("loaded", () => {
+            this.editorSvc.clEditor.setContent(this.value);
+            this.editorSvc.clEditor.on('contentChanged', (content, diffs, sectionList) => {
+                this.valueChange.next(content);
+            });
+        })
     }
 
     finalizeImageUpload({ label, link }) {

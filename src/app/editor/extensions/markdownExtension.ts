@@ -8,6 +8,7 @@ import markdownitSub from 'markdown-it-sub';
 import markdownitSup from 'markdown-it-sup';
 import markdownitTasklist from './libs/markdownItTasklist';
 import markdownitAnchor from './libs/markdownItAnchor';
+import MarkdownIt from 'markdown-it';
 
 const coreBaseRules = [
     'normalize',
@@ -53,7 +54,7 @@ export default (extensionSvc) => {
     extensionSvc.onGetOptions((options, properties) => Object
         .assign(options, properties.extensions.markdown));
 
-    extensionSvc.onInitConverter(0, (markdown, options) => {
+    extensionSvc.onInitConverter(0, (markdown: MarkdownIt, options) => {
         markdown.set({
             html: true,
             breaks: !!options.breaks,
@@ -111,14 +112,14 @@ export default (extensionSvc) => {
         markdown.use(markdownitAnchor);
 
         // Wrap tables into a div for scrolling
-        markdown.renderer.rules.table_open = (tokens, idx, opts) =>
+        markdown.renderer.rules['table_open'] = (tokens, idx, opts) =>
             `<div class="table-wrapper">${markdown.renderer.renderToken(tokens, idx, opts)}`;
-        markdown.renderer.rules.table_close = (tokens, idx, opts) =>
+        markdown.renderer.rules['table_close'] = (tokens, idx, opts) =>
             `${markdown.renderer.renderToken(tokens, idx, opts)}</div>`;
 
         // Transform style into align attribute to pass the HTML sanitizer
         const textAlignLength = 'text-align:'.length;
-        markdown.renderer.rules.td_open = (tokens, idx, opts) => {
+        markdown.renderer.rules['td_open'] = (tokens, idx, opts) => {
             const token = tokens[idx];
             if (token.attrs && token.attrs.length && token.attrs[0][0] === 'style') {
                 token.attrs = [
@@ -127,9 +128,9 @@ export default (extensionSvc) => {
             }
             return markdown.renderer.renderToken(tokens, idx, opts);
         };
-        markdown.renderer.rules.th_open = markdown.renderer.rules.td_open;
+        markdown.renderer.rules['th_open'] = markdown.renderer.rules['td_open'];
 
-        markdown.renderer.rules.footnote_ref = (tokens, idx) => {
+        markdown.renderer.rules['footnote_ref'] = (tokens, idx) => {
             const n = `${Number(tokens[idx].meta.id + 1)}`;
             let id = `fnref${n}`;
             if (tokens[idx].meta.subId > 0) {

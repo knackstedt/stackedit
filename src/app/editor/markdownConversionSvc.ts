@@ -1,7 +1,6 @@
 import DiffMatchPatch from 'diff-match-patch';
 import Prism from './prism';
 import MarkdownIt from 'markdown-it';
-import extensionSvc from './extensionSvc';
 
 /**
  * This provides the HTML rendering for markdown preview content.
@@ -107,24 +106,16 @@ function hashArray(arr, valueHash, valueArray) {
 }
 
 export default {
-    defaultOptions: null,
-    defaultConverter: null,
-    defaultPrismGrammars: null,
-
-
-
     /**
      * Creates a converter and init it with extensions.
      * @returns {Object} A converter.
      */
-    createConverter(options) {
+    createConverter() {
         // Let the listeners add the rules
         const converter = new MarkdownIt('zero');
         converter.core.ruler.enable([], true);
         converter.block.ruler.enable([], true);
         converter.inline.ruler.enable([], true);
-
-        extensionSvc.initConverter(converter, options);
 
         Object.keys(startSectionBlockTypeMap).forEach((type) => {
             const rule = converter.renderer.rules[type] || converter.renderer.renderToken;
@@ -146,7 +137,7 @@ export default {
      * @param {String} text The text to be parsed.
      * @returns {Object} A parsing context to be passed to `convert`.
      */
-    parseSections(converter, text) {
+    parseSections(converter: MarkdownIt, text: string) {
         const markdownState = new converter.core.State(text, converter, {});
         const markdownCoreRules = converter.core.ruler.getRules('');
         markdownCoreRules[0](markdownState); // Pass the normalize rule
@@ -183,7 +174,7 @@ export default {
             // index === 0 means there are empty lines at the begining of the file
             if (token.level === 0 && startSectionBlockTypeMap[token.type] === true) {
                 if (index > 0) {
-                    token.sectionDelimiter = true;
+                    token['sectionDelimiter'] = true;
                     addSection(token.map[0]);
                 }
                 if (listBlockTypeMap[token.type] === true) {
@@ -234,6 +225,7 @@ export default {
         const valueHash = Object.create(null);
         const valueArray = [];
         const newSectionHash = hashArray(htmlSectionList, valueHash, valueArray);
+
         let htmlSectionDiff;
         if (previousConversionCtx) {
             const oldSectionHash = hashArray(
