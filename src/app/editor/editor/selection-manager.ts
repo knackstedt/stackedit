@@ -151,6 +151,12 @@ export class SelectionMgr extends EventEmittingClass {
         this.selectionEnd = end < 0 ? 0 : end;
         this.lastSelectionStart = this.selectionStart;
         this.lastSelectionEnd = this.selectionEnd;
+
+        const sel = window.getSelection();
+        let startContainer = this.findContainer(this.selectionStart);
+        let endContainer = this.findContainer(this.selectionEnd);
+        sel.setPosition(startContainer.container, startContainer.offsetInContainer);
+        sel.extend(endContainer.container, endContainer.offsetInContainer);
     }
 
     setSelectionStartEnd(start, end, restoreSelection = true) {
