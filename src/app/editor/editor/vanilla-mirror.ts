@@ -87,7 +87,7 @@ export class VanillaMirror extends EventEmittingClass {
     }
 
     onMouseUp(evt: MouseEvent) {
-        const {selectionStart, selectionEnd} = this.selectionMgr;
+        const { selectionStart, selectionEnd } = this.selectionMgr;
         this.selectionMgr.saveSelectionState();
 
         // If selection is unchanged, deselect the text.
@@ -95,15 +95,22 @@ export class VanillaMirror extends EventEmittingClass {
             selectionStart == this.selectionMgr.lastSelectionStart &&
             selectionEnd == this.selectionMgr.lastSelectionEnd
         ) {
-            // console.log("delete my asshole")
             let selection = window.getSelection();
 
-            // TODO: Figure out a solution.
+            // TODO: There may be a better way to collapse the selection.
+
+            // All webkit browsers support this properly. (incl. Safari)
             if (typeof document.caretRangeFromPoint == "function") {
                 const range = document.caretRangeFromPoint(evt.clientX, evt.clientY);
                 selection.collapse(range.startContainer, range.startOffset);
             }
+            // Ugly stepchild named Firefox needs this mess.
+            else if (typeof document['caretPositionFromPoint'] == "function") {
+                const range = document['caretPositionFromPoint'](evt.clientX, evt.clientY);
+                selection.collapse(range.offsetNode, range.offset);
+            }
             else {
+                // In the nearly impossible scenario neither of the above exists, just collapse the selection.
                 selection.collapse(selection.focusNode, selection.focusOffset);
             }
 
