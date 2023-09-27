@@ -147,8 +147,17 @@ export class SelectionMgr extends EventEmittingClass {
     };
 
     setSelection(start: number = this.selectionStart, end: number = this.selectionEnd) {
-        this.selectionStart = start < 0 ? 0 : start;
-        this.selectionEnd = end < 0 ? 0 : end;
+
+        // Ensure the selection doesn't end up clipping out of bounds
+        if (start < 0) start = 0;
+        if (end < 0) end = 0;
+        if (start > this.editor.value.length) start = this.editor.value.length;
+        if (end > this.editor.value.length) end = this.editor.value.length;
+
+        // Use math.min and math.max to ensure the selection isn't backwards.
+        this.selectionStart = Math.min(start, end);
+        this.selectionEnd = Math.max(start, end);
+
         this.lastSelectionStart = this.selectionStart;
         this.lastSelectionEnd = this.selectionEnd;
 
@@ -159,7 +168,7 @@ export class SelectionMgr extends EventEmittingClass {
         sel.extend(endContainer.container, endContainer.offsetInContainer);
     }
 
-    setSelectionStartEnd(start, end, restoreSelection = true) {
+    setSelectionStartEnd(start: number, end: number, restoreSelection = true) {
         this.setSelection(start, end);
         if (restoreSelection && this.hasFocus) {
             return this.restoreSelection();
