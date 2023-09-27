@@ -45,6 +45,7 @@
     "rxjs": "7.8.1",
     "tslib": "^2.3.0",
     "turndown": "^7.1.2",
+    "ulidx": "^2.1.0",
     "zone.js": "~0.13.3"
   },
   "devDependencies": {
