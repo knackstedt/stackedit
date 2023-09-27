@@ -593,11 +593,12 @@ export class VanillaMirror extends EventEmittingClass {
     }
 
     /**
-     * Return the line at a given index
+     * Return the line at a given character index
+     * This is _not_ the line number, but the index of the char in the whole string.
      */
-    private getLine(text: string, index: number) {
+    getLine(charIndex: number, text = this.getContent()) {
         const lines = text.split(/[\r\n]/g);
-        const number = text.slice(0, index).match(/[\r\n]/g).length;
+        const number = text.slice(0, charIndex).match(/[\r\n]/g).length;
         const line = lines[number];
         const lineStart = lines.slice(0, number).map(l => l.length).reduce((a, b) => a + b, 0) + (number);
         const lineEnd = lineStart + line.length;
@@ -617,7 +618,7 @@ export class VanillaMirror extends EventEmittingClass {
         const { selectionStart, selectionEnd } = this.selectionMgr;
         const text = this.getContent() as string;
 
-        const { lineStart, lineEnd, line } = selectionStart == selectionEnd ? this.getLine(text, selectionStart) : {} as any;
+        const { lineStart, lineEnd, line } = selectionStart == selectionEnd ? this.getLine(selectionStart, text) : {} as any;
 
         const startIndex = lineStart ?? Math.min(selectionStart, selectionEnd);
         const endIndex = lineEnd ?? Math.max(selectionStart, selectionEnd);
