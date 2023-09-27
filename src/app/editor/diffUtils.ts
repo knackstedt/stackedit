@@ -1,5 +1,4 @@
 import DiffMatchPatch from 'diff-match-patch';
-import utils from './utils';
 
 const diffMatchPatch = new DiffMatchPatch();
 diffMatchPatch.Match_Distance = 10000;
@@ -86,16 +85,29 @@ function mergeText(serverText, clientText, lastMergedText) {
     return diffMatchPatch.patch_apply(patches, fusionText)[0];
 }
 
+const serializeObject = (obj: any) =>
+    obj === undefined ? obj : JSON.stringify(obj, (key, value) => {
+        if (Object.prototype.toString.call(value) !== '[object Object]') {
+            return value;
+        }
+        // Sort keys to have a predictable result
+        return Object.keys(value).sort().reduce((sorted, valueKey) => {
+            sorted[valueKey] = value[valueKey];
+            return sorted;
+        }, {});
+    });
+
+
 function mergeValues(serverValue, clientValue, lastMergedValue) {
     if (!lastMergedValue) {
         return serverValue || clientValue; // Take the server value in priority
     }
-    const newSerializedValue = utils.serializeObject(clientValue);
-    const serverSerializedValue = utils.serializeObject(serverValue);
+    const newSerializedValue = serializeObject(clientValue);
+    const serverSerializedValue = serializeObject(serverValue);
     if (newSerializedValue === serverSerializedValue) {
         return serverValue; // no conflict
     }
-    const oldSerializedValue = utils.serializeObject(lastMergedValue);
+    const oldSerializedValue = serializeObject(lastMergedValue);
     if (oldSerializedValue !== newSerializedValue && !serverValue) {
         return clientValue; // Removed on server but changed on client
     }
@@ -119,7 +131,7 @@ export function mergeObjects(serverObject, clientObject, lastMergedObject = {}) 
             mergedObject[key] = mergedValue;
         }
     });
-    return utils.deepCopy(mergedObject);
+    return structuredClone(mergedObject);
 }
 
 export function mergeContent(serverContent, clientContent, lastMergedContent = {}) {

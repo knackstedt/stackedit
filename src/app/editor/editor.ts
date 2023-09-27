@@ -264,9 +264,12 @@ export class Editor extends EventEmittingClass {
                 type: "content"
             };//store.getters['content/current'];
 
+            // last char must be a `\n`.
+            // TODO: This is probably not right
+            const sanitizedText = `${text}\n`.replace(/\n\n$/, '\n');
             const newContent = {
-                ...utils.deepCopy(oldContent),
-                text: utils.sanitizeText(text),
+                ...structuredClone(oldContent),
+                text: sanitizedText,
             };
             if (!this.isChangePatch) {
                 this.previousPatchableText = this.currentPatchableText;

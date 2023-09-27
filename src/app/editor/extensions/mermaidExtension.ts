@@ -1,5 +1,5 @@
 import mermaid from 'mermaid';
-import utils from '../utils';
+import { ulid } from 'ulidx';
 
 const config = {
     logLevel: 5,
@@ -63,7 +63,7 @@ let init = () => {
 
 const render = async (elt) => {
     init();
-    const svgId = `mermaid-svg-${utils.uid()}`;
+    const svgId = `mermaid-svg-${ulid()}`;
 
     mermaid.mermaidAPI.renderAsync(svgId, elt.textContent, () => {
         while (elt.firstChild) {
