@@ -8,7 +8,6 @@ import Prism from './prism';
 import { VanillaMirror } from './editor/vanilla-mirror';
 import { EventEmittingClass, findContainer } from './editor/utils';
 import { makePatchableText } from './diffUtils';
-import utils from './utils';
 import { StackEditorComponent } from './editor.component';
 
 
