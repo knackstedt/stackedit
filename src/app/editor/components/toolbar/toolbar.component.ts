@@ -25,6 +25,9 @@ import { StackEditorComponent } from '../../editor.component';
     standalone: true
 })
 export class ToolbarComponent {
+    get wrapSelection() {
+        return this.stackEditor.editorSvc.clEditor.wrapSelection;
+    }
 
     // 2D array of color hex codes that show up for the color picker.
     @Input() colorList = [
@@ -55,7 +58,7 @@ export class ToolbarComponent {
         "separator",
         ...mermaidLayouts.map(l => ({
             label: l.label,
-            action: () => this.wrapText(l.value, '', null, true)
+            action: () => this.wrapSelection(l.value, '', null, true)
         }))
     ];
 
@@ -75,55 +78,55 @@ export class ToolbarComponent {
 
 
     colorizeText(color: string) {
-        this.wrapText(`<span style="color: ${color}">`, "</span>");
+        this.wrapSelection(`<span style="color: ${color}">`, "</span>");
     }
 
     setTextFont(font: string) {
-        this.wrapText(`<span style="font-family: ${font}">`, "</span>");
+        this.wrapSelection(`<span style="font-family: ${font}">`, "</span>");
     }
 
     boldText() {
-        this.wrapText("**", "**");
+        this.wrapSelection("**", "**");
     }
 
     italicizeText() {
-        this.wrapText("*", "*");
+        this.wrapSelection("*", "*");
     }
 
     strikethroughText() {
-        this.wrapText("~~", "~~");
+        this.wrapSelection("~~", "~~");
     }
 
     blockQuoteText() {
-        this.wrapText("> ", '', 2, true);
+        this.wrapSelection("> ", '', 2, true);
     }
 
     insertLink(url, label) {
-        this.replaceText(`[${label}](${url})`);
+        this.stackEditor.editorSvc.clEditor.replaceSelection(`[${label}](${url})`);
     }
 
     insertOrderedList() {
-        this.wrapText(" 1. ", '', 4, true);
+        this.wrapSelection(" 1. ", '', 4, true);
     }
 
     insertList() {
-        this.wrapText(" - ", '', 3, true);
+        this.wrapSelection(" - ", '', 3, true);
     }
 
     insertCheckList() {
-        this.wrapText(" - [ ] ", '', 7, true);
+        this.wrapSelection(" - [ ] ", '', 7, true);
     }
 
     insertInlineCode() {
-        this.wrapText("`", "`");
+        this.wrapSelection("`", "`");
     }
 
     insertCodeBlock() {
         // TODO: align to start of line
-        this.wrapText("```\n", "\n```", null, true);
+        this.wrapSelection("```\n", "\n```", null, true);
     }
     insertComment() {
-        this.wrapText("<!-- ", " -->", null, true);
+        this.wrapSelection("<!-- ", " -->", null, true);
     }
 
     /**
@@ -155,7 +158,7 @@ export class ToolbarComponent {
         }
 
         const table = text.join('\n');
-        this.wrapText('', '\n' + table, null, true);
+        this.wrapSelection('', '\n' + table, null, true);
     }
 
     private keybindings: Subscription[] = [];
@@ -280,107 +283,12 @@ export class ToolbarComponent {
             this.cursorIsInCode = true;
     }
 
-
-    getLine(text: string, index: number) {
-        const lines = text.split(/[\r\n]/g);
-        const number = text.slice(0, index).match(/[\r\n]/g).length;
-        const line = lines[number];
-        const lineStart = lines.slice(0, number).map(l => l.length).reduce((a, b) => a+b, 0) + (number);
-        const lineEnd = lineStart + line.length;
-
-        return {
-            lineStart,
-            lineEnd,
-            line
-        };
-    }
-
-    wrapText(before = '', after = '', indent?: number, insertNewline = false) {
-        const { selectionStart, selectionEnd } = this.stackEditor.editorSvc.clEditor.selectionMgr;
-        const text = this.stackEditor.editorSvc.clEditor.getContent() as string;
-
-        const { lineStart, lineEnd, line } = selectionStart == selectionEnd ? this.getLine(text, selectionStart) : {} as any;
-
-        const startIndex = lineStart ?? Math.min(selectionStart, selectionEnd);
-        const endIndex   = lineEnd ?? Math.max(selectionStart, selectionEnd);
-
-        const selectionText = line ?? text.slice(startIndex, endIndex);
-        let preString = text.slice(0, startIndex);
-        let postString = text.slice(endIndex);
-
-        // Check if this is a duplicate invocation that should remove the decoration effect
-        if (preString.endsWith(before) && postString.startsWith(after)) {
-            // Strip out the symbols
-            preString = preString.slice(0, preString.length - before.length);
-            postString = postString.slice(after.length);
-
-            // Move the selection to what it will be after removing the text
-            this.stackEditor.editorSvc.clEditor.selectionMgr.selectionStart += before.length;
-            this.stackEditor.editorSvc.clEditor.selectionMgr.selectionEnd += before.length;
-
-            // Clear before and after to re-use the result logic.
-            before = '';
-            after = '';
-            indent = null;
-            insertNewline = false;
-        }
-        else {
-            this.stackEditor.editorSvc.clEditor.selectionMgr.selectionStart += before.length;
-            this.stackEditor.editorSvc.clEditor.selectionMgr.selectionEnd += before.length;
-        }
-
-        let updatedSelection = selectionText;
-
-        if (indent) {
-            // Indent all lines in the selection
-            updatedSelection = selectionText.split('\n').map(l => ''.padStart(indent, ' ') + l).join('\n');
-        }
-
-        if (insertNewline && before) {
-            // Insert a newline at the start if we're in the middle of a selection.
-            if (!preString.endsWith('\n'))
-                before = "\n" + before;
-        }
-
-        const patchedText =
-            preString +
-            before +
-            updatedSelection +
-            after +
-            postString;
-
-        this.stackEditor.editorSvc.clEditor.setContent(patchedText);
-        this.stackEditor.editorSvc.clEditor.selectionMgr.setSelectionStartEnd(startIndex + before.length, endIndex + after.length);
-    }
-
-    /**
-     * Replace the current selection with the given text.
-     */
-    replaceText(text: string) {
-        const { selectionStart, selectionEnd } = this.stackEditor.editorSvc.clEditor.selectionMgr;
-        let content = this.stackEditor.editorSvc.clEditor.getContent() as string;
-
-        const startIndex = Math.min(selectionStart, selectionEnd);
-        const endIndex = Math.max(selectionStart, selectionEnd);
-
-        const preString = content.slice(0, startIndex);
-        const postString = content.slice(endIndex);
-
-        const patchedText =
-            preString +
-            text +
-            postString;
-
-        this.stackEditor.editorSvc.clEditor.setContent(patchedText);
-    }
-
     injectHeading(size: number) {
         const headerString = ''.padStart(size, '#') + ' ';
-        this.wrapText(headerString, '', null, true);
+        this.wrapSelection(headerString, '', null, true);
     }
 
     onUploadImage() {
         // this.stackEditor.onImageUpload.next('123');
     }
-
 }

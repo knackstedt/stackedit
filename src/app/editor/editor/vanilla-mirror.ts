@@ -591,4 +591,104 @@ export class VanillaMirror extends EventEmittingClass {
         }
         this.adjustCursorPosition();
     }
+
+    /**
+     * Return the line at a given index
+     */
+    private getLine(text: string, index: number) {
+        const lines = text.split(/[\r\n]/g);
+        const number = text.slice(0, index).match(/[\r\n]/g).length;
+        const line = lines[number];
+        const lineStart = lines.slice(0, number).map(l => l.length).reduce((a, b) => a + b, 0) + (number);
+        const lineEnd = lineStart + line.length;
+
+        return {
+            lineStart,
+            lineEnd,
+            line
+        };
+    }
+
+    /**
+     * Wrap the current selection in text
+     *
+     */
+    wrapSelection(before = '', after = '', indent?: number, insertNewline = false) {
+        const { selectionStart, selectionEnd } = this.selectionMgr;
+        const text = this.getContent() as string;
+
+        const { lineStart, lineEnd, line } = selectionStart == selectionEnd ? this.getLine(text, selectionStart) : {} as any;
+
+        const startIndex = lineStart ?? Math.min(selectionStart, selectionEnd);
+        const endIndex = lineEnd ?? Math.max(selectionStart, selectionEnd);
+
+        const selectionText = line ?? text.slice(startIndex, endIndex);
+        let preString = text.slice(0, startIndex);
+        let postString = text.slice(endIndex);
+
+        // Check if this is a duplicate invocation that should remove the decoration effect
+        if (preString.endsWith(before) && postString.startsWith(after)) {
+            // Strip out the symbols
+            preString = preString.slice(0, preString.length - before.length);
+            postString = postString.slice(after.length);
+
+            // Move the selection to what it will be after removing the text
+            this.selectionMgr.selectionStart += before.length;
+            this.selectionMgr.selectionEnd += before.length;
+
+            // Clear before and after to re-use the result logic.
+            before = '';
+            after = '';
+            indent = null;
+            insertNewline = false;
+        }
+        else {
+            this.selectionMgr.selectionStart += before.length;
+            this.selectionMgr.selectionEnd += before.length;
+        }
+
+        let updatedSelection = selectionText;
+
+        if (indent) {
+            // Indent all lines in the selection
+            updatedSelection = selectionText.split('\n').map(l => ''.padStart(indent, ' ') + l).join('\n');
+        }
+
+        if (insertNewline && before) {
+            // Insert a newline at the start if we're in the middle of a selection.
+            if (!preString.endsWith('\n'))
+                before = "\n" + before;
+        }
+
+        const patchedText =
+            preString +
+            before +
+            updatedSelection +
+            after +
+            postString;
+
+        this.setContent(patchedText);
+        this.selectionMgr.setSelectionStartEnd(startIndex + before.length, endIndex + after.length);
+    }
+
+    /**
+     * Replace the current selection with the given text.
+     */
+    replaceSelection(text: string) {
+        const { selectionStart, selectionEnd } = this.selectionMgr;
+        let content = this.getContent() as string;
+
+        const startIndex = Math.min(selectionStart, selectionEnd);
+        const endIndex = Math.max(selectionStart, selectionEnd);
+
+        const preString = content.slice(0, startIndex);
+        const postString = content.slice(endIndex);
+
+        const patchedText =
+            preString +
+            text +
+            postString;
+
+        this.setContent(patchedText);
+    }
 }
