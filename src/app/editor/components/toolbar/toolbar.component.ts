@@ -25,8 +25,9 @@ import { StackEditorComponent } from '../../editor.component';
     standalone: true
 })
 export class ToolbarComponent {
+    get editor() { return this.stackEditor.editorSvc.clEditor }
     get wrapSelection() {
-        return this.stackEditor.editorSvc.clEditor.wrapSelection;
+        return this.editor.wrapSelection.bind(this.editor);
     }
 
     // 2D array of color hex codes that show up for the color picker.
@@ -102,7 +103,7 @@ export class ToolbarComponent {
     }
 
     insertLink(url, label) {
-        this.stackEditor.editorSvc.clEditor.replaceSelection(`[${label}](${url})`);
+        this.editor.replaceSelection(`[${label}](${url})`);
     }
 
     insertOrderedList() {
@@ -194,16 +195,44 @@ export class ToolbarComponent {
             //     ctrl: true
             // }).subscribe(this.insertComment.bind(this)),
             this.keyboard.onKeyCommand({
-                label: "Delete Line",
+                label: "Select Line",
                 key: "l",
                 ctrl: true
-            }).subscribe(this.insertComment.bind(this)),
+            }).subscribe(() => {
+                const text = this.editor.getContent();
+                const { selectionStart, selectionEnd } = this.editor.selectionMgr;
+
+                // select the current line
+                if (selectionStart == selectionEnd) {
+                    const line = this.editor.getLine(selectionStart, text);
+                    this.editor.selectionMgr.setSelection(line.lineStart, line.lineEnd);
+                }
+                // Expand the selection to the start of the first line, and the end of the last line
+                // If that is already the case, select the next line below the end.
+                else {
+                    const startLine = this.editor.getLine(selectionStart, text);
+                    const endLine = this.editor.getLine(selectionEnd, text);
+
+                    // Select the next line below the selection
+                    if (startLine.lineStart == selectionStart && endLine.lineEnd == selectionEnd) {
+                        const nextLine = this.editor.getLine(endLine.lineEnd+1, text);
+
+                        this.editor.selectionMgr.setSelection(startLine.lineStart, nextLine.lineEnd);
+                    }
+                    // Expand the selection to the start and end of the first and last lines.
+                    else {
+                        this.editor.selectionMgr.setSelection(startLine.lineStart, endLine.lineEnd);
+                    }
+                }
+            }),
             this.keyboard.onKeyCommand({
                 label: "Duplicate Current Line",
                 key: "d",
                 ctrl: true,
                 shift: true
-            }).subscribe(this.insertComment.bind(this)),
+            }).subscribe(() => {
+
+            }),
             this.keyboard.onKeyCommand({
                 label: "BREAKPOINT",
                 key: "pause"
