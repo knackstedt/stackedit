@@ -231,7 +231,39 @@ export class ToolbarComponent {
                 ctrl: true,
                 shift: true
             }).subscribe(() => {
+                const text = this.editor.getContent();
+                const { selectionStart, selectionEnd } = this.editor.selectionMgr;
 
+                // Duplicate the current line
+                if (selectionStart == selectionEnd) {
+                    const line = this.editor.getLine(selectionStart, text);
+                    const copy = '\n' + line.line;
+                    const patched = text.slice(0, line.lineEnd) + copy + text.slice(line.lineEnd);
+
+                    this.editor.setContent(patched);
+
+                    // Run this on the next tick to give the browser time to settle things
+                    // Observe an issue on duplicating content at the last line.
+                    setTimeout(() => {
+                        this.editor.setSelection(selectionStart + copy.length, selectionEnd + copy.length);
+                    })
+                }
+                // Expand the selection to the start of the first line, and the end of the last line
+                // Duplicate the contents through the start and the end.
+                else {
+                    const startLine = this.editor.getLine(selectionStart, text);
+                    const endLine = this.editor.getLine(selectionEnd, text);
+                    const copyLines = '\n' + text.slice(startLine.lineStart, endLine.lineEnd);
+                    const patched = text.slice(0, endLine.lineEnd) + copyLines + text.slice(endLine.lineEnd);
+
+                    this.editor.setContent(patched);
+
+                    // Run this on the next tick to give the browser time to settle things
+                    // Observe an issue on duplicating content at the last line.
+                    setTimeout(() => {
+                        this.editor.setSelection(selectionStart + copyLines.length, selectionEnd + copyLines.length);
+                    })
+                }
             }),
             this.keyboard.onKeyCommand({
                 label: "BREAKPOINT",
