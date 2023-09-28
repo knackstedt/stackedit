@@ -324,7 +324,7 @@ export class VanillaMirror extends EventEmittingClass {
     }, 10);
 
     // Detect editor changes
-    setSelection(start, end) {
+    setSelection(start: number, end: number) {
         this.selectionMgr.setSelectionStartEnd(start, end == null ? start : end);
         this.selectionMgr.updateCursorCoordinates();
     }
