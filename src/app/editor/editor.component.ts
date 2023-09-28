@@ -133,6 +133,7 @@ export class StackEditorComponent {
 
     editorSvc: Editor;
     public options: StackEditConfig = {};
+    public showTOC = false;
 
     constructor(
         private readonly viewContainer: ViewContainerRef,

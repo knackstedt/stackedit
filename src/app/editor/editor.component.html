@@ -26,8 +26,8 @@
     <!-- TODO: -->
     <div
         class="toc"
-        [style.display]="mode == 'view' ? 'none' : 'none'"
-        [style.width]="false ? '0px' : '240px'"
+        [style.--display]="mode == 'view' ? 'none' : 'none'"
+        [style.width]="!showTOC ? '0px' : '240px'"
     >
         <div class="toc__inner"></div>
     </div>
