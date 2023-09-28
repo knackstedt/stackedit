@@ -67,6 +67,7 @@ export class ToolbarComponent {
     cursorIsInBold = false;
     cursorIsInItalic = false;
     cursorIsInStrikethrough = false;
+    cursorIsInUnderline = false;
     cursorIsInBlockquote = false;
     cursorIsInLink = false;
     cursorIsInOrderedList = false;
@@ -91,7 +92,7 @@ export class ToolbarComponent {
     }
 
     italicizeText() {
-        this.wrapSelection("*", "*");
+        this.wrapSelection("_", "_");
     }
 
     strikethroughText() {
@@ -185,10 +186,24 @@ export class ToolbarComponent {
                 ctrl: true
             }).subscribe(this.boldText.bind(this)),
             this.keyboard.onKeyCommand({
+                label: "Bold",
+                key: "*",
+                ctrl: true
+            }).subscribe(() => this.wrapSelection("**", "**")),
+            this.keyboard.onKeyCommand({
                 label: "Italic",
                 key: "i",
                 ctrl: true
             }).subscribe(this.italicizeText.bind(this)),
+            this.keyboard.onKeyCommand({
+                label: "Bold",
+                key: "_",
+                ctrl: true
+            }).subscribe(this.italicizeText.bind(this)),
+            this.keyboard.onKeyCommand({
+                label: "Strikethrough",
+                key: "~"
+            }).subscribe(this.strikethroughText.bind(this)),
             // this.keyboard.onKeyCommand({
             //     label: "Select All",
             //     key: "/",
@@ -351,5 +366,9 @@ export class ToolbarComponent {
 
     onUploadImage() {
         // this.stackEditor.onImageUpload.next('123');
+    }
+
+    toggleTOC() {
+        this.stackEditor.showTOC = !this.stackEditor.showTOC;
     }
 }
