@@ -47,9 +47,9 @@ export const defaultKeystrokes = [
 
 
         let action;
-        if (evt.key.toLowerCase() == "z")
-            action = 'redo';
         if (evt.key.toLowerCase() == "y")
+            action = 'redo';
+        if (evt.key.toLowerCase() == "z")
             action = evt.shiftKey ? 'redo' : 'undo';
 
         if (action) {
@@ -57,6 +57,40 @@ export const defaultKeystrokes = [
             setTimeout(() => editor.undoMgr[action](), 10);
             return true;
         }
+        return false;
+    }),
+
+    // Bracket matching  () {} []
+    new Keystroke((evt, state, editor) => {
+        if ((!evt.ctrlKey && !evt.metaKey) || evt.altKey) {
+            return false;
+        }
+
+        const isInPrism = editor.selectionMgr;
+
+        // let action;
+        let boundChars: [string, string];
+
+        switch(evt.key) {
+            case ("("): boundChars = ["(", ")"]; break;
+            case ("{"): boundChars = ["{", "}"]; break;
+            case ("["): boundChars = ["[", "]"]; break;
+            case ("<"): boundChars = ["<", ">"]; break;
+        }
+
+        if (boundChars) {
+
+        }
+
+        //     action = 'redo';
+        // if (evt.key.toLowerCase() == "y")
+        //     action = evt.shiftKey ? 'redo' : 'undo';
+
+        // if (action) {
+        //     evt.preventDefault();
+        //     setTimeout(() => editor.undoMgr[action](), 10);
+        //     return true;
+        // }
         return false;
     }),
 
