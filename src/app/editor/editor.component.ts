@@ -148,7 +148,7 @@ export class StackEditorComponent {
     }
 
     ngAfterViewInit() {
-        const editorElt = this.$el.querySelector('.editor__inner') as HTMLElement;
+        const editorElt = this.$el.querySelector('.editor') as HTMLElement;
         const previewElt = this.$el.querySelector('.preview__inner-2') as HTMLElement;
         const tocElt = this.$el.querySelector('.toc__inner') as HTMLElement;
         this.editorSvc = new Editor(this, editorElt, previewElt, tocElt);

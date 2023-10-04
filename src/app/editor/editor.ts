@@ -106,8 +106,25 @@ export class Editor extends EventEmittingClass {
                 this.restoreScrollPosition(this.getScrollPosition(this.editorIsActive ? editorElt : previewElt));
             };
 
-            editorElt.parentNode.addEventListener('scroll', onScroll);
-            previewElt.parentNode.addEventListener('scroll', onScroll);
+            let scrollMode: "editor" | "preview";
+            let lastScrollEvent = 0;
+            const scrollDebounceTime = 25;
+            editorElt.addEventListener('scroll', evt => {
+                if (scrollMode == "editor" || lastScrollEvent + scrollDebounceTime < Date.now()) {
+                    scrollMode = "editor";
+                    lastScrollEvent = Date.now();
+                    // console.log("A");
+                    onScroll(evt);
+                }
+            });
+            previewElt.parentNode.addEventListener('scroll', evt => {
+                if (scrollMode == "preview" || lastScrollEvent + scrollDebounceTime < Date.now()) {
+                    scrollMode = "preview";
+                    lastScrollEvent = Date.now();
+                    // console.log("B");
+                    onScroll(evt);
+                }
+            });
 
             const refreshPreview = allowDebounce(() => {
                 this.convert();
@@ -365,7 +382,7 @@ export class Editor extends EventEmittingClass {
             ? 'editorDimension'
             : 'previewDimension';
 
-        const { scrollTop } = elt.parentNode;
+        const { scrollTop } = dimensionKey == "editorDimension" ? elt : elt.parentNode;
 
         let result;
 
@@ -398,7 +415,7 @@ export class Editor extends EventEmittingClass {
             const editorScrollTop = sectionDesc.editorDimension.startOffset +
                 (sectionDesc.editorDimension.height * scrollPosition.posInSection);
 
-            (this.editorElt.parentNode as HTMLElement).scrollTop = Math.floor(editorScrollTop);
+            (this.editorElt as HTMLElement).scrollTop = Math.floor(editorScrollTop);
 
             const previewScrollTop = sectionDesc.previewDimension.startOffset +
                 (sectionDesc.previewDimension.height * scrollPosition.posInSection);

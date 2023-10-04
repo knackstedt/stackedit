@@ -20,7 +20,7 @@ export class VanillaMirror extends EventEmittingClass {
     $keystrokes = [];
     value = '';
     lastTextContent = '';
-    get $contentElt() { return this.contentElt };
+    get $contentElt() { return this.editorElt };
     get $scrollElt() { return this.scrollElt };
 
     watcher = new Watcher(this, this.checkContentChange.bind(this));
@@ -49,29 +49,31 @@ export class VanillaMirror extends EventEmittingClass {
 
     constructor(
         public ngEditor: StackEditorComponent,
-        private contentElt: HTMLElement,
+        private editorElt: HTMLElement,
         private scrollEltOpt: HTMLElement
     ) {
         super();
+
         window['editor'] = this;
 
-        this.scrollElt = scrollEltOpt || contentElt;
+        this.scrollElt = scrollEltOpt || editorElt;
 
-        contentElt.setAttribute('tabindex', '0'); // To have focus even when disabled
+        editorElt.setAttribute('tabindex', '0'); // To have focus even when disabled
         this.toggleEditable(true);
 
         // Disable escaping
         this.turndownService.escape = str => str;
 
         // This handles 'Enter' and keyboard arrow events.
-        contentElt.addEventListener('keydown', this.keydownHandler((evt) => this.onKeyDown(evt)));
-        contentElt.addEventListener('paste', (evt) => this.onPaste(evt));
+        editorElt.addEventListener('keydown', this.keydownHandler((evt) => this.onKeyDown(evt)));
+        editorElt.addEventListener('paste', (evt) => this.onPaste(evt));
 
-        contentElt.addEventListener('focus', () => this.$trigger('focus'));
-        contentElt.addEventListener('blur', () => this.$trigger('blur'));
+        editorElt.addEventListener('focus', () => this.$trigger('focus'));
+        editorElt.addEventListener('blur', () => this.$trigger('blur'));
 
         // Mouseup can happen outside the editor element
-        contentElt.addEventListener('mouseup', this.onMouseUp.bind(this));
+        editorElt.addEventListener('mouseup', this.onMouseUp.bind(this));
+        // document.addEventListener("selectionchange", this.onSelectionChange.bind(this))
 
         // Resize provokes cursor coordinate changes
         window.addEventListener('resize', this.onWindowResize.bind(this));
@@ -82,8 +84,8 @@ export class VanillaMirror extends EventEmittingClass {
     }
 
     toggleEditable(isEditable) {
-        this.contentElt.contentEditable = isEditable == null ? !this.contentElt.contentEditable : isEditable;
-        this.contentElt.spellcheck = false;
+        this.editorElt.contentEditable = isEditable == null ? !this.editorElt.contentEditable : isEditable;
+        this.editorElt.spellcheck = false;
     }
 
     onMouseUp(evt: MouseEvent) {
@@ -163,7 +165,7 @@ export class VanillaMirror extends EventEmittingClass {
     }
 
     tryDestroy() {
-        if (document.contains(this.contentElt)) {
+        if (document.contains(this.editorElt)) {
             return false;
         }
 
@@ -214,7 +216,7 @@ export class VanillaMirror extends EventEmittingClass {
             return null;
         };
 
-        return recursivelyFindNode(this.contentElt);
+        return recursivelyFindNode(this.editorElt);
     }
 
     getContent(): string {
@@ -242,7 +244,7 @@ export class VanillaMirror extends EventEmittingClass {
             }
         }
 
-        const text = recursivelyCollectChildrenText(this.contentElt);
+        const text = recursivelyCollectChildrenText(this.editorElt);
 
 
         // Markdown-it sanitization (Mac/DOS to Unix)
@@ -264,7 +266,7 @@ export class VanillaMirror extends EventEmittingClass {
 
             const markModifiedSection = (node) => {
                 let currentNode = node;
-                while (currentNode && currentNode !== this.contentElt) {
+                while (currentNode && currentNode !== this.editorElt) {
                     if (currentNode.section) {
                         const array = currentNode.parentNode ? modifiedSections : removedSections;
                         if (array.indexOf(currentNode.section) === -1) {
@@ -451,7 +453,7 @@ export class VanillaMirror extends EventEmittingClass {
 
     focus() {
         this.selectionMgr.restoreSelection();
-        this.contentElt.focus();
+        this.editorElt.focus();
     }
 
     addMarker(marker) {
