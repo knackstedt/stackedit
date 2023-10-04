@@ -92,6 +92,11 @@
         }
     }
 
+    .editor__inner {
+        padding: 10px 24px 38px;
+        width: 100%;
+    }
+
     .prism {
         background-color: #f0f0f0;
     }
@@ -100,14 +105,6 @@
     }
 }
 
-.editor__inner {
-    padding: 10px 64px 38px;
-    width: 100%;
-
-    // &.showLineNumbers {
-    //     padding-left: 64px;
-    // }
-}
 
 .preview {
     background-color: var(--preview-background-color);
@@ -827,9 +824,8 @@
         right: 0
     }
 
-    .editor {
+    .editor.linenumbers {
         .lf {
-
             &::before {
                 content: attr(data-linenumber);
                 position: absolute;
@@ -838,6 +834,9 @@
                 // active #ccc
                 font-family: var(--stackedit-font-family-mono);
             }
+        }
+        .editor__inner {
+            padding: 10px 24px 38px 64px;
         }
     }
 }

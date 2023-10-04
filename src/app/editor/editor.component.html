@@ -3,6 +3,7 @@
 <div class="contents">
     <div
         class="editor"
+        [class.linenumbers]="showLineNumbers"
         [style.flex]="'1 1 50%'"
         [style.display]="mode == 'view' ? 'none' : 'flex'"
         (click)="editorSvc.clEditor.focus()"
