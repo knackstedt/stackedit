@@ -1,29 +1,21 @@
-import { EventEmittingClass, isWebkit } from './utils';
+import { EventEmittingClass, debounce } from './utils';
 import { VanillaMirror } from './vanilla-mirror';
-
-const styleElts = [];
-
-// TODO: this is dumb
-function createStyleSheet(document) {
-    const styleElt = document.createElement('style');
-    styleElt.type = 'text/css';
-    styleElt.innerHTML = '.cledit-section * { display: inline; } .cledit-section .injected div {display: block}';
-    document.head.appendChild(styleElt);
-    styleElts.push(styleElt);
-}
 
 class Section {
     text;
-    data;
-    elt;
+    data: "list" | "main" | "blockquote";
+    elt: HTMLDivElement;
 
-    constructor(text) {
+    // AFAIK nothing ever sets this
+    forceHighlighting = false;
+
+    constructor(text: string | any) {
         this.text = text.text === undefined ? text : text.text;
         this.data = text.data;
     }
-    setElement(elt) {
+    setElement(elt: HTMLDivElement) {
         this.elt = elt;
-        elt.section = this;
+        elt['section'] = this;
     }
 }
 
@@ -33,59 +25,57 @@ export class Highlighter extends EventEmittingClass {
     get contentElt() { return this.editor.$contentElt };
     cancelComposition: any;
 
-    sectionList = [];
-    insertBeforeSection;
-    useBr = isWebkit;
+    sectionList: Section[] = [];
+    insertBeforeSection: Section;
 
     readonly trailingNodeTag = 'div';
-    readonly hiddenLfInnerHtml = '<br><span class="hd-lf" style="display: none">\n</span>';
-
-    readonly lfHtml = `<span class="lf">${this.useBr ? this.hiddenLfInnerHtml : '\n'}</span>`;
-
+    readonly lfHtml = `<span class="lf">\n</span>`;
 
     constructor(private editor: VanillaMirror) {
         super();
-
-        if (!styleElts.find(styleElt => document.head.contains(styleElt))) {
-            createStyleSheet(document);
-        }
     }
 
-    fixContent = (modifiedSections, removedSections, noContentFix) => {
+    fixContent(modifiedSections: Section[], removedSections: Section[], noContentFix: boolean) {
         modifiedSections.forEach((section) => {
             section.forceHighlighting = true;
             if (!noContentFix) {
-                if (this.useBr) {
-                    [...section.elt.getElementsByClassName('hd-lf')]
-                        .forEach(lfElt => lfElt.parentNode.removeChild(lfElt));
-                    [...section.elt.getElementsByTagName('br')]
-                        .forEach(brElt => brElt.parentNode.replaceChild(document.createTextNode('\n'), brElt));
-                }
+                // if (isWebkit) {
+                //     [...section.elt.getElementsByClassName('hd-lf')]
+                //         .forEach(lfElt => lfElt.parentNode.removeChild(lfElt));
+                //     [...section.elt.getElementsByTagName('br')]
+                //         .forEach(brElt => brElt.parentNode.replaceChild(document.createTextNode('\n'), brElt));
+                // }
                 if (section.elt.textContent.slice(-1) !== '\n') {
                     section.elt.appendChild(document.createTextNode('\n'));
                 }
             }
         });
-    };
+    }
 
     addTrailingNode() {
         this.trailingNode = document.createElement(this.trailingNodeTag);
         this.contentElt.appendChild(this.trailingNode);
     };
 
-    parseSections(content, isInit = false) {
+    calcLineNumbers = debounce(() => {
+        [...(this.editor.$contentElt?.querySelectorAll(".lf") || []) as any].forEach((e, i) => {
+            e.setAttribute("data-linenumber", i+1);
+        });
+    }, 25)
+
+    parseSections(content: string, isInit = false) {
         if (this.isComposing && !this.cancelComposition) {
             return this.sectionList;
         }
 
         this.cancelComposition = false;
-        const newSectionList = (this.editor.options.sectionParser
+        const newSectionList: Section[] = (this.editor.options.sectionParser
             ? this.editor.options.sectionParser(content)
             : [content])
             .map(sectionText => new Section(sectionText));
 
-        let modifiedSections = [];
-        let sectionsToRemove = [];
+        let modifiedSections: Section[] = [];
+        let sectionsToRemove: Section[] = [];
         this.insertBeforeSection = undefined;
 
         if (isInit) {
@@ -141,13 +131,16 @@ export class Highlighter extends EventEmittingClass {
             const leftSections = this.sectionList.slice(0, leftIndex);
             modifiedSections = newSectionList.slice(leftIndex, newSectionList.length + rightIndex);
             const rightSections = this.sectionList.slice(this.sectionList.length + rightIndex, this.sectionList.length);
-            [this.insertBeforeSection] = rightSections;
+            this.insertBeforeSection = rightSections?.[0];
             sectionsToRemove = this.sectionList.slice(leftIndex, this.sectionList.length + rightIndex);
             this.sectionList = leftSections.concat(modifiedSections).concat(rightSections);
         }
 
-        const highlight = (section) => {
-            const html = this.editor.options.sectionHighlighter(section).replace(/\n/g, this.lfHtml);
+        // TODO: All of the rendering logic for the editor should be unified.
+        const highlight = (section: Section) => {
+            const initialMarkup = this.editor.options.sectionHighlighter(section) as string;
+            const html = initialMarkup.replace(/\n/g, this.lfHtml);
+
             const sectionElt = document.createElement('div');
             sectionElt.className = 'cledit-section';
             sectionElt.innerHTML = html;
@@ -176,7 +169,7 @@ export class Highlighter extends EventEmittingClass {
                     this.contentElt.removeChild(section.elt);
                 }
                 // To detect sections that come back with built-in undo
-                section.elt.section = undefined;
+                section.elt['section'] = undefined;
             });
 
             if (this.insertBeforeSection !== undefined) {
@@ -203,6 +196,8 @@ export class Highlighter extends EventEmittingClass {
                 this.editor.selectionMgr.restoreSelection();
                 this.editor.selectionMgr.updateCursorCoordinates();
             }
+
+            this.calcLineNumbers()
         });
 
         return this.sectionList;
