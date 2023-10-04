@@ -365,6 +365,15 @@ export default (Prism) => {
         [ "MUSICAL SYMBOL END PHRASE",    0x1D17A ],
     ]
 
+    // Make indentation act like it's monospace chars
+    Prism.languages.insertBefore('markdown', 'comment', {
+        "indent-space": {
+            pattern: /(^|\n)[ ]+/,
+            greedy: true,
+            lookbehind: true
+        }
+    });
+
     Prism.languages.insertBefore('markdown', 'comment',
         invisibleChars.map(([name, code]) => {
             const className = name.replace(/ /g, '-').toLowerCase();

@@ -517,25 +517,10 @@ export class Editor extends EventEmittingClass {
 
         // This is the CL Editor for the text input
         const options = {
-            sectionHighlighter: section => {
+            sectionHighlighter: (section) => {
+                const highlighted = Prism.highlight(section.text, Prism.languages.markdown, 'markdown');
 
-                // TODO: Allow pasting code blocks with native rendering
-                // Render pasted code fence
-                // if (section.text.match(/\`\`\`<injected>/)) {
-                //     const text = section.text.replace(/\`\`\`<injected>/, '')
-                //         .replace('\`\`\`', '');
-                //     const source = text.replace(/[\r\n]/gm, '\\n').replace(/"/gm, '\\"');
-                //     const d = document.createElement('div');
-                //     d.innerHTML = text;
-                //     d.classList.add("injected");
-                //     d.setAttribute("data-source", source);
-                //     return d.outerHTML;
-                // }
-
-                // const lang = section.text.match(/\`\`\`(?<lang>[a-z]+)\n/i)?.groups?.lang;
-
-                const res = Prism.highlight(section.text, Prism.languages.markdown, 'markdown');
-                return `<div class="prism language-markdown">${res}</div>`;
+                return `<div class="prism language-markdown">${highlighted}</div>`;
 
             },
             sectionParser: (text) => {
