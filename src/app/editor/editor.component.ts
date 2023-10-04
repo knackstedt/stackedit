@@ -110,6 +110,8 @@ export class StackEditorComponent {
      */
     @Input() mode: "edit" | "view" = "edit";
 
+    @Input() showLineNumbers = false;
+
     /**
      * Initial value of the editor.
      * 2-way binding capable.

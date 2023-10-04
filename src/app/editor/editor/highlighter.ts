@@ -197,7 +197,8 @@ export class Highlighter extends EventEmittingClass {
                 this.editor.selectionMgr.updateCursorCoordinates();
             }
 
-            this.calcLineNumbers()
+            if (this.editor.ngEditor.showLineNumbers)
+                this.calcLineNumbers();
         });
 
         return this.sectionList;

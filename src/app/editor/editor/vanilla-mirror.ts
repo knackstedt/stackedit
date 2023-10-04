@@ -48,7 +48,7 @@ export class VanillaMirror extends EventEmittingClass {
     private scrollElt: HTMLElement
 
     constructor(
-        private ngEditor: StackEditorComponent,
+        public ngEditor: StackEditorComponent,
         private contentElt: HTMLElement,
         private scrollEltOpt: HTMLElement
     ) {
@@ -130,7 +130,10 @@ export class VanillaMirror extends EventEmittingClass {
 
         const options = {
             sectionHighlighter(section) {
-                return section.text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\u00a0/g, ' ');
+                return section.text
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/\u00a0/g, ' ');
             },
             sectionDelimiter: '',
             ...opts
