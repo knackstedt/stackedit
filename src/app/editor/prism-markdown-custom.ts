@@ -197,7 +197,6 @@ export default (Prism) => {
                  * format of a regex exec result.
                  */
                 exec: (str: string) => {
-                    console.log("ASD")
                     const root = scanSpan(str);
                     const match = root.children[0];
 
@@ -295,14 +294,87 @@ export default (Prism) => {
         }
     });
 
-
     Prism.languages.insertBefore('markdown', 'comment', {
         'injection-fence': {
             pattern: /\`\`\`<injected>(?:.+?)<\/injected>\s*\`\`\`/s,
             greedy: true,
             lookbehind: true
-        }
+        },
     });
+
+    /**
+     * All known whitespace characters are matched so when
+     * whitespace visibility is enabled we can visualize them
+     *
+     * ? Is this problematic for non-latin languages
+     */
+    const invisibleChars: [string, number][] = [
+        [ "CHARACTER TABULATION",         0x0009 ],
+        [ "SPACE",                        0x0020 ],
+        [ "NO-BREAK SPACE",               0x00A0 ],
+        [ "SOFT HYPHEN",                  0x00AD ],
+        [ "COMBINING GRAPHEME JOINER",    0x034F ],
+        [ "ARABIC LETTER MARK",           0x061C ],
+        [ "HANGUL CHOSEONG FILLER",       0x115F ],
+        [ "HANGUL JUNGSEONG FILLER",      0x1160 ],
+        [ "KHMER VOWEL INHERENT AQ",      0x17B4 ],
+        [ "KHMER VOWEL INHERENT AA",      0x17B5 ],
+        [ "MONGOLIAN VOWEL SEPARATOR",    0x180E ],
+        [ "EN QUAD",                      0x2000 ],
+        [ "EM QUAD",                      0x2001 ],
+        [ "EN SPACE",                     0x2002 ],
+        [ "EM SPACE",                     0x2003 ],
+        [ "THREE-PER-EM SPACE",           0x2004 ],
+        [ "FOUR-PER-EM SPACE",            0x2005 ],
+        [ "SIX-PER-EM SPACE",             0x2006 ],
+        [ "FIGURE SPACE",                 0x2007 ],
+        [ "PUNCTUATION SPACE",            0x2008 ],
+        [ "THIN SPACE",                   0x2009 ],
+        [ "HAIR SPACE",                   0x200A ],
+        [ "ZERO WIDTH SPACE",             0x200B ],
+        [ "ZERO WIDTH NON-JOINER",        0x200C ],
+        [ "ZERO WIDTH JOINER",            0x200D ],
+        [ "LEFT-TO-RIGHT MARK",           0x200E ],
+        [ "RIGHT-TO-LEFT MARK",           0x200F ],
+        [ "NARROW NO-BREAK SPACE",        0x202F ],
+        [ "MEDIUM MATHEMATICAL SPACE",    0x205F ],
+        [ "WORD JOINER",                  0x2060 ],
+        [ "FUNCTION APPLICATION",         0x2061 ],
+        [ "INVISIBLE TIMES",              0x2062 ],
+        [ "INVISIBLE SEPARATOR",          0x2063 ],
+        [ "INVISIBLE PLUS",               0x2064 ],
+        [ "INHIBIT SYMMETRIC SWAPPING",   0x206A ],
+        [ "ACTIVATE SYMMETRIC SWAPPING",  0x206B ],
+        [ "INHIBIT ARABIC FORM SHAPING",  0x206C ],
+        [ "ACTIVATE ARABIC FORM SHAPING", 0x206D ],
+        [ "NATIONAL DIGIT SHAPES",        0x206E ],
+        [ "NOMINAL DIGIT SHAPES",         0x206F ],
+        [ "IDEOGRAPHIC SPACE",            0x3000 ],
+        [ "BRAILLE PATTERN BLANK",        0x2800 ],
+        [ "HANGUL FILLER",                0x3164 ],
+        [ "ZERO WIDTH NO-BREAK SPACE",    0xFEFF ],
+        [ "HALFWIDTH HANGUL FILLER",      0xFFA0 ],
+        [ "MUSICAL SYMBOL NULL NOTEHEAD", 0x1D159 ],
+        [ "MUSICAL SYMBOL BEGIN BEAM",    0x1D173 ],
+        [ "MUSICAL SYMBOL END BEAM",      0x1D174 ],
+        [ "MUSICAL SYMBOL BEGIN TIE",     0x1D175 ],
+        [ "MUSICAL SYMBOL END TIE",       0x1D176 ],
+        [ "MUSICAL SYMBOL BEGIN SLUR",    0x1D177 ],
+        [ "MUSICAL SYMBOL END SLUR",      0x1D178 ],
+        [ "MUSICAL SYMBOL BEGIN PHRASE",  0x1D179 ],
+        [ "MUSICAL SYMBOL END PHRASE",    0x1D17A ],
+    ]
+
+    Prism.languages.insertBefore('markdown', 'comment',
+        invisibleChars.map(([name, code]) => {
+            const className = name.replace(/ /g, '-').toLowerCase();
+            return {
+                [className]: {
+                    pattern: new RegExp(`\\u\{${code.toString(16)}\}`, 'u'),
+                }
+            };
+        })
+        .reduce((a, b) => ({ ...a, ...b }), {}));
 
     Prism.hooks.add('wrap', function (env) {
         // Render a custom img element

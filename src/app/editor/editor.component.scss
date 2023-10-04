@@ -522,12 +522,6 @@
             line-height: 1.33
         }
 
-        .tag .attr-name,
-        .tag .attr-value,
-        .tag .punctuation {
-            font-weight: 400
-        }
-
         .entity {
             color: var(--text-color);
             font-style: italic
@@ -959,6 +953,11 @@
     .token.pre.gfm .token.bold,
     .token.pre.gfm .token.important {
         font-weight: 500
+    }
+
+
+    .token.space {
+        letter-spacing: .45em;
     }
 
     .light {
