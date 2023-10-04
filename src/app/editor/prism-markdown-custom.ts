@@ -1,7 +1,104 @@
+const scanSpan = (text: string) => {
+    // TODO: preprocess inline span syntax highlighting
+    // <span style="">{...}</span>
+    let spanDepth = 0;
+    type treeNode = {
+        parent: Omit<treeNode, 'parent'>,
+        children: treeNode[],
+        depth: number,
+        nodeAttributes: {
+            [key: string]: string;
+        },
+
+        /**
+         * The index of the opening `<` in the span tag
+         * e.g.
+         * foobar <span color="">...</span>
+         *        ^
+         */
+        outerStartIndex: number,
+        /**
+         * The index of the first character of content in the span tag
+         * e.g.
+         * foobar <span color="">...</span>
+         *                       ^
+         */
+        innerStartIndex: number,
+        /**
+         * The index of the last character inside of the span tag
+         * e.g.
+         * foobar <span color="">...</span>
+         *                         ^
+         */
+        innerEndIndex: number,
+        /**
+         * The index of the final terminating '>' of the span tag.
+         * e.g.
+         * foobar <span color="">...</span>
+         *                                ^
+         */
+        outerEndIndex: number,
+    };
+
+    const rootNode = {
+        depth: 0,
+        children: [] as treeNode[],
+        outerStartIndex: 0,
+        innerStartIndex: 0,
+        innerEndIndex: text.length,
+        outerEndIndex: text.length
+    };
+    let spanTree: treeNode = rootNode as any;
+
+    for (let i = 0; i < text.length; i++) {
+        // Only do semantic checking when an opening angle bracket is encountered
+        if (text[i] != '<') continue;
+
+        const chunk = text.slice(i);
+
+        // Encountered the start of a node
+        if (chunk.match(/^<\s*?span\s*?style=/)) {
+            spanDepth++;
+
+            const tagMatch = chunk.match(/^<\s*?span([\s]*?style\s*?=\s*?(?<style>"[^"]+"|'[']+'))\s*?[^>]*?>/);
+
+            const newItem: treeNode = {
+                children: [],
+                parent: spanTree,
+                depth: spanDepth,
+                outerStartIndex: i,
+                innerStartIndex: i + tagMatch[0]?.length,
+                innerEndIndex: -1,
+                outerEndIndex: -1,
+                nodeAttributes: tagMatch.groups
+            };
+
+            spanTree.children.push(newItem);
+            spanTree = newItem;
+        }
+        // Navigate up the tree by one level
+        else if (chunk.match(/^<\s*?\/\s*?span\s*?>/)) {
+            spanDepth--;
+
+            // This scenario can happen when there are more
+            // closing span tags than there should be
+            if (!spanTree.parent || spanDepth < 0) {
+                break; // give up -- bad input
+            }
+
+            spanTree.innerEndIndex = i;
+            spanTree.outerEndIndex = i + chunk.match(/^<\s*?\/\s*?span\s*?>/)[0].length;
+
+            spanTree = spanTree.parent as any;
+        }
+    }
+    return rootNode;
+}
+
 export default (Prism) => {
     Prism.languages.insertBefore('markdown', 'title', {
         'h6': {
-            pattern: /^######[ \t]?.+$/gm,
+            pattern: /^######[ \t]*?.+$/gm,
             lookbehind: true,
             greedy: true,
             inside: {
@@ -9,7 +106,7 @@ export default (Prism) => {
             }
         },
         'h5': {
-            pattern: /^#####[ \t]?.+$/gm,
+            pattern: /^#####[ \t]*?.+$/gm,
             lookbehind: true,
             greedy: true,
             inside: {
@@ -17,7 +114,7 @@ export default (Prism) => {
             }
         },
         'h4': {
-            pattern: /^####[ \t]?.+$/gm,
+            pattern: /^####[ \t]*?.+$/gm,
             lookbehind: true,
             greedy: true,
             inside: {
@@ -25,7 +122,7 @@ export default (Prism) => {
             }
         },
         'h3': {
-            pattern: /^###[ \t]?.+$/gm,
+            pattern: /^###[ \t]*?.+$/gm,
             lookbehind: true,
             greedy: true,
             inside: {
@@ -33,7 +130,7 @@ export default (Prism) => {
             }
         },
         'h2': {
-            pattern: /^##[ \t]?.+$/gm,
+            pattern: /^##[ \t]*?.+$/gm,
             lookbehind: true,
             greedy: true,
             inside: {
@@ -41,7 +138,7 @@ export default (Prism) => {
             }
         },
         'h1': {
-            pattern: /^#[ \t]?.+$/gm,
+            pattern: /^#[ \t]*?.+$/gm,
             lookbehind: true,
             greedy: true,
             inside: {
@@ -84,15 +181,38 @@ export default (Prism) => {
         }
     });
 
-
     Prism.languages.insertBefore('markdown', 'comment', {
         'image-spinner': {
             pattern: /```img-spinner```/g,
             lookbehind: true,
             greedy: true
         },
-        'color': {
-            pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*?<\/span>/g,
+        'span-styled': {
+            // Regex match does not work as we need to match the closing </span> tag.
+            // pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*?<\/span>/g,
+            pattern: {
+                /**
+                 * Instead we implement the exec method that Prism ultimately calls.
+                 * Return `null` if there are no matches, or the first match in the
+                 * format of a regex exec result.
+                 */
+                exec: (str: string) => {
+                    console.log("ASD")
+                    const root = scanSpan(str);
+                    const match = root.children[0];
+
+                    if (!match)
+                        return null;
+
+                    const res = [match].map(m => str.slice(m.outerStartIndex, m.outerEndIndex));
+                    console.log(str, res, root);
+
+                    res['index'] = match?.outerStartIndex;
+                    res['input'] = str;
+                    res['groups'] = { foo: 'bar'};
+                    return res;
+                }
+            },
             lookbehind: true,
             greedy: false,
             inside: {
@@ -105,21 +225,25 @@ export default (Prism) => {
                     pattern: /(?<=<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">).+(?=<\/span>)/,
                     lookbehind: true,
                     greedy: true,
-                    inside: {
-                        url: Prism.languages.markdown.url,
-                        bold: Prism.languages.markdown.bold,
-                        italic: Prism.languages.markdown.italic,
-                        strike: Prism.languages.markdown.strike,
-                        'code-snippet': Prism.languages.markdown['code-snippet'],
-                        color: Prism.languages.markdown.color,
-                        img: Prism.languages.markdown.img,
-                        'img-url': Prism.languages.markdown['img-url']
-                    }
-                }
+                    inside: Prism.languages.markdown,
+                    // inside: {
+                    //     url: Prism.languages.markdown.url,
+                    //     bold: Prism.languages.markdown.bold,
+                    //     italic: Prism.languages.markdown.italic,
+                    //     strike: Prism.languages.markdown.strike,
+                    //     'code-snippet': Prism.languages.markdown['code-snippet'],
+                    //     'span-styled': Prism.languages.markdown.color,
+                    //     img: Prism.languages.markdown.img,
+                    //     'img-url': Prism.languages.markdown['img-url']
+                    // }
+                },
+                ['special-attr']: Prism.languages.markdown['special-attr'],
+                punctuation: Prism.languages.markdown.punctuation,
+                tag: Prism.languages.markdown.tag
             }
         }
     });
-    Prism.languages.markdown.color.inside.content.inside.color = Prism.languages.markdown.color;
+    Prism.languages.markdown['span-styled'].inside.content.inside.color = Prism.languages.markdown['span-styled'];
 
     // Add inside highlighting to the header levels
     for (let i = 1; i <= 6; i++) {
@@ -222,10 +346,23 @@ export default (Prism) => {
         //         env.content = label;
         //     }
         // }
-        if (env.type == 'color') {
-            const { color } = env.content.match(/#(?<color>[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})(?=[^A-Fa-f0-9])/)?.groups || {};
 
-            env.content = env.content.replace(/class=\"token content\"/, `class="token content" style="color: #${color}"`);
+
+        // if (env.type == 'color-hex') {
+        //     const color = env.content;//.match(/#(?<color>[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})(?=[^A-Fa-f0-9])/)?.groups || {};
+        //     console.log(color)
+        //     if (color)
+        //         env.attributes.style="color: " + color;
+        //         // env.content = env.content.replace(/class=\"token color-hex\"/, `class="token color-hex" style="color: #${color}"`);
+        // }
+        if (env.type == 'span-styled') {
+
+            const { style } = env.content
+                    .replace(/<[^>]+?>/g, '')
+                    .match(/style="(?<style>[^"]+?)"/)?.groups || {};
+
+            if (style)
+                env.attributes.style = style;
         }
     });
 }
