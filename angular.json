@@ -29,11 +29,6 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-                {
-                    "glob": "**/*",
-                    "input": "node_modules/@dotglitch/ngx-web-components/assets/lib/vs/",
-                    "output": "./lib/monaco/vs"
-                },
               "src/manifest.webmanifest"
             ],
             "styles": [
