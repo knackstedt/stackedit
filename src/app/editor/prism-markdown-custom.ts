@@ -204,7 +204,6 @@ export default (Prism) => {
                         return null;
 
                     const res = [match].map(m => str.slice(m.outerStartIndex, m.outerEndIndex));
-                    console.log(str, res, root);
 
                     res['index'] = match?.outerStartIndex;
                     res['input'] = str;
