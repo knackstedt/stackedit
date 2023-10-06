@@ -100,7 +100,7 @@ export const defaultKeystrokes = [
             return false;
         }
 
-        const strSplice = (str, i, remove, add = '') =>
+        const strSplice = (str: string, i: number, remove: number, add = '') =>
             str.slice(0, i) + add + str.slice(i + (+remove || 0));
 
         evt.preventDefault();
@@ -108,9 +108,9 @@ export const defaultKeystrokes = [
         const lf = state.before.lastIndexOf('\n') + 1;
         if (isInverse) {
             if (/\s/.test(state.before.charAt(lf))) {
-                state.before = strSplice(state.before, lf, 1);
+                state.before = strSplice(state.before, lf, 4);
             }
-            state.selection = state.selection.replace(/^[ \t]/gm, '');
+            state.selection = state.selection.replace(/^([ ]{4}|\t)/gm, '');
         }
         else if (state.selection) {
             state.before = strSplice(state.before, lf, 0, '    ');
