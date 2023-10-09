@@ -667,11 +667,13 @@ export class VanillaMirror extends EventEmittingClass {
     /**
      * Return the line at a given character index
      * This is _not_ the line number, but the index of the char in the whole string.
+     *
+     * This will default in the case of an empty modal.
      */
     getLine(charIndex: number, text = this.getContent()) {
         const lines = text.split(/[\r\n]/g);
-        const number = text.slice(0, charIndex).match(/[\r\n]/g).length;
-        const line = lines[number];
+        const number = text.slice(0, charIndex).match(/[\r\n]/g)?.length || 0;
+        const line = lines[number] || '';
         const lineStart = lines.slice(0, number).map(l => l.length).reduce((a, b) => a + b, 0) + (number);
         const lineEnd = lineStart + line.length;
 
