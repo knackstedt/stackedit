@@ -118,8 +118,6 @@ export class Editor extends EventEmittingClass {
                     // Take a chance to restore discussion offsets on undo/redo
                     newContent.text = this.currentPatchableText;
                 }
-                // TODO:
-                // store.dispatch('content/patchCurrent', newContent);
                 this.isChangePatch = false;
 
                 this.parsingCtx = {
@@ -186,6 +184,15 @@ export class Editor extends EventEmittingClass {
                     this.$trigger('selectionRange', this.selectionRange);
                 }
             }, 10);
+
+            window.addEventListener('resize', () => {
+                // Update the scroll sync heights
+                this.refreshPreview();
+                this.measureSectionDimensions(false, true);
+
+                // Trigger a scroll event
+                this.editorElt.scrollBy(0,0);
+            });
 
             this.clEditor.selectionMgr.on('selectionChanged', (start, end, selectionRange) => {
                 newSelectionRange = selectionRange;
@@ -473,6 +480,7 @@ export class Editor extends EventEmittingClass {
             }
             const posInSection = (scrollTop - sectionDesc[dimensionKey].startOffset) /
                 (sectionDesc[dimensionKey].height || 1);
+
             result = {
                 sectionIdx,
                 posInSection,
@@ -568,8 +576,11 @@ export class Editor extends EventEmittingClass {
     /**
      * Get the coordinates of an offset in the preview
      * @unused
+     *
+     * ! Was used by discussions
      */
-    getPreviewOffsetCoordinates(offset) {
+    getPreviewOffsetCoordinates(offset?: number) {
+        // TODO:
         const start = findContainer(this.previewElt, offset && offset - 1);
         const end = findContainer(this.previewElt, offset || offset + 1);
         const range = document.createRange();
@@ -577,6 +588,7 @@ export class Editor extends EventEmittingClass {
         range.setEnd(end.container, end.offsetInContainer);
         const rect = range.getBoundingClientRect();
         const contentRect = this.previewElt.getBoundingClientRect();
+
         return {
             top: Math.round((rect.top - contentRect.top) + this.previewElt.scrollTop),
             height: Math.round(rect.height),
