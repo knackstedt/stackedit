@@ -1,7 +1,14 @@
 import { isMac } from './utils';
 import { VanillaMirror } from './vanilla-mirror';
 
-export function Keystroke(handler: (evt: KeyboardEvent, state: any, editor: VanillaMirror) => boolean, priority?) {
+type State = {
+    before: string;
+    after: string;
+    selection: string;
+    isBackwardSelection: boolean;
+}
+
+export function Keystroke(handler: (evt: KeyboardEvent, state: State, editor: VanillaMirror) => boolean, priority?) {
     this.handler = handler;
     this.priority = priority || 100;
 }
@@ -95,7 +102,7 @@ export const defaultKeystrokes = [
     }),
 
     // TAB
-    new Keystroke((evt, state) => {
+    new Keystroke((evt, state, editor) => {
         if (evt.key !== 'Tab' || evt.metaKey || evt.ctrlKey) {
             return false;
         }
@@ -106,18 +113,26 @@ export const defaultKeystrokes = [
         evt.preventDefault();
         const isInverse = evt.shiftKey;
         const lf = state.before.lastIndexOf('\n') + 1;
+        const indentText = ''.padStart(editor.ngEditor.tabSize, editor.ngEditor.tabChar);
+
         if (isInverse) {
             if (/\s/.test(state.before.charAt(lf))) {
-                state.before = strSplice(state.before, lf, 4);
+                state.before = strSplice(state.before, lf, editor.ngEditor.tabSize);
             }
-            state.selection = state.selection.replace(/^([ ]{4}|\t)/gm, '');
+            state.selection = state.selection.replace(new RegExp(`^([ ]{${editor.ngEditor.tabSize}}|\t)`, 'gm'), '');
         }
         else if (state.selection) {
-            state.before = strSplice(state.before, lf, 0, '    ');
-            state.selection = state.selection.replace(/\n(?=[\s\S])/g, '\n    ');
+            // const beforeLen = state.selection.length;
+            state.before = strSplice(state.before, lf, 0, indentText);
+            state.selection = state.selection.replace(/\n(?=[\s\S])/g, '\n' + indentText);
+            // const newChars = state.selection.length - beforeLen;
+
+            // editor.getNodeAtIndex()
+            // const sel = window.getSelection();
+            // sel.extend(sel.anchorNode, sel.anchorOffset + newChars);
         }
         else {
-            state.before += '    ';
+            state.before += indentText;
         }
         return true;
     }),
@@ -155,7 +170,7 @@ export const defaultKeystrokes = [
         let prefix = '';
         if (isList) prefix = '- ';
         if (isOrderedList) {
-            const prevNumber = previousLine.match(/^\s*(?<num>\d+)\.\s*\S/)?.groups?.num;
+            const prevNumber = previousLine.match(/^\s*(?<num>\d+)\.\s*\S/)?.groups?.['num'];
 
             let num = parseInt(prevNumber);
             if (Number.isNaN(num))

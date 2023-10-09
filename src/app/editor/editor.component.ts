@@ -112,6 +112,9 @@ export class StackEditorComponent {
 
     @Input() showLineNumbers = false;
 
+    @Input() tabSize = 4;
+    @Input() tabChar: ' ' | '\t' = ' ';
+
     /**
      * Initial value of the editor.
      * 2-way binding capable.
@@ -153,17 +156,6 @@ export class StackEditorComponent {
         const tocElt = this.$el.querySelector('.toc__inner') as HTMLElement;
         this.editorSvc = new Editor(this, editorElt, previewElt, tocElt);
         this.toolbar.bindEditorEvents();
-
-        // Focus on the editor every time reader mode is disabled
-        const focus = () => {
-            // if (this.styles.showEditor) {
-            //     this.editorSvc.clEditor.focus();
-            // }
-        };
-        setTimeout(focus, 100);
-        // this.$watch(() => this.styles.showEditor, focus);
-
-        // this.editorSvc.clEditor.focus();
 
         // Bind the 'value' property
         this.editorSvc.on("loaded", () => {
