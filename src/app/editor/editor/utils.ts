@@ -35,23 +35,23 @@ export const defer = (() => {
     };
 })();
 
-export const debounce = (func, wait?) => {
+export const debounce = <T = Function>(func: T, wait?): T => {
     let timeoutId;
     let isExpected;
-    return wait
+    return (wait
         ? () => {
             clearTimeout(timeoutId);
-            timeoutId = setTimeout(func, wait);
+            timeoutId = setTimeout(func as any, wait);
         }
         : () => {
             if (!isExpected) {
                 isExpected = true;
                 defer(() => {
                     isExpected = false;
-                    func();
+                    (func as any)();
                 });
             }
-        };
+        }) as any;
 };
 
 
