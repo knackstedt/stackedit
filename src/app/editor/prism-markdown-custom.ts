@@ -92,8 +92,19 @@ const scanSpan = (text: string) => {
             spanTree = spanTree.parent as any;
         }
     }
+
     return rootNode;
 }
+
+const blockNames = [
+    'tip',
+    'warning',
+    'important',
+    'example',
+    'note',
+    'info',
+    'question'
+];
 
 export default (Prism) => {
     Prism.languages.insertBefore('markdown', 'title', {
@@ -364,13 +375,50 @@ export default (Prism) => {
         [ "MUSICAL SYMBOL END PHRASE",    0x1D17A ],
     ]
 
+    // const blockInner = {
+    //     "label": {
+    //         pattern: /^\s*?!!!\s*?[a-z]+?\s*?(?:"[^"]+?"|'[^']+?'|`[^`]+?`)/,
+    //         greedy: true,
+    //         lookbehind: true,
+    //         inside: {
+    //             "string": {
+    //                 pattern: /(?:"[^"]+?"|'[^']+?'|`[^`]+?`)/,
+    //                 greedy: true,
+    //                 lookbehind: true,
+    //             },
+    //             "type": {
+    //                 pattern: /(?<=!!!)\s*?[a-z]+?\s/,
+    //                 greedy: true,
+    //                 lookbehind: true,
+    //             },
+    //             "punctuation": {
+    //                 pattern: /['"`]|^\s*!!!/,
+    //                 greedy: true,
+    //                 lookbehind: true,
+    //             },
+    //         }
+    //     },
+    //     rest: Prism.languages.markdown
+    // };
+
+    // const blockParsers = {};
+    // blockNames.forEach(name => {
+    //     blockParsers["block-" + name] = {
+    //         pattern: new RegExp(`^\\s*?!!!\\s*?${name}\\s*?(?:"[^"]+?"|'[^']+?'|\`[^\`]+?\`).+(?=\\n[ ]{4}|\\n)`, 'is'),
+    //         greedy: true,
+    //         lookbehind: true,
+    //         inside: blockInner
+    //     }
+    // })
+
     // Make indentation act like it's monospace chars
     Prism.languages.insertBefore('markdown', 'comment', {
         "indent-space": {
             pattern: /(^|\n)[ ]+/,
             greedy: true,
             lookbehind: true
-        }
+        },
+        // ...blockParsers
     });
 
     Prism.languages.insertBefore('markdown', 'comment',
