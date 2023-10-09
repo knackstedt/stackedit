@@ -11,6 +11,7 @@ export class SelectionMgr extends EventEmittingClass {
     lastSelectionEnd = 0;
     selectionStart = 0;
     selectionEnd = 0;
+    selectionIsReverse = false;
     cursorCoordinates: any = {};
 
     adjustScroll;
@@ -21,7 +22,7 @@ export class SelectionMgr extends EventEmittingClass {
         super();
     }
 
-    findContainer(offset) {
+    findContainer(offset: number) {
         const result = findContainer(this.contentElt, offset);
         if (result.container.nodeValue === '\n') {
             const hdLfElt = result.container.parentNode;
@@ -164,8 +165,11 @@ export class SelectionMgr extends EventEmittingClass {
         const sel = window.getSelection();
         let startContainer = this.findContainer(this.selectionStart);
         let endContainer = this.findContainer(this.selectionEnd);
-        sel.setPosition(startContainer.container, startContainer.offsetInContainer);
-        sel.extend(endContainer.container, endContainer.offsetInContainer);
+
+        sel.setBaseAndExtent(
+            startContainer.container, startContainer.offsetInContainer,
+            endContainer.container, endContainer.offsetInContainer
+        )
     }
 
     setSelectionStartEnd(start: number, end: number, restoreSelection = true) {
@@ -181,8 +185,7 @@ export class SelectionMgr extends EventEmittingClass {
             return null;
         }
 
-        let { selectionStart } = this;
-        let { selectionEnd } = this;
+        let { selectionStart, selectionEnd } = this;
 
         if (!selection)
             selection = window.getSelection();
@@ -224,14 +227,21 @@ export class SelectionMgr extends EventEmittingClass {
             selectionText += '\n';
         }
 
-        if (direction) {
-            selectionStart = offset + selectionText.length;
-            selectionEnd = offset;
+        if (selectionText == '') {
+            // console.trace();
+            // debugger;
         }
-        else {
+
+        // console.log(direction, offset, selectionText)
+
+        // if (direction) {
+        //     selectionStart = offset + selectionText.length;
+        //     selectionEnd = offset;
+        // }
+        // else {
             selectionStart = offset;
             selectionEnd = offset + selectionText.length;
-        }
+        // }
 
         if (selectionStart >= this.editor.value.length) {
             // If cursor is after the trailingNode

@@ -547,7 +547,7 @@ export class VanillaMirror extends EventEmittingClass {
             isBackwardSelection: this.selectionMgr.selectionStart > this.selectionMgr.selectionEnd,
         };
 
-        this.$keystrokes.forEach((keystroke) => {
+        this.$keystrokes.find((keystroke) => {
             if (!keystroke.handler(evt, state, this)) {
                 return false;
             }
@@ -571,9 +571,10 @@ export class VanillaMirror extends EventEmittingClass {
             return true;
         });
 
+        /// WTF does this shit even do?!
         if (!contentChanging) {
             // Optimization to avoid saving selection
-            this.adjustCursorPosition();
+            // this.adjustCursorPosition();
         }
     }
 
