@@ -3,7 +3,7 @@ import { VanillaMirror } from './vanilla-mirror';
 
 export class SelectionMgr extends EventEmittingClass {
     get contentElt() { return this.editor.$contentElt };
-    get scrollElt() { return this.editor.$scrollElt };
+    get scrollElt() { return this.editor.$contentElt };
 
     get hasFocus() { return this.contentElt === document.activeElement };
 
