@@ -8,8 +8,8 @@
 
 ::ng-deep :root {
     --primary-color: #0c93e4;
-    --stackedit-font-family: 'Fira Sans';
-    --stackedit-font-family-mono: 'Fira Mono';
+    --stackedit-font-family: 'Fira Sans', Arial;
+    --stackedit-font-family-mono: "Fira Mono", "Droid Sans Mono", "monospace", monospace;
 }
 
 // Globally unscoped styles
@@ -23,15 +23,16 @@
         --editor-background-color: #1f1f1f; //#181a1b;
         --preview-background-color: #1f2123;
         --text-color: #efefef;
-        --text-muted-color: rgba(255, 255, 255, .28);
+        --text-muted-color: rgba(255, 255, 255, .38);
         --text-header-color: #ceceff;
         --selection-color: var(--primary-color);
+        --code-background-color: #2b2b2b;
+        --blockquote-background-color: #2b2b2b;
 
         --md-border-color: #474747;
         --md-header-border-color: #000;
         --md-blockquote-color: #aaa;
         --md-blockquote-border-color: hsla(0, 0%, 100%, .1);
-        --md-keyword-color: #fff;
         --md-anchor-color: var(--primary-color);
 
 
@@ -58,13 +59,14 @@
         --editor-background-color: #ffffff;
         --preview-background-color: #f3f3f3;
         --text-color: #121212;
-        --text-muted-color: rgba(0, 0, 0, .28);
+        --text-muted-color: rgba(0, 0, 0, .38);
         --text-header-color: #121244;
         --selection-color: var(--primary-color);
+        --code-background-color: #c4c4c4;
+        --blockquote-background-color: #c4c4c4;
 
         --md-border-color: #dcdcdc;
         --md-header-border-color: #fff;
-        --md-keyword-color: #000;
         --md-blockquote-color: #444;
         --md-blockquote-border-color: rgba(0, 0, 0, .1);
         --md-anchor-color: var(--primary-color);
@@ -93,6 +95,10 @@
 
 :host ::ng-deep {
 
+    .monaco-editor {
+        display: block !important;
+    }
+
     .editor {
         overflow: auto;
         font-family: var(--stackedit-font-family);
@@ -100,8 +106,8 @@
         cursor: text;
         contain: content;
         flex-direction: column;
-        padding: 28px 24px 24px;
-        padding: 10px 24px 38px;
+        // padding: 28px 24px 24px;
+        padding: 10px 24px 0px;
         width: 100%;
         margin: 0;
         white-space: pre-wrap;
@@ -123,7 +129,7 @@
         }
 
         &.monospaced {
-            font-family: var(--stackedit-font-family-mono), "Droid Sans Mono", "monospace", monospace;
+            font-family: var(--stackedit-font-family-mono);
             font-size: .85em !important;
 
             * {
@@ -159,7 +165,8 @@
         .cledit-section {
             font-family: inherit;
 
-            * {
+            // ???
+            span {
                 display: inline;
             }
 
@@ -179,7 +186,44 @@
                     display: block;
                 }
             }
+
+            .block-note {
+                background-color: rgba(0, 61, 163, 0.1);
+                border-color: rgb(0, 59, 158);
+                --bg : #448aff
+            }
+            .block-important {
+                background-color: rgba(0, 153, 132, 0.1);
+                border-color: rgb(0, 198, 171);
+                --bg: #00bfa5
+            }
+            .block-question {
+                background-color: rgba(80, 177, 18, 0.1);
+                border-color: rgb(75, 165, 17);
+                --bg: #64dd17
+            }
+            .block-example {
+                background-color: rgba(58, 0, 185, 0.1);
+                border-color: rgb(53, 0, 169);
+                --bg: rgb(112, 47, 255);
+            }
+            .block-warning {
+                --color: rgb(179, 102, 0);
+                --color: #ff9100;
+                --bg: rgba(204, 116, 0, 0.1)
+            }
+            .block-tip {
+                --color: rgb(70, 255, 230);
+                --border: #00bfa5;
+                --bg: rgba(0, 153, 132, 0.1);
+            }
+            .block-info {
+                background-color: rgba(0, 147, 170, 0.1);
+                border-color: rgb(0, 166, 191);
+                --bd: #00b8d4;
+            }
         }
+
 
         &>div:nth-last-of-type(2) {
             padding-bottom: 38px;
@@ -190,11 +234,11 @@
         }
     }
 
-
     .preview {
         background-color: var(--preview-background-color);
         overflow: hidden;
         contain: content;
+        line-height: 24px;
 
         &,
         .preview__inner-1 {
@@ -314,32 +358,33 @@
         code,
         kbd,
         samp {
-            font-family: var(--stackedit-font-family-mono), "Droid Sans Mono", "monospace", monospace;
-            font-size: 1em
+            font-family: var(--stackedit-font-family-mono);
+            font-size: 1em;
+            background-color: var(--code-background-color)
         }
 
         img {
             border-style: none
         }
 
-        blockquote,
-        dl,
-        ol,
-        p,
-        pre,
-        ul {
-            margin: 1.2em 0
-        }
+        // blockquote,
+        // dl,
+        // ol,
+        // p,
+        // pre,
+        // ul {
+        //     margin: 1.2em 0
+        // }
 
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
-            margin: 1.8em 0;
-            line-height: 1.33
-        }
+        // h1,
+        // h2,
+        // h3,
+        // h4,
+        // h5,
+        // h6 {
+        //     margin: 1.8em 0;
+        //     line-height: 1.33
+        // }
 
         h1:after,
         h2:after {
@@ -375,7 +420,7 @@
         code,
         pre,
         samp {
-            font-family: var(--stackedit-font-family-mono), "Droid Sans Mono", "monospace", monospace;
+            font-family: var(--stackedit-font-family-mono);
             // font-size: .85em
         }
 
@@ -385,16 +430,26 @@
             font-size: inherit
         }
 
+        pre > code,
         blockquote {
-            color: var(--md-blockquote-color);
-            padding-left: 1.5em;
-            border-left: 5px solid var(--md-blockquote-border-color)
+            padding: 6px 12px;
+            border-radius: 5px;
+            background-color: var(--blockquote-background-color);
         }
 
-        code {
-            background-color: rgba(0, 0, 0, .05);
-            border-radius: 3px;
-            padding: 2px 4px
+        blockquote {
+            color: var(--md-blockquote-color);
+            border-left: 7px solid var(--md-blockquote-border-color);
+            margin-inline-start: 0;
+            margin-inline-end: 0;
+
+            blockquote {
+                margin-inline-start: 12px;
+                margin-inline-end: 12px;
+            }
+            p {
+                margin: 0;
+            }
         }
 
         hr {
@@ -403,10 +458,8 @@
             margin: 2em 0
         }
 
-        pre>code {
-            background-color: rgba(0, 0, 0, .05);
+        pre > code {
             display: block;
-            padding: .5em;
             -webkit-text-size-adjust: none;
             overflow-x: auto;
             white-space: pre
@@ -446,7 +499,7 @@
         }
 
         kbd {
-            font-family: Lato, Helvetica Neue, Helvetica, sans-serif;
+            font-family: var(--stackedit-font-family-mono);
             background-color: #fff;
             border: 1px solid rgba(63, 63, 63, .25);
             border-radius: 3px;
@@ -566,12 +619,20 @@
         font-weight: 400;
 
         .code, .tag, .pre, .entity, .table {
-            font-family: 'Fira Mono', "Droid Sans Mono", "monospace", monospace;
+            font-family: var(--stackedit-font-family-mono);
         }
 
-        // .tag *, .entity *, .pre *, .code *, .table * {
-        //     font-size: inherit !important
-        // }
+        .code:not(.code-snippet), .pre, .table {
+            background-color: var(--code-background-color);
+            padding: 6px 12px;
+            border-radius: 5px;
+        }
+
+        .code:not(.code-snippet) {
+            // Inline block to handle background correctly
+            display: inline-block !important;
+            width: 100%;
+        }
 
         .pre {
             color: rgba(0, 0, 0, .8);
@@ -587,7 +648,6 @@
             font-style: italic
         }
 
-        .keyword,
         .cl-hash,
         .cl,
         .hr,
@@ -599,10 +659,6 @@
         .linkref,
         .comment {
             color: var(--text-muted-color);
-        }
-
-        .keyword {
-            font-weight: 600
         }
 
         .img-wrapper {
@@ -904,10 +960,18 @@
             text-decoration-color: #40a6ff88;
         }
 
-        .token.atrule,
-        .token.attr-value,
-        .token.keyword {
-            color: var(--prism-boolean-color);
+        .token.atrule {
+            color: var(--prism-builtin-color);
+        }
+
+        // ? which cases is this OK?
+        .token.attr-value {
+            color: var(--prism-string-color);
+            // color: var(--prism-boolean-color);
+        }
+
+        .token.code-snippet {
+            color: var(--prism-string-color)
         }
 
         .token.function {
