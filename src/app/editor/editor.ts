@@ -90,17 +90,52 @@ export class Editor extends EventEmittingClass {
         ].filter(e => !!e)).then((extensions) => {
             this.converter = markdownConversionSvc.createConverter();
             this.initConverter(this.converter, ngEditor.options.markdownIt);
+            this.clEditor = new VanillaMirror(this.ngEditor, editorElt, editorElt.parentNode as any);
 
-            this.createClEditor(editorElt);
+            this.clEditor.on('contentChanged', (text, diffs, sectionList) => {
+                const oldContent = {
+                    comments: {},
+                    discussions: {},
+                    hash: 0,
+                    id: null,
+                    properties: "\n",
+                    text: "\n",
+                    type: "content"
+                };
 
-            this.clEditor.on('contentChanged', (content, diffs, sectionList) => {
+                // last char must be a `\n`.
+                // TODO: This is probably not right
+                const sanitizedText = `${text}\n`.replace(/\n\n$/, '\n');
+                const newContent = {
+                    ...structuredClone(oldContent),
+                    text: sanitizedText,
+                };
+                if (!this.isChangePatch) {
+                    this.previousPatchableText = this.currentPatchableText;
+                    this.currentPatchableText = makePatchableText(newContent, this.markerKeys, this.markerIdxMap);
+                }
+                else {
+                    // Take a chance to restore discussion offsets on undo/redo
+                    newContent.text = this.currentPatchableText;
+                }
+                // TODO:
+                // store.dispatch('content/patchCurrent', newContent);
+                this.isChangePatch = false;
+
                 this.parsingCtx = {
                     ...this.parsingCtx,
                     sectionList,
                 };
+                newSectionList = sectionList;
+                onEditorChanged(!this.instantPreview);
             });
 
+
             // Manually handle scroll events
+            // const onScroll = (e) => {
+            //     e.preventDefault();
+            //     this.restoreScrollPosition(this.getScrollPosition(this.editorIsActive ? editorElt : previewElt));
+            // };
             const onScroll = (e) => {
                 e.preventDefault();
                 this.restoreScrollPosition(this.getScrollPosition(this.editorIsActive ? editorElt : previewElt));
@@ -108,7 +143,7 @@ export class Editor extends EventEmittingClass {
 
             let scrollMode: "editor" | "preview";
             let lastScrollEvent = 0;
-            const scrollDebounceTime = 25;
+            const scrollDebounceTime = 250;
             editorElt.addEventListener('scroll', evt => {
                 if (scrollMode == "editor" || lastScrollEvent + scrollDebounceTime < Date.now()) {
                     scrollMode = "editor";
@@ -157,11 +192,6 @@ export class Editor extends EventEmittingClass {
                 onEditorChanged(!this.instantPreview);
             });
 
-            this.clEditor.on('contentChanged', (content, diffs, sectionList) => {
-                newSectionList = sectionList;
-                onEditorChanged(!this.instantPreview);
-            });
-
             this.clEditor.highlighter.on('sectionHighlighted', (section) => this.onEditorRenderSection(section));
 
             this.measureSectionDimensions(false, true, true);
@@ -206,7 +236,7 @@ export class Editor extends EventEmittingClass {
 
     onEditorRenderSection(section) {
         // Render images inline in the editor.
-        [...section.elt.getElementsByClassName('token img')].forEach((imgTokenElt) => {
+        section.elt.querySelectorAll('.token.img').forEach((imgTokenElt) => {
             const srcElt = imgTokenElt.querySelector('.token.cl-src');
             if (!srcElt) return;
 
@@ -261,6 +291,93 @@ export class Editor extends EventEmittingClass {
             fenceElement.insertAdjacentElement('beforebegin', insertWrapper);
             fenceElement.remove();
         });
+
+
+        // section.elt.querySelectorAll('.code-block').forEach((imgTokenElt) => {
+
+        //     // Create an img element before the .img.token and wrap both elements
+        //     // into a .token.img-wrapper
+        //     const imgElt = document.createElement('div');
+
+        //     const imgTokenWrapper = document.createElement('span');
+        //     imgTokenWrapper.className = 'token img-wrapper';
+        //     imgTokenElt.parentNode.insertBefore(imgTokenWrapper, imgTokenElt);
+        //     imgTokenWrapper.appendChild(imgElt);
+        //     imgTokenWrapper.appendChild(imgTokenElt);
+        // });
+
+        // ! Experimental
+        // if (this.ngEditor.useMonacoEditor) {
+        //     section.elt.querySelectorAll('.code-block').forEach((fenceElement: HTMLElement) => {
+        //         console.log("bootstrap monaco ediotr")
+        //         fenceElement.parentElement.classList.add("vscode-injected");
+        //         const language = fenceElement.parentElement.querySelector('.code-language').textContent;
+
+        //         const insertWrapper = document.createElement('div');
+        //         insertWrapper.classList.add('injected-monaco-editor');
+        //         insertWrapper.style.display = "block";
+        //         insertWrapper.style.width = "100%";
+
+        //         const getHeight = () => {
+
+        //         }
+
+        //         insertWrapper.style.height = "500px";
+        //         const settings = {
+        //             theme: "vs-dark",
+        //             automaticLayout: true,
+        //             colorDecorators: true,
+        //             folding: true,
+        //             fontSize: 16,
+        //             // fontFamily: 'Dr',
+        //             scrollbar: {
+        //                 alwaysConsumeMouseWheel: false,
+        //             },
+        //             smoothScrolling: true,
+        //             mouseWheelScrollSensitivity: 2,
+        //             scrollBeyondLastLine: false,
+        //             value: fenceElement.textContent,
+        //             language: language || 'auto'
+        //         };
+        //         const editor = self['monaco'].editor.create(insertWrapper, settings);
+        //         insertWrapper.setAttribute("source", fenceElement.textContent);
+        //         insertWrapper.setAttribute("contenteditable", "false");
+        //         insertWrapper['_editor'] = editor;
+
+        //         // disable click handler so contenteditable
+        //         // doesn't try to handle the click event
+        //         // Disable onmouseup to prevent our own listener from changing the selection
+        //         // insertWrapper.onkeyup =
+        //         insertWrapper.onkeyup = (evt) => {
+        //             // evt.preventDefault();
+        //             evt.stopPropagation();
+        //         }
+
+        //         insertWrapper.onkeydown = (evt) => {
+        //             // evt.preventDefault();
+        //             evt.stopPropagation();
+        //         }
+
+        //         insertWrapper.onclick =
+        //         insertWrapper.onmouseup = (evt: any) => {
+        //             evt.preventDefault();
+        //             evt.stopPropagation()
+        //         }
+
+        //         editor.getModel().onDidChangeContent(() => {
+        //             const text = editor.getValue();
+        //             const cleanedText = text.replace(/\\n/gm, '\n')
+        //                                     .replace(/\\"/gm, '"');
+
+        //             insertWrapper.setAttribute("source", cleanedText);
+        //             // TODO: handle text change event passively
+        //             this.clEditor.onMutationObserved([]);
+        //         });
+
+        //         fenceElement.insertAdjacentElement('beforebegin', insertWrapper);
+        //         fenceElement.remove();
+        //     });
+        // }
     }
 
     makePatches() {
@@ -292,42 +409,6 @@ export class Editor extends EventEmittingClass {
             });
         });
         return result;
-    }
-
-    createClEditor(editorElt) {
-        this.clEditor = new VanillaMirror(this.ngEditor, editorElt, editorElt.parentNode);
-        this.clEditor.on('contentChanged', (text) => {
-            const oldContent = {
-                comments: {},
-                discussions: {},
-                hash: 0,
-                id: null,
-                properties: "\n",
-                text: "\n",
-                type: "content"
-            };//store.getters['content/current'];
-
-            // last char must be a `\n`.
-            // TODO: This is probably not right
-            const sanitizedText = `${text}\n`.replace(/\n\n$/, '\n');
-            const newContent = {
-                ...structuredClone(oldContent),
-                text: sanitizedText,
-            };
-            if (!this.isChangePatch) {
-                this.previousPatchableText = this.currentPatchableText;
-                this.currentPatchableText = makePatchableText(newContent, this.markerKeys, this.markerIdxMap);
-            } else {
-                // Take a chance to restore discussion offsets on undo/redo
-                newContent.text = this.currentPatchableText;
-            }
-            // TODO:
-            // store.dispatch('content/patchCurrent', newContent);
-            this.isChangePatch = false;
-        });
-        // TODO:
-        // clEditor.on('focus', () => store.commit('discussion/setNewCommentFocus', false));
-
     }
 
     initClEditorInternal(opts) {
@@ -729,8 +810,9 @@ export class Editor extends EventEmittingClass {
                         return false;
                     });
                 if (hasMore) {
-                    setTimeout(() => makeOne(), 10);
-                } else {
+                    setTimeout(() => makeOne(), 5);
+                }
+                else {
                     this.previewCtxWithDiffs = this.previewCtx;
                     this.$trigger('previewCtxWithDiffs', this.previewCtxWithDiffs);
                 }
