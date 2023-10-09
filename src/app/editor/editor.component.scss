@@ -62,8 +62,8 @@
         --text-muted-color: rgba(0, 0, 0, .38);
         --text-header-color: #121244;
         --selection-color: var(--primary-color);
-        --code-background-color: #c4c4c4;
-        --blockquote-background-color: #c4c4c4;
+        --code-background-color: #ebebeb;
+        --blockquote-background-color: #ebebeb;
 
         --md-border-color: #dcdcdc;
         --md-header-border-color: #fff;
@@ -73,15 +73,22 @@
 
 
         --prism-tag-color: #800000;
-        --prism-property-color: #e50000
-        --prism-punctuation-color: #800000
+        --prism-property-color: #e50000;
+        --prism-punctuation-color: #800000;
         --prism-attribute-color: #0000ff;
         --prism-attribute-punctuation-color: #3b3b3b;
         --prism-attribute-value-color: #0000ff;
         --prism-attribute-value-punctuation-color: #3b3b3b;
         --prism-number-color: #098658;
         --prism-comment-color: #008000;
-        --prism-string-color: red;
+        --prism-string-color: #a31515;
+        --prism-function-color: #795e26;
+        --prism-type-color: #267f99;
+        --prism-boolean-color: #0000ff;
+        --prism-this-color: #0000ff;
+        --prism-modifier-color: #0000ff;
+        --prism-selector-color: #800000;
+        --prism-builtin-color: #800000;
     }
 }
 
