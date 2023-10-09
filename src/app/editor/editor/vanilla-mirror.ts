@@ -15,7 +15,7 @@ export class VanillaMirror extends EventEmittingClass {
 
     ignoreUndo = false;
     noContentFix = false;
-    skipSaveSelection;
+    skipSaveSelection: boolean;
     $markers = {};
     $keystrokes = [];
     value = '';
@@ -23,7 +23,7 @@ export class VanillaMirror extends EventEmittingClass {
     get $contentElt() { return this.editorElt };
     get $scrollElt() { return this.scrollElt };
 
-    watcher = new Watcher(this, this.checkContentChange.bind(this));
+    watcher = new Watcher(this, this.onMutationObserved.bind(this));
     highlighter = new Highlighter(this);
     diffMatchPatch = new DiffMatchPatch();
     selectionMgr = new SelectionMgr(this);
@@ -58,7 +58,7 @@ export class VanillaMirror extends EventEmittingClass {
 
         this.scrollElt = scrollEltOpt || editorElt;
 
-        editorElt.setAttribute('tabindex', '0'); // To have focus even when disabled
+        // editorElt.setAttribute('tabindex', '0'); // To have focus even when disabled
         this.toggleEditable(true);
 
         // Disable escaping
@@ -73,7 +73,10 @@ export class VanillaMirror extends EventEmittingClass {
 
         // Mouseup can happen outside the editor element
         editorElt.addEventListener('mouseup', this.onMouseUp.bind(this));
-        // document.addEventListener("selectionchange", this.onSelectionChange.bind(this))
+
+        // document.addEventListener("selectionchange", () => {
+        //     this.selectionMgr.updateCursorCoordinates(true);
+        // })
 
         // Resize provokes cursor coordinate changes
         window.addEventListener('resize', this.onWindowResize.bind(this));
@@ -83,12 +86,29 @@ export class VanillaMirror extends EventEmittingClass {
         this.watcher.startWatching();
     }
 
-    toggleEditable(isEditable) {
-        this.editorElt.contentEditable = isEditable == null ? !this.editorElt.contentEditable : isEditable;
+    toggleEditable(isEditable: boolean) {
+        this.editorElt.contentEditable = isEditable == null ? !this.editorElt.contentEditable : isEditable as any;
         this.editorElt.spellcheck = false;
     }
 
     onMouseUp(evt: MouseEvent) {
+        // if (this.ngEditor.useMonacoEditor && evt.target) {
+        //     const classPath = [
+        //         (evt.target as any).classList?.value,
+        //         (evt.target as any).parentElement?.classList?.value,
+        //         (evt.target as any).parentElement?.parentElement?.classList?.value,
+        //         (evt.target as any).parentElement?.parentElement?.parentElement?.classList?.value,
+        //         (evt.target as any).parentElement?.parentElement?.parentElement?.parentElement?.classList?.value,
+        //         (evt.target as any).parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.classList?.value,
+        //         (evt.target as any).parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.classList?.value,
+        //         (evt.target as any).parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.classList?.value,
+        //         (evt.target as any).parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.classList?.value,
+        //         (evt.target as any).parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.classList?.value,
+        //     ].join('/');
+        //     if (classPath.includes("monaco"))
+        //         return;
+        // }
+
         const { selectionStart, selectionEnd } = this.selectionMgr;
         this.selectionMgr.saveSelectionState();
 
@@ -101,24 +121,28 @@ export class VanillaMirror extends EventEmittingClass {
 
             // TODO: There may be a better way to collapse the selection.
 
+            let range;
             // All webkit browsers support this properly. (incl. Safari)
             if (typeof document.caretRangeFromPoint == "function") {
-                const range = document.caretRangeFromPoint(evt.clientX, evt.clientY);
-                selection.collapse(range.startContainer, range.startOffset);
+                range = document.caretRangeFromPoint(evt.clientX, evt.clientY);
+                if (range) selection.collapse(range.startContainer, range.startOffset);
             }
             // Ugly stepchild named Firefox needs this mess.
             else if (typeof document['caretPositionFromPoint'] == "function") {
-                const range = document['caretPositionFromPoint'](evt.clientX, evt.clientY);
-                selection.collapse(range.offsetNode, range.offset);
+                range = document['caretPositionFromPoint'](evt.clientX, evt.clientY);
+                if (range) selection.collapse(range.offsetNode, range.offset);
             }
-            else {
-                // In the nearly impossible scenario neither of the above exists, just collapse the selection.
+            // Fallthrough if we can't get the nearest range to the pointer click.
+            // Occurs in rare edge cases, and would occur if browsers ever actually deprecate
+            // caretRangeFromPoint
+            else if (!range) {
                 selection.collapse(selection.focusNode, selection.focusOffset);
             }
 
             this.selectionMgr.saveSelectionState();
         }
-        this.selectionMgr.updateCursorCoordinates(true);
+
+        this.selectionMgr.updateCursorCoordinates(false);
     }
 
     onWindowResize() {
@@ -258,8 +282,49 @@ export class VanillaMirror extends EventEmittingClass {
         return this.value = textContent;
     }
 
-    // Primarily invoked by mutation observer
-    checkContentChange(mutations: any[]) {
+    onMutationObserved(mutations: MutationRecord[]) {
+
+        // ! Experimental
+        // if (this.ngEditor.useMonacoEditor) {
+        //     // Collect all mutations that occur under a monaco-editor
+        //     const monacoMutations = mutations.filter(m => {
+        //         const nodes = [...m.addedNodes as any, ...m.removedNodes as any];
+
+        //         const monacoElements = nodes.filter(n => {
+        //             const classPath = [
+        //                 n.classList?.value,
+        //                 n.parentElement?.classList?.value,
+        //                 n.parentElement?.parentElement.classList?.value,
+        //                 n.parentElement?.parentElement.parentElement.classList?.value,
+        //                 n.parentElement?.parentElement.parentElement.parentElement.classList?.value,
+        //             ].join('/');
+        //             return classPath.includes("monaco");
+        //         });
+        //         return monacoElements.length > 0;// != nodes.length;
+        //     })
+
+        //     // Skip DOM mutations underneath a monaco-editor
+        //     // instance in the tree.
+        //     if (monacoMutations.length != 0) {
+        //         return;
+        //     }
+        // }
+
+        // ? Is this problematic
+        // Scroll any mutations into view
+        // mutations.forEach(m => {
+        //     let el: HTMLElement = m.target instanceof HTMLElement ? m.target : m.target.parentElement;
+        //     const bounds = el.getBoundingClientRect();
+
+        //     if (m.target instanceof HTMLElement) {
+
+        //         m.target.scrollIntoView();
+        //     }
+        //     else {
+        //         m.target.parentElement.scrollIntoView()
+        //     }
+        // })
+
         this.watcher.noWatch(() => {
             const removedSections = [];
             const modifiedSections = [];
@@ -283,6 +348,7 @@ export class VanillaMirror extends EventEmittingClass {
                 mutation.addedNodes.forEach(markModifiedSection);
                 mutation.removedNodes.forEach(markModifiedSection);
             });
+
             this.highlighter.fixContent(modifiedSections, removedSections, this.noContentFix);
             this.noContentFix = false;
         });
@@ -310,6 +376,7 @@ export class VanillaMirror extends EventEmittingClass {
         this.triggerSpellCheck();
     }
 
+    // TODO: use better spell checker ?
     triggerSpellCheck = debounce(() => {
         // Hack for Chrome to trigger the spell checker
         const selection = window.getSelection();
@@ -519,7 +586,7 @@ export class VanillaMirror extends EventEmittingClass {
             if (this.highlighter.isComposing) {
                 this.highlighter.isComposing -= 1;
                 if (!this.highlighter.isComposing) {
-                    this.checkContentChange([]);
+                    this.onMutationObserved([]);
                 }
             }
         }, 1);
