@@ -140,6 +140,10 @@ export class StackEditorComponent {
     public options: StackEditConfig = {};
     public showTOC = false;
 
+    private resizeChecker;
+    private width = 0;
+    private height = 0;
+
     constructor(
         private readonly viewContainer: ViewContainerRef,
         @Optional() @Inject(NGX_LAZY_LOADER_CONFIG) private config: StackEditConfig = {}
@@ -163,11 +167,32 @@ export class StackEditorComponent {
             this.editorSvc.clEditor.on('contentChanged', (content, diffs, sectionList) => {
                 this.valueChange.next(content);
             });
-        })
+        });
+
+        this.resizeChecker = setInterval(() => {
+            if (
+                this.height != 0 && this.height != this.$el.clientHeight ||
+                this.width != 0 && this.width != this.$el.clientWidth
+            ) {
+                this.triggerResize();
+            }
+
+            this.height = this.$el.clientHeight;
+            this.width = this.$el.clientWidth;
+        }, 300);
     }
 
-    finalizeImageUpload({ label, link }) {
+    ngOnDestroy() {
+        clearInterval(this.resizeChecker);
+        this.editorSvc.destroy();
+    }
+
+    public finalizeImageUpload({ label, link }) {
         const text = `![${label}](${link})`;
         this.editorSvc.clEditor.replaceAll(/```img-spinner```/gs, text);
+    }
+
+    private triggerResize() {
+
     }
 }

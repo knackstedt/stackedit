@@ -312,6 +312,11 @@ export default (Prism) => {
         },
     });
 
+
+    const _lmc = Prism.languages.markdown.code.find(c => !!c.inside)?.inside['code-block'];
+    _lmc && (_lmc.alias = "prism");
+    console.log(_lmc)
+
     /**
      * All known whitespace characters are matched so when
      * whitespace visibility is enabled we can visualize them

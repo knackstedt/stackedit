@@ -72,18 +72,24 @@ export class VanillaMirror extends EventEmittingClass {
         editorElt.addEventListener('blur', () => this.$trigger('blur'));
 
         // Mouseup can happen outside the editor element
-        editorElt.addEventListener('mouseup', this.onMouseUp.bind(this));
+        editorElt.addEventListener('mouseup', this.onMouseUp);
 
         // document.addEventListener("selectionchange", () => {
         //     this.selectionMgr.updateCursorCoordinates(true);
         // })
 
         // Resize provokes cursor coordinate changes
-        window.addEventListener('resize', this.onWindowResize.bind(this));
+        window.addEventListener('resize', this.onWindowResize);
 
         this.addKeystroke(defaultKeystrokes);
 
         this.watcher.startWatching();
+    }
+
+    destroy() {
+        this.watcher.stopWatching();
+
+        window.removeEventListener('resize', this.onWindowResize);
     }
 
     toggleEditable(isEditable: boolean) {
@@ -91,7 +97,7 @@ export class VanillaMirror extends EventEmittingClass {
         this.editorElt.spellcheck = false;
     }
 
-    onMouseUp(evt: MouseEvent) {
+    onMouseUp: (evt: MouseEvent) => void = ((evt: MouseEvent) => {
         // if (this.ngEditor.useMonacoEditor && evt.target) {
         //     const classPath = [
         //         (evt.target as any).classList?.value,
@@ -143,13 +149,11 @@ export class VanillaMirror extends EventEmittingClass {
         }
 
         this.selectionMgr.updateCursorCoordinates(false);
-    }
+    }).bind(this);
 
-    onWindowResize() {
-        if (!this.tryDestroy()) {
-            this.selectionMgr.updateCursorCoordinates();
-        }
-    }
+    onWindowResize: () => void = (() => {
+        this.selectionMgr.updateCursorCoordinates();
+    }).bind(this)
 
     init(opts: any = {}) {
         opts.content = ``;
@@ -186,22 +190,6 @@ export class VanillaMirror extends EventEmittingClass {
         if (options.scrollTop !== undefined) {
             this.scrollElt.scrollTop = options.scrollTop;
         }
-    }
-
-    tryDestroy() {
-        if (document.contains(this.editorElt)) {
-            return false;
-        }
-
-        this.watcher.stopWatching();
-
-        window.removeEventListener('keydown', this.windowKeydownListener);
-        window.removeEventListener('mousedown', this.windowMouseListener);
-        window.removeEventListener('mouseup', this.windowMouseListener);
-        window.removeEventListener('resize', this.windowResizeListener);
-
-        this.$trigger('destroy');
-        return true;
     }
 
     getNodeAtIndex(index: number): Node {

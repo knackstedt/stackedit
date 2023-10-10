@@ -61,4 +61,77 @@ import 'prismjs/components/prism-yaml';
 import custom from './prism-markdown-custom';
 custom(Prism);
 
+const keywordSupport = {
+    "import": {
+        pattern: /^\s*import\s+[^;]+?(?:;|$|\n)/ms,
+        greedy: true,
+        lookbehind: true,
+        inside: {
+            "keyword": {
+                pattern: /^import/,
+                greedy: true,
+                lookbehind: true
+            },
+            "string": {
+                pattern: /(?:'[^']+?'|"[^"]+?"|`[^`]+?`)/,
+                greedy: true,
+                lookbehind: true
+            },
+            "subject": {
+                pattern: /\{[^}]+?\}/,
+                greedy: true,
+                lookbehind: true,
+                inside: {
+                    "keyword": {
+                        pattern: /import|from/,
+                        greedy: true,
+                        lookbehind: true
+                    },
+                    "punctuation": {
+                        pattern: /[{},]/,
+                        greedy: true,
+                        lookbehind: true
+                    }
+                }
+            },
+            "default-subject": {
+                pattern: /import\s*?([^'"`]+)\s*?(?:from|['"`])/,
+                greedy: true,
+                lookbehind: true,
+                inside: {
+                    "keyword": {
+                        pattern: /import|from/,
+                        greedy: true,
+                        lookbehind: true
+                    },
+                    "punctuation": {
+                        pattern: /[{},]/,
+                        greedy: true,
+                        lookbehind: true
+                    }
+                }
+            },
+            "punctuation": {
+                pattern: /[,;]/,
+                greedy: true,
+                lookbehind: true
+            },
+            "keyword keyword-from": {
+                pattern: /from/,
+                greedy: true,
+                lookbehind: true
+            }
+        }
+    },
+    // "require": {
+    //     pattern: /import/,
+    //     greedy: true,
+    //     lookbehind: true
+    // },
+    // ...blockParsers
+};
+
+Prism.languages.insertBefore('typescript', 'keyword', keywordSupport);
+Prism.languages.insertBefore('javascript', 'keyword', keywordSupport);
+
 export default Prism;

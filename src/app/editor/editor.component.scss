@@ -53,6 +53,8 @@
         --prism-modifier-color: #569cd6;
         --prism-selector-color: #d7ba7d;
         --prism-builtin-color: #9cdcfe;
+        --prism-ts-keyword-color: #c586c0;
+        --prism-ts-punctuation-color: #ccc;
     }
 
     .light {
@@ -89,6 +91,8 @@
         --prism-modifier-color: #0000ff;
         --prism-selector-color: #800000;
         --prism-builtin-color: #800000;
+        --prism-ts-keyword-color: #af00db;
+        --prism-ts-punctuation-color: #333;
     }
 }
 
@@ -895,9 +899,21 @@
     }
 
     .prism {
-        &.language-css,
-        .language-css {
+        &.language-css {
             color: var(--prism-string-color);
+        }
+
+        &.language-ts,
+        &.language-js {
+            .token.subject {
+                color: var(--prism-builtin-color);
+            }
+            .token.import {
+                color: var(--prism-ts-keyword-color);
+            }
+            .token.punctuation {
+                color: var(--prism-ts-punctuation-color);
+            }
         }
 
         .img-spinner {

@@ -185,14 +185,7 @@ export class Editor extends EventEmittingClass {
                 }
             }, 10);
 
-            window.addEventListener('resize', () => {
-                // Update the scroll sync heights
-                this.refreshPreview();
-                this.measureSectionDimensions(false, true);
-
-                // Trigger a scroll event
-                this.editorElt.scrollBy(0,0);
-            });
+            window.addEventListener('resize', this.refreshScrollSync);
 
             this.clEditor.selectionMgr.on('selectionChanged', (start, end, selectionRange) => {
                 newSelectionRange = selectionRange;
@@ -207,6 +200,11 @@ export class Editor extends EventEmittingClass {
             this.clEditor.toggleEditable(true);
             this.$trigger('loaded');
         });
+    }
+
+    destroy() {
+        this.clEditor.destroy();
+        window.removeEventListener('resize', this.refreshScrollSync);
     }
 
     onGetOptions(listener: Function) {
@@ -779,6 +777,18 @@ export class Editor extends EventEmittingClass {
         // Debounce if sections have already been measured
         this.measureSectionDimensions(!!this.previewCtxMeasured);
     }
+
+    /**
+     * Refresh the stored heights of the preview
+     * and editor elements
+     */
+    refreshScrollSync: () => void = (() => {
+        this.refreshPreview();
+        this.measureSectionDimensions(false, true);
+
+        // Trigger a scroll event
+        this.editorElt.scrollBy(0, 0);
+    }).bind(this)
 
     /**
      * Measure the height of each section in editor, preview and toc.
