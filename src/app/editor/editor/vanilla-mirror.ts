@@ -591,7 +591,7 @@ export class VanillaMirror extends EventEmittingClass {
         const files = [...clipboardData.files] as File[];
 
         // TODO: should this be interleaved with text paste?
-        if (files.length > 0) {
+        if (files.length > 0 && this.ngEditor.allowImageUpload) {
             this.insertTextAtCarat("```img-spinner```");
             this.ngEditor.onImageUpload.next({ data: files, ...this.selectionMgr, stackEditor: this.ngEditor });
             return;

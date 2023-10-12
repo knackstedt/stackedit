@@ -111,6 +111,7 @@ export class StackEditorComponent {
     @Input() mode: "edit" | "view" = "edit";
 
     @Input() showLineNumbers = false;
+    @Input() allowImageUpload = true;
 
     @Input() tabSize = 4;
     @Input() tabChar: ' ' | '\t' = ' ';
