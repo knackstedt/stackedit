@@ -1,0 +1,28 @@
+<mat-form-field>
+    <mat-label matTooltip="Preview text for the link">Link Text</mat-label>
+    <input matInput type="text" [(ngModel)]="linkText">
+</mat-form-field>
+
+<mat-form-field>
+    <mat-label matTooltip="URL that the link points to">Link URL</mat-label>
+    <input matInput type="text" [(ngModel)]="linkUrl">
+</mat-form-field>
+
+<div style="flex: 1"></div>
+
+<div style="display: flex; justify-content: end;">
+    <button mat-flat-button (click)="applyChanges()">
+        <mat-icon *ngIf="!isSaving">check</mat-icon>
+        <mat-progress-spinner
+            *ngIf="isSaving"
+            mode="indeterminate"
+            [diameter]="18"
+            style="display: inline"
+        />
+        Ok
+    </button>
+    <button mat-flat-button (click)="dialogRef.close()">
+        <mat-icon>close</mat-icon>
+        Cancel
+    </button>
+</div>

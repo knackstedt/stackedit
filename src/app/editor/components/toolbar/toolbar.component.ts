@@ -8,6 +8,9 @@ import { NgForOf, NgIf } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { StackEditorComponent } from '../../editor.component';
+import { MatDialog } from '@angular/material/dialog';
+import { ImageInsertComponent } from './image-insert/image-insert.component';
+import { LinkInsertComponent } from './link-insert/link-insert.component';
 
 @Component({
     selector: 'app-toolbar',
@@ -103,10 +106,6 @@ export class ToolbarComponent {
         this.wrapSelection("> ", '', 2, true);
     }
 
-    insertLink(url, label) {
-        this.editor.replaceSelection(`[${label}](${url})`);
-    }
-
     insertOrderedList() {
         this.wrapSelection(" 1. ", '', 4, true);
     }
@@ -167,7 +166,8 @@ export class ToolbarComponent {
 
     constructor(
         private readonly keyboard: KeyboardService,
-        public readonly stackEditor: StackEditorComponent
+        public readonly stackEditor: StackEditorComponent,
+        private readonly dialog: MatDialog
     ) { }
 
     bindEditorEvents() {
@@ -291,6 +291,14 @@ export class ToolbarComponent {
         this.keybindings.forEach(k => k.unsubscribe());
     }
 
+    openImageDialog() {
+        this.dialog.open(ImageInsertComponent, { data: { stackEditor: this.stackEditor } })
+    }
+
+    openLinkDialog() {
+        this.dialog.open(LinkInsertComponent, { data: { stackEditor: this.stackEditor } })
+    }
+
     async onSelectionChange() {
         this.cursorIsInHeading = false;
         this.cursorIsInBold = false;
@@ -362,10 +370,6 @@ export class ToolbarComponent {
     injectHeading(size: number) {
         const headerString = ''.padStart(size, '#') + ' ';
         this.wrapSelection(headerString, '', null, true);
-    }
-
-    onUploadImage() {
-        // this.stackEditor.onImageUpload.next('123');
     }
 
     toggleTOC() {

@@ -1,0 +1,45 @@
+
+<div>
+    <mat-form-field>
+        <mat-label>Image URL</mat-label>
+        <input matInput type="text" [(ngModel)]="imageUrl">
+
+        <input #file type="file" style="display: none;">
+        <button
+            mat-flat-button
+            *ngIf="data.stackEditor.allowImageUpload"
+            (click)="file.click(); onFileUpload(file.files)"
+            style="float: right"
+        >
+            <mat-icon>upload_file</mat-icon>
+            Or upload an Image
+        </button>
+    </mat-form-field>
+</div>
+
+<mat-form-field>
+    <mat-label matTooltip="Text shown if the image fails to load">Placeholder Text</mat-label>
+    <input matInput type="text" [(ngModel)]="imagePlaceholder">
+</mat-form-field>
+
+<div style="flex: 1"></div>
+
+<div style="display: flex; justify-content: end;">
+    <button mat-flat-button (click)="applyChanges()">
+        <mat-icon *ngIf="!isSaving">check</mat-icon>
+        <mat-progress-spinner
+            *ngIf="isSaving"
+            mode="indeterminate"
+            [diameter]="18"
+            style="display: inline"
+        />
+        Ok
+    </button>
+    <button
+        mat-flat-button
+        (click)="dialogRef.close()"
+    >
+        <mat-icon>close</mat-icon>
+        Cancel
+    </button>
+</div>
