@@ -16,7 +16,7 @@ $light-theme: mat.define-light-theme((
     typography: $app-typography)
 );
 
-$dark-primary: mat.define-palette(mat.$blue-palette, 700, 500, 800);
+$dark-primary: mat.define-palette(mat.$blue-palette, A100, A200, 300);
 $dark-accent: mat.define-palette(mat.$purple-palette, 700, 500, 800);
 $dark-warn: mat.define-palette(mat.$deep-orange-palette, 700, 500, 800);
 
