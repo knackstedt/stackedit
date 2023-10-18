@@ -8,6 +8,7 @@
     "inlineSources": true,
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
+    "resolveJsonModule": true,
     "types": [],
     "sourceRoot": ".",
   },
