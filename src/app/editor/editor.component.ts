@@ -7,8 +7,6 @@ import { TooltipDirective, MenuDirective } from '@dotglitch/ngx-common';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { Editor } from './editor';
 import { MermaidConfig } from 'mermaid';
-import pjson from '../../package.json';
-
 type StackEditConfig = Partial<{
     /**
      * Mermaid chart configuration
@@ -157,7 +155,7 @@ export class StackEditorComponent {
     }
 
     ngAfterViewInit() {
-        this.$el.setAttribute("version", pjson.version);
+        this.$el.setAttribute("version", "__VERSION__");
 
         const editorElt = this.$el.querySelector('.editor') as HTMLElement;
         const previewElt = this.$el.querySelector('.preview__inner-2') as HTMLElement;
