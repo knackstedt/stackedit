@@ -7,7 +7,7 @@ import { TooltipDirective, MenuDirective } from '@dotglitch/ngx-common';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { Editor } from './editor';
 import { MermaidConfig } from 'mermaid';
-import { version } from '../../package.json';
+const { version } = require('../../package.json');
 
 type StackEditConfig = Partial<{
     /**
