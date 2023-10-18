@@ -7,6 +7,7 @@ import { TooltipDirective, MenuDirective } from '@dotglitch/ngx-common';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { Editor } from './editor';
 import { MermaidConfig } from 'mermaid';
+import { version } from '../../package.json';
 
 type StackEditConfig = Partial<{
     /**
@@ -78,7 +79,7 @@ const defaults = {
     }
 }
 
-export const NGX_LAZY_LOADER_CONFIG = new InjectionToken<StackEditConfig>('stackedit-config');
+export const NGX_STACKEDIT_CONFIG = new InjectionToken<StackEditConfig>('stackedit-config');
 
 @Component({
     selector: 'ngx-stackedit',
@@ -147,7 +148,7 @@ export class StackEditorComponent {
 
     constructor(
         private readonly viewContainer: ViewContainerRef,
-        @Optional() @Inject(NGX_LAZY_LOADER_CONFIG) private config: StackEditConfig = {}
+        @Optional() @Inject(NGX_STACKEDIT_CONFIG) private config: StackEditConfig = {}
     ) {
         this.options = {
             ...defaults,
@@ -156,6 +157,8 @@ export class StackEditorComponent {
     }
 
     ngAfterViewInit() {
+        this.$el.setAttribute("version", version);
+
         const editorElt = this.$el.querySelector('.editor') as HTMLElement;
         const previewElt = this.$el.querySelector('.preview__inner-2') as HTMLElement;
         const tocElt = this.$el.querySelector('.toc__inner') as HTMLElement;
