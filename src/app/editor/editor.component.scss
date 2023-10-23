@@ -271,6 +271,7 @@
     .toc {
 
         transition: width 200ms ease;
+        overflow: hidden;
 
         .toc__inner {
             width: 240px;
