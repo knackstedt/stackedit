@@ -12,7 +12,11 @@ export class SelectionMgr extends EventEmittingClass {
     selectionStart = 0;
     selectionEnd = 0;
     selectionIsReverse = false;
-    cursorCoordinates: any = {};
+    cursorCoordinates: {
+        top: number,
+        height: number,
+        left: number
+    } = { top: 0, height: 0, left: 0 };
 
     adjustScroll;
     oldSelectionRange;
@@ -73,30 +77,40 @@ export class SelectionMgr extends EventEmittingClass {
             this.$trigger('cursorCoordinatesChanged', coordinates);
         }
 
+        // Scroll the coords into view
         if (this.adjustScroll) {
-            let scrollEltHeight = this.scrollElt.clientHeight;
-            if (typeof this.adjustScroll === 'number') {
-                scrollEltHeight -= this.adjustScroll;
-            }
-            const adjustment = (scrollEltHeight / 2) * .15;
-            let cursorTop = this.cursorCoordinates.top + (this.cursorCoordinates.height / 2);
-            // Adjust cursorTop with contentElt position relative to scrollElt
-            cursorTop += (this.contentElt.getBoundingClientRect().top - this.scrollElt.getBoundingClientRect().top)
-                + this.scrollElt.scrollTop;
-            const minScrollTop = cursorTop - adjustment;
-            const maxScrollTop = (cursorTop + adjustment) - scrollEltHeight;
+            // let scrollEltHeight = this.scrollElt.clientHeight;
+            // if (typeof this.adjustScroll === 'number') {
+            //     scrollEltHeight -= this.adjustScroll;
+            // }
+            // const adjustment = (scrollEltHeight / 2) * .15;
+            // let cursorTop = this.cursorCoordinates.top + (this.cursorCoordinates.height / 2);
+            // // Adjust cursorTop with contentElt position relative to scrollElt
+            // cursorTop += (this.contentElt.getBoundingClientRect().top - this.scrollElt.getBoundingClientRect().top)
+            //     + this.scrollElt.scrollTop;
+            // const minScrollTop = cursorTop - adjustment;
+            // const maxScrollTop = (cursorTop + adjustment) - scrollEltHeight;
 
-            if (this.scrollElt.scrollTop > minScrollTop) {
-                this.scrollElt.scrollTop = minScrollTop;
-            }
-            else if (this.scrollElt.scrollTop < maxScrollTop) {
-                this.scrollElt.scrollTop = maxScrollTop;
+            // if (this.scrollElt.scrollTop > minScrollTop) {
+            //     this.scrollElt.scrollTop = minScrollTop;
+            // }
+            // else if (this.scrollElt.scrollTop < maxScrollTop) {
+            //     this.scrollElt.scrollTop = maxScrollTop;
+            // }
+
+            const { top, height } = this.cursorCoordinates;
+            const caretTop = top + height;
+
+            if (caretTop > (this.scrollElt.scrollTop + this.scrollElt.clientHeight)) {
+                this.scrollElt.scrollTo({
+                    top: Math.max(0, (caretTop - this.scrollElt.clientHeight) + 24)
+                });
             }
         }
         this.adjustScroll = false;
     });
 
-    updateCursorCoordinates(adjustScrollParam?) {
+    updateCursorCoordinates(adjustScrollParam = false, immediate = false) {
         this.adjustScroll = this.adjustScroll || adjustScrollParam;
         this.debouncedUpdateCursorCoordinates();
     };
@@ -264,7 +278,7 @@ export class SelectionMgr extends EventEmittingClass {
         return this.editor.getContent().substring(min, max);
     };
 
-    getCoordinates(inputOffset, containerParam, offsetInContainerParam) {
+    getCoordinates(inputOffset: number, containerParam, offsetInContainerParam: number) {
         let container = containerParam;
         let offsetInContainer = offsetInContainerParam;
 
@@ -325,7 +339,8 @@ export class SelectionMgr extends EventEmittingClass {
             }
             else if (endOffset.offsetInContainer === container.textContent.length) {
                 // Need to calculate offset+1
-                endOffset = inputOffset + 1;
+                console.error("Shit my bed")
+                // endOffset = inputOffset + 1;
             }
             else {
                 endOffset.offsetInContainer += 1;

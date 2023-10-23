@@ -35,7 +35,7 @@ export const defer = (() => {
     };
 })();
 
-export const debounce = <T = Function>(func: T, wait?): T => {
+export const debounce = <T = Function>(func: T, wait = 0): T => {
     let timeoutId;
     let isExpected;
     return (wait

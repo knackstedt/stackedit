@@ -142,6 +142,7 @@ export const defaultKeystrokes = [
     new Keystroke((evt, state, editor) => {
         if (evt.key !== 'Enter') {
             clearNewline = false;
+
             return false;
         }
 
@@ -150,6 +151,7 @@ export const defaultKeystrokes = [
             state.before = state.before.substring(0, lf);
             state.selection = '';
             clearNewline = false;
+
             return true;
         }
 
@@ -188,7 +190,7 @@ export const defaultKeystrokes = [
         evt.preventDefault();
 
         setTimeout(() => {
-            editor.scrollCursorIntoView();
+            editor.selectionMgr.updateCursorCoordinates(true)
         }, 1);
 
         return true;

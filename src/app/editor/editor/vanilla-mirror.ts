@@ -74,9 +74,9 @@ export class VanillaMirror extends EventEmittingClass {
         // Mouseup can happen outside the editor element
         editorElt.addEventListener('mouseup', this.onMouseUp);
 
-        // document.addEventListener("selectionchange", () => {
-        //     this.selectionMgr.updateCursorCoordinates(true);
-        // })
+        document.addEventListener("selectionchange", () => {
+            this.selectionMgr.updateCursorCoordinates(true);
+        })
 
         // Resize provokes cursor coordinate changes
         window.addEventListener('resize', this.onWindowResize);
@@ -390,14 +390,7 @@ export class VanillaMirror extends EventEmittingClass {
     }
 
     scrollCursorIntoView() {
-        const { top, height } = this.selectionMgr.cursorCoordinates;
-        const caretTop = top + height*3;
-
-        if (caretTop > (this.$contentElt.parentElement.scrollTop + this.$contentElt.clientHeight)) {
-            this.$contentElt.parentElement.scrollTo({
-                top: Math.max(0, caretTop - this.$contentElt.clientHeight)
-            });
-        }
+        this.selectionMgr.updateCursorCoordinates(true);
     }
 
     keydownHandler(handler) {
