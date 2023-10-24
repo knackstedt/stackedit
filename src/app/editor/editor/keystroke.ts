@@ -241,85 +241,18 @@ export const defaultKeystrokes = [
         if (evt.code !== 'ArrowLeft' && evt.code !== 'ArrowRight') {
             return false;
         }
-        let { selectionStart, selectionEnd } = editor.selectionMgr;
-        console.log(selectionStart, selectionEnd);
-
-        const isJump = (isMac && evt.altKey) || (!isMac && evt.ctrlKey);
+        const isJump = (false && evt.altKey) || (!true && evt.ctrlKey);
         if (!isJump) {
-            if (!evt.shiftKey) return false;
-            evt.preventDefault();
-
-            // this.restoreSelection()
-            // selectionEnd -= 1;
-            if (evt.code == 'ArrowLeft') {
-                console.log("LEFT", selectionEnd, selectionStart)
-                if (selectionEnd == selectionStart) {
-                    editor.selectionMgr.selectionIsReverse = true;
-                }
-
-                if (editor.selectionMgr.selectionIsReverse)
-                    editor.selectionMgr.setSelection(selectionStart-1, selectionEnd);
-                else
-                    editor.selectionMgr.setSelection(selectionStart, selectionEnd-1);
-            }
-
-            if (evt.code == 'ArrowRight') {
-                console.log("RIGHT", selectionEnd, selectionStart)
-                if (selectionEnd == selectionStart) {
-                    editor.selectionMgr.selectionIsReverse = false;
-                }
-
-                if (editor.selectionMgr.selectionIsReverse)
-                    editor.selectionMgr.setSelection(selectionStart+1, selectionEnd);
-                else
-                    editor.selectionMgr.setSelection(selectionStart, selectionEnd+1);
-            }
-            // editor.selectionMgr.saveSelectionState(false);
-
-            // Shift pressed selection
-
             return false;
         }
 
-        evt.preventDefault();
         // Custom jump behavior
         const textContent = editor.getContent();
         const offset = getNextWordOffset(
             textContent,
             editor.selectionMgr.selectionEnd,
-            evt.code == 'ArrowLeft'
+            evt.code == "ArrowLeft",
         );
-        const delta = Math.abs(selectionEnd - offset);
-        console.log({offset, delta, selectionEnd, selectionStart});
-
-        if (evt.code == 'ArrowLeft') {
-            if (selectionEnd == selectionStart) {
-                editor.selectionMgr.selectionIsReverse = true;
-            }
-
-            if (editor.selectionMgr.selectionIsReverse)
-                editor.selectionMgr.setSelection(selectionStart - delta, selectionEnd);
-            else
-                editor.selectionMgr.setSelection(selectionStart, Math.max(selectionEnd - delta, selectionStart));
-
-            return false;
-        }
-
-        if (evt.code == 'ArrowRight') {
-            if (selectionEnd == selectionStart) {
-                editor.selectionMgr.selectionIsReverse = false;
-            }
-
-            if (editor.selectionMgr.selectionIsReverse) {
-                editor.selectionMgr.setSelection(Math.min(selectionStart + delta, selectionEnd), selectionEnd);
-            }
-            else {
-                editor.selectionMgr.setSelection(selectionStart, selectionEnd + delta);
-            }
-
-            return false;
-        }
-
         if (evt.shiftKey) {
             // rebuild the state completely
             const min = Math.min(editor.selectionMgr.selectionStart, offset);
@@ -329,12 +262,12 @@ export const defaultKeystrokes = [
             state.selection = textContent.slice(min, max);
             state.isBackwardSelection = editor.selectionMgr.selectionStart > offset;
         }
-        else { // works
+        else {
             state.before = textContent.slice(0, offset);
             state.after = textContent.slice(offset);
             state.selection = '';
         }
-
+        evt.preventDefault();
         return true;
     }),
 ];

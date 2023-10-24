@@ -101,7 +101,7 @@ export class SelectionMgr extends EventEmittingClass {
             const { top, height } = this.cursorCoordinates;
             const caretTop = top + height;
 
-            if (caretTop > (this.scrollElt.scrollTop + this.scrollElt.clientHeight)) {
+            if (caretTop > (this.scrollElt.scrollTop + this.scrollElt.clientHeight) - 24) {
                 this.scrollElt.scrollTo({
                     top: Math.max(0, (caretTop - this.scrollElt.clientHeight) + 24)
                 });
@@ -162,28 +162,10 @@ export class SelectionMgr extends EventEmittingClass {
     };
 
     setSelection(start: number = this.selectionStart, end: number = this.selectionEnd) {
-
-        // Ensure the selection doesn't end up clipping out of bounds
-        if (start < 0) start = 0;
-        if (end < 0) end = 0;
-        if (start > this.editor.value.length) start = this.editor.value.length;
-        if (end > this.editor.value.length) end = this.editor.value.length;
-
-        // Use math.min and math.max to ensure the selection isn't backwards.
-        this.selectionStart = Math.min(start, end);
-        this.selectionEnd = Math.max(start, end);
-
+        this.selectionStart = start < 0 ? 0 : start;
+        this.selectionEnd = end < 0 ? 0 : end;
         this.lastSelectionStart = this.selectionStart;
         this.lastSelectionEnd = this.selectionEnd;
-
-        const sel = window.getSelection();
-        let startContainer = this.findContainer(this.selectionStart);
-        let endContainer = this.findContainer(this.selectionEnd);
-
-        sel.setBaseAndExtent(
-            startContainer.container, startContainer.offsetInContainer,
-            endContainer.container, endContainer.offsetInContainer
-        )
     }
 
     setSelectionStartEnd(start: number, end: number, restoreSelection = true) {
@@ -241,21 +223,65 @@ export class SelectionMgr extends EventEmittingClass {
             selectionText += '\n';
         }
 
-        if (selectionText == '') {
-            // console.trace();
-            // debugger;
+        const isBackwardsSelection = (() => {
+            if (selection.anchorNode === selection.focusNode) {
+                return selection.anchorOffset > selection.focusOffset;
+            }
+
+            const anchorTree: HTMLElement[] = [];
+            const focusTree: HTMLElement[] = [];
+            let _focusNode: Node = selection.focusNode;
+            let _anchorNode: Node = selection.anchorNode;
+
+            // Build two node paths
+            do {
+                focusTree.unshift(_focusNode.parentElement);
+                _focusNode = _focusNode.parentElement;
+            }
+            while(_focusNode != this.editor.$contentElt)
+
+            do {
+                anchorTree.unshift(_anchorNode.parentElement);
+                _anchorNode = _anchorNode.parentElement;
+            }
+            while(_anchorNode != this.editor.$contentElt)
+
+            // Walk down tree A until it diverges from tree B
+            // Max 128 depth.
+            for (let i = 0; i < 128; i++) {
+
+                // The trees have diverged!
+                if (!focusTree[i]) {
+                    const commonElement = focusTree[i - 1];
+                    const nodes = [...commonElement.childNodes as any];
+                    return nodes.indexOf(selection.focusNode) < nodes.indexOf(anchorTree[i]);
+                }
+
+                // The trees have diverged!
+                if (!anchorTree[i]) {
+                    const commonElement = anchorTree[i - 1];
+                    const nodes = [...commonElement.childNodes as any];
+                    return nodes.indexOf(focusTree[i]) < nodes.indexOf(selection.anchorNode);
+                }
+
+                // The trees have diverged!
+                if (anchorTree[i] != focusTree[i]) {
+                    const commonElement = anchorTree[i - 1];
+                    const nodes = [...commonElement.childNodes as any];
+                    return nodes.indexOf(focusTree[i]) < nodes.indexOf(anchorTree[i]);
+                }
+            }
+            return false;
+        })();
+
+        if (isBackwardsSelection) {
+            selectionStart = offset + selectionText.length;
+            selectionEnd = offset;
         }
-
-        // console.log(direction, offset, selectionText)
-
-        // if (direction) {
-        //     selectionStart = offset + selectionText.length;
-        //     selectionEnd = offset;
-        // }
-        // else {
+        else {
             selectionStart = offset;
             selectionEnd = offset + selectionText.length;
-        // }
+        }
 
         if (selectionStart >= this.editor.value.length) {
             // If cursor is after the trailingNode
