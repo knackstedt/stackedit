@@ -162,7 +162,7 @@ export class Editor extends EventEmittingClass {
 
             let scrollMode: "editor" | "preview";
             let lastScrollEvent = 0;
-            const scrollDebounceTime = 250;
+            const scrollDebounceTime = 500;
             editorElt.addEventListener('scroll', evt => {
                 if (scrollMode == "editor" || lastScrollEvent + scrollDebounceTime < Date.now()) {
                     scrollMode = "editor";
@@ -694,11 +694,12 @@ export class Editor extends EventEmittingClass {
         let loadingImages = [];
 
         this.conversionCtx.htmlSectionDiff.forEach((item) => {
-            for (let i = 0; i < item[1].length; i += 1) {
+            for (let i = 0; i < item[1]?.length; i++) {
                 const section = this.conversionCtx.sectionList[sectionIdx];
+
                 if (item[0] === 0) {
                     let sectionDesc = this.previewCtx.sectionDescList[sectionDescIdx] as SectionDesc;
-                    sectionDescIdx += 1;
+                    sectionDescIdx++;
                     if (sectionDesc.editorElt !== section.elt) {
                         // Force textToPreviewDiffs computation
                         sectionDesc = new SectionDesc(
@@ -710,12 +711,12 @@ export class Editor extends EventEmittingClass {
                     }
                     sectionDescList.push(sectionDesc);
                     previewHtml += sectionDesc.html;
-                    sectionIdx += 1;
+                    sectionIdx++;
                     insertBeforePreviewElt = insertBeforePreviewElt.nextSibling;
                     insertBeforeTocElt = insertBeforeTocElt.nextSibling;
                 }
                 else if (item[0] === -1) {
-                    sectionDescIdx += 1;
+                    sectionDescIdx++;
                     sectionPreviewElt = insertBeforePreviewElt;
                     insertBeforePreviewElt = insertBeforePreviewElt.nextSibling;
                     this.previewElt.removeChild(sectionPreviewElt);
@@ -725,12 +726,13 @@ export class Editor extends EventEmittingClass {
                 }
                 else if (item[0] === 1) {
                     const html = htmlSanitizer.sanitizeHtml(this.conversionCtx.htmlSectionList[sectionIdx]);
-                    sectionIdx += 1;
+                    sectionIdx++;
 
                     // Create preview section element
                     sectionPreviewElt = document.createElement('div');
                     sectionPreviewElt.className = 'cl-preview-section';
                     sectionPreviewElt.innerHTML = html;
+
                     if (insertBeforePreviewElt) {
                         this.previewElt.insertBefore(sectionPreviewElt, insertBeforePreviewElt);
                     }
@@ -774,7 +776,12 @@ export class Editor extends EventEmittingClass {
                     previewHtml += html;
                     sectionDescList.push(new SectionDesc(section, sectionPreviewElt, sectionTocElt, html));
                 }
+
             }
+
+            // Mark the item as having been rastered
+            // to prevent duplicate sections from being added
+            item[0] = 0;
         });
 
         this.tocElt.classList[
@@ -814,7 +821,7 @@ export class Editor extends EventEmittingClass {
      */
     refreshScrollSync: () => void = (() => {
         this.refreshPreview();
-        this.measureSectionDimensions(false, true);
+        // this.measureSectionDimensions(false, true);
 
         // Trigger a scroll event
         this.editorElt.scrollBy(0, 0);
@@ -824,16 +831,17 @@ export class Editor extends EventEmittingClass {
      * Measure the height of each section in editor, preview and toc.
      */
     measureSectionDimensions = allowDebounce((restoreScrollPosition = false, force = false) => {
-        if (force || this.previewCtx !== this.previewCtxMeasured) {
-            sectionUtils.measureSectionDimensions(this);
-            this.previewCtxMeasured = this.previewCtx;
+        if (!force && this.previewCtx === this.previewCtxMeasured)
+            return;
 
-            if (restoreScrollPosition) {
-                this.restoreScrollPosition();
-            }
+        sectionUtils.measureSectionDimensions(this);
+        this.previewCtxMeasured = this.previewCtx;
 
-            this.$trigger('previewCtxMeasured', this.previewCtxMeasured);
+        if (restoreScrollPosition) {
+            this.restoreScrollPosition();
         }
+
+        this.$trigger('previewCtxMeasured', this.previewCtxMeasured);
     }, 500)
 
     /**
