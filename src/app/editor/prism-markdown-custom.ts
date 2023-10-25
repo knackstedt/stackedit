@@ -292,52 +292,50 @@ export default (Prism) => {
         }
     }
 
-    Prism.languages.insertBefore('markdown', 'comment', {
-        'table': {
-            // Regex match does not work as we need to match the closing </span> tag.
-            // pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*?<\/span>/g,
-            pattern: /\s{0,3}\|(?:[^|]+\|)+\n(?:\s{0,3}\|\s*(?:-+\s*\|)+)(?:\s{0,3}\|(?:[^|]+\|)+\n)+/s,
-            lookbehind: true,
-            greedy: false,
-            inside: {
-                'header-row': {
-                    pattern: /^\s{0,3}\|(?:[^|\n]+\|)+\n(?=\s{0,3}\|\s*(?:-+\s*\|)+)/s,
-                    lookbehind: true,
-                    greedy: false,
-                    inside: {
-                        'cell': {
-                            pattern: /(?<=\|)[^|]+(?=\|)/,
-                            lookbehind: true,
-                            greedy: false,
-                            inside: basicRules
-                        },
-                        'pipe': /\|/
-                    }
-                },
-                'table-row': {
-                    pattern: /\n\s{0,3}\|(?:[^|\n]+\|)+(?=\n|$)/s,
-                    lookbehind: true,
-                    greedy: false,
-                    inside: {
-                        'cell': {
-                            pattern: /(?<=\|)[^|]+(?=\|)/,
-                            lookbehind: true,
-                            greedy: false,
-                            inside: basicRules
-                        },
-                        'pipe': /\|/
-                    }
-                },
-                'break-row': {
-                    pattern: /\s{0,3}\|\s*(?:-+\s*\|)+/,
-                    inside: {
-                        'pipe': /\|/,
-                        'dash': /\-+/,
-                    }
+    Prism.languages.markdown.table = {
+        // Regex match does not work as we need to match the closing </span> tag.
+        // pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*?<\/span>/g,
+        pattern: /\s{0,3}\|(?:[^|]+\|)+\n(?:\s{0,3}\|\s*(?:-+\s*\|)+)(?:\s{0,3}\|(?:[^|]+\|)+\n)+/s,
+        lookbehind: true,
+        greedy: false,
+        inside: {
+            'header-row': {
+                pattern: /^\s{0,3}\|(?:[^|\n]+\|)+\n(?=\s{0,3}\|\s*(?:-+\s*\|)+)/s,
+                lookbehind: true,
+                greedy: false,
+                inside: {
+                    'cell': {
+                        pattern: /(?<=\|)[^|]+(?=\|)/,
+                        lookbehind: true,
+                        greedy: false,
+                        inside: basicRules
+                    },
+                    'pipe': /\|/
+                }
+            },
+            'table-row': {
+                pattern: /\n\s{0,3}\|(?:[^|\n]+\|)+(?=\n|$)/s,
+                lookbehind: true,
+                greedy: false,
+                inside: {
+                    'cell': {
+                        pattern: /(?<=\|)[^|]+(?=\|)/,
+                        lookbehind: true,
+                        greedy: false,
+                        inside: basicRules
+                    },
+                    'pipe': /\|/
+                }
+            },
+            'break-row': {
+                pattern: /\s{0,3}\|\s*(?:-+\s*\|)+/,
+                inside: {
+                    'pipe': /\|/,
+                    'dash': /\-+/,
                 }
             }
         }
-    });
+    }
 
     Prism.languages.insertBefore('markdown', 'comment', {
         'injection-fence': {
