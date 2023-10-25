@@ -371,7 +371,6 @@ export class SelectionMgr extends EventEmittingClass {
             }
             else if (endOffset.offsetInContainer === container.textContent.length) {
                 // Need to calculate offset+1
-                console.error("Shit my bed")
                 // endOffset = inputOffset + 1;
             }
             else {
