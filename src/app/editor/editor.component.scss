@@ -988,7 +988,9 @@
         }
 
         .token.code-snippet {
-            color: var(--prism-string-color)
+            color: var(--prism-string-color);
+            background-color: var(--code-background-color);
+            border-radius: 3px;
         }
 
         .token.function {
