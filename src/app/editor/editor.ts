@@ -26,8 +26,8 @@ const allowDebounce = (action, wait) => {
 };
 
 
-class SectionDesc {
-    public editorElt;
+export class SectionDesc {
+    public editorElt: HTMLElement;
 
     public editorDimension: SectionDimension;
     public previewDimension: SectionDimension;
