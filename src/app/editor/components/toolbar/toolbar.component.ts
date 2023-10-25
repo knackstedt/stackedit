@@ -200,10 +200,6 @@ export class ToolbarComponent {
                 key: "_",
                 ctrl: true
             }).subscribe(this.italicizeText.bind(this)),
-            this.keyboard.onKeyCommand({
-                label: "Strikethrough",
-                key: "~"
-            }).subscribe(this.strikethroughText.bind(this)),
             // this.keyboard.onKeyCommand({
             //     label: "Select All",
             //     key: "/",
