@@ -1,7 +1,7 @@
 import { EventEmittingClass, debounce } from './utils';
 import { VanillaMirror } from './vanilla-mirror';
 
-class Section {
+export class Section {
     text;
     data: "list" | "main" | "blockquote";
     elt: HTMLDivElement;

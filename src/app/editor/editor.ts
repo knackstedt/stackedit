@@ -1,7 +1,7 @@
 import DiffMatchPatch from 'diff-match-patch';
 import htmlSanitizer from './libs/htmlSanitizer';
 import markdownConversionSvc from './markdownConversionSvc';
-import sectionUtils from './editor/sectionUtils';
+import sectionUtils, { SectionDimension } from './editor/sectionUtils';
 import { VanillaMirror } from './editor/vanilla-mirror';
 import { EventEmittingClass, findContainer, debounce } from './editor/utils';
 import { makePatchableText } from './diffUtils';
@@ -9,6 +9,8 @@ import { StackEditorComponent } from './editor.component';
 import Prism from './prism';
 import MarkdownIt from 'markdown-it';
 import markdownGFM from './extensions/markdownExtension';
+import { ulid } from 'ulidx';
+import { Section } from './editor/highlighter';
 
 const allowDebounce = (action, wait) => {
     let timeoutId;
@@ -16,7 +18,8 @@ const allowDebounce = (action, wait) => {
         clearTimeout(timeoutId);
         if (doDebounce) {
             timeoutId = setTimeout(() => action(...params), wait);
-        } else {
+        }
+        else {
             action(...params);
         }
     };
@@ -25,8 +28,26 @@ const allowDebounce = (action, wait) => {
 
 class SectionDesc {
     public editorElt;
-    constructor(public section, public previewElt, public tocElt, public html) {
+
+    public editorDimension: SectionDimension;
+    public previewDimension: SectionDimension;
+    public tocDimension: SectionDimension;
+
+    // public ulid = ulid();
+
+    constructor(
+        public section: Section,
+        public previewElt: HTMLElement,
+        public tocElt: HTMLElement,
+        public html
+    ) {
         this.editorElt = section.elt;
+        // if (previewElt)
+        //     previewElt.setAttribute("ulid", this.ulid);
+        // if (tocElt)
+        //     tocElt.setAttribute("ulid", this.ulid);
+        // if (section.elt)
+        //     section.elt.setAttribute("ulid", this.ulid);
     }
 }
 
@@ -49,12 +70,12 @@ export class Editor extends EventEmittingClass {
     // Other object;
     parsingCtx: any;
     conversionCtx: any;
-    previewCtx =  {
-        sectionDescList: []
+    previewCtx = {
+        sectionDescList: [] as SectionDesc[]
     };
     previewCtxMeasured: any;
     previewCtxWithDiffs: any;
-    sectionList: any;
+    sectionList: Section[];
     selectionRange: any;
     previewSelectionRange: any;
     previewSelectionStartOffset: any;
@@ -253,6 +274,15 @@ export class Editor extends EventEmittingClass {
             if (true || !/^unsafe/.test(htmlSanitizer.sanitizeUri(uri, true))) {
                 imgElt.onload = () => {
                     imgElt.style.display = '';
+
+                    // TODO figure out why this delay is needed
+                    // setTimeout(() => {
+                        // this.measureSectionDimensions(false, true);
+                        sectionUtils.measureSectionDimensions(this);
+                        this.previewCtxMeasured = this.previewCtx;
+
+                        this.restoreScrollPosition();
+                    // }, 0);
                 };
                 imgElt.src = uri;
                 // Take img size into account
@@ -653,7 +683,7 @@ export class Editor extends EventEmittingClass {
      * Refresh the preview with the result of `convert()`
      */
     async refreshPreview() {
-        const sectionDescList = [];
+        const sectionDescList: SectionDesc[] = [];
         let sectionPreviewElt;
         let sectionTocElt;
         let sectionIdx = 0;
@@ -667,7 +697,7 @@ export class Editor extends EventEmittingClass {
             for (let i = 0; i < item[1].length; i += 1) {
                 const section = this.conversionCtx.sectionList[sectionIdx];
                 if (item[0] === 0) {
-                    let sectionDesc = this.previewCtx.sectionDescList[sectionDescIdx] as any;
+                    let sectionDesc = this.previewCtx.sectionDescList[sectionDescIdx] as SectionDesc;
                     sectionDescIdx += 1;
                     if (sectionDesc.editorElt !== section.elt) {
                         // Force textToPreviewDiffs computation

@@ -1,4 +1,6 @@
-class SectionDimension {
+import { Editor } from '../editor';
+
+export class SectionDimension {
     height: number;
     constructor(public startOffset: number, public endOffset: number) {
         this.startOffset = startOffset;
@@ -10,12 +12,11 @@ class SectionDimension {
 const dimensionNormalizer = dimensionName => (editorSvc) => {
     const dimensionList = editorSvc.previewCtx.sectionDescList
         .map(sectionDesc => sectionDesc[dimensionName]);
-    let dimension;
-    let i;
-    let j;
-    for (i = 0; i < dimensionList.length; i += 1) {
-        dimension = dimensionList[i];
+
+    for (let i = 0; i < dimensionList.length; i += 1) {
+        let dimension = dimensionList[i];
         if (dimension.height) {
+            let j;
             for (j = i + 1; j < dimensionList.length && dimensionList[j].height === 0; j += 1) {
                 // Loop
             }
@@ -42,14 +43,14 @@ const normalizePreviewDimensions = dimensionNormalizer('previewDimension');
 const normalizeTocDimensions = dimensionNormalizer('tocDimension');
 
 export default {
-    measureSectionDimensions(editorSvc) {
+    measureSectionDimensions(editorSvc: Editor) {
         let editorSectionOffset = 0;
         let previewSectionOffset = 0;
         let tocSectionOffset = 0;
         let sectionDesc = editorSvc.previewCtx.sectionDescList[0];
         let nextSectionDesc;
         let i = 1;
-        for (; i < editorSvc.previewCtx.sectionDescList.length; i += 1) {
+        for (; i < editorSvc.previewCtx.sectionDescList.length; i++) {
             nextSectionDesc = editorSvc.previewCtx.sectionDescList[i];
 
             // Measure editor section
@@ -96,15 +97,15 @@ export default {
         if (sectionDesc) {
             sectionDesc.editorDimension = new SectionDimension(
                 editorSectionOffset,
-                editorSvc.editorElt.scrollHeight,
+                editorSvc['editorElt'].scrollHeight,
             );
             sectionDesc.previewDimension = new SectionDimension(
                 previewSectionOffset,
-                editorSvc.previewElt.scrollHeight,
+                editorSvc['previewElt'].scrollHeight,
             );
             sectionDesc.tocDimension = new SectionDimension(
                 tocSectionOffset,
-                editorSvc.tocElt.scrollHeight,
+                editorSvc['tocElt'].scrollHeight,
             );
         }
 
