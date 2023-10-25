@@ -197,44 +197,44 @@ export const defaultKeystrokes = [
     }),
 
     // BACKSPACE, DELETE
-    new Keystroke((evt, state, editor) => {
-        if (evt.key !== 'Backspace' && evt.key !== 'Delete') {
-            return false;
-        }
+    // new Keystroke((evt, state, editor) => {
+    //     if (evt.key !== 'Backspace' && evt.key !== 'Delete') {
+    //         return false;
+    //     }
 
-        editor.undoMgr.setCurrentMode('delete');
-        if (!state.selection) {
-            const isJump = (isMac && evt.altKey) || (!isMac && evt.ctrlKey);
-            if (isJump) {
-                // Custom kill word behavior
-                const text = state.before + state.after;
-                const offset = getNextWordOffset(text, state.before.length, evt.key === 'Backspace');
-                if (evt.key === 'Backspace') {
-                    state.before = state.before.slice(0, offset);
-                }
-                else {
-                    state.after = state.after.slice(offset - text.length);
-                }
-                return true;
-            }
-            else if (evt.key == 'Backspace' && state.before.slice(-1) === '\n') {
-                // Special treatment for end of lines
-                state.before = state.before.slice(0, -1);
-                evt.preventDefault();
-                return true;
-            }
-            else if (evt.key == 'Delete' && state.after.slice(0, 1) === '\n') {
-                state.after = state.after.slice(1);
-                evt.preventDefault();
-                return true;
-            }
-            return false;
-        }
-        else {
-            state.selection = '';
-            return true;
-        }
-    }),
+    //     editor.undoMgr.setCurrentMode('delete');
+    //     if (!state.selection) {
+    //         const isJump = (isMac && evt.altKey) || (!isMac && evt.ctrlKey);
+    //         if (isJump) {
+    //             // Custom kill word behavior
+    //             const text = state.before + state.after;
+    //             const offset = getNextWordOffset(text, state.before.length, evt.key === 'Backspace');
+    //             if (evt.key === 'Backspace') {
+    //                 state.before = state.before.slice(0, offset);
+    //             }
+    //             else {
+    //                 state.after = state.after.slice(offset - text.length);
+    //             }
+    //             return true;
+    //         }
+    //         else if (evt.key == 'Backspace' && state.before.slice(-1) === '\n') {
+    //             // Special treatment for end of lines
+    //             state.before = state.before.slice(0, -1);
+    //             evt.preventDefault();
+    //             return true;
+    //         }
+    //         else if (evt.key == 'Delete' && state.after.slice(0, 1) === '\n') {
+    //             state.after = state.after.slice(1);
+    //             evt.preventDefault();
+    //             return true;
+    //         }
+    //         return false;
+    //     }
+    //     else {
+    //         state.selection = '';
+    //         return true;
+    //     }
+    // }),
 
     // LEFT_ARROW, RIGHT_ARROW
     new Keystroke((evt, state, editor) => {
