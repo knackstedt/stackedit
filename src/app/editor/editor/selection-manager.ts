@@ -28,9 +28,14 @@ export class SelectionMgr extends EventEmittingClass {
 
     findContainer(offset: number) {
         const result = findContainer(this.contentElt, offset);
-        if (result.container.nodeValue === '\n') {
+
+        if (result.container.nodeValue == '\n') {
             const hdLfElt = result.container.parentNode;
-            if (hdLfElt.className === 'hd-lf' && hdLfElt.previousSibling && hdLfElt.previousSibling.tagName === 'BR') {
+
+            if (
+                hdLfElt.className == 'hd-lf' &&
+                hdLfElt.previousSibling?.tagName == 'BR'
+            ) {
                 result.container = hdLfElt.parentNode;
                 result.offsetInContainer = Array.prototype.indexOf.call(
                     result.container.childNodes,
@@ -38,8 +43,9 @@ export class SelectionMgr extends EventEmittingClass {
                 );
             }
         }
+
         return result;
-    };
+    }
 
     createRange(start, end) {
         const range = document.createRange();
@@ -235,16 +241,16 @@ export class SelectionMgr extends EventEmittingClass {
 
             // Build two node paths
             do {
-                focusTree.unshift(_focusNode.parentElement);
-                _focusNode = _focusNode.parentElement;
+                focusTree.unshift(_focusNode?.parentElement);
+                _focusNode = _focusNode?.parentElement;
             }
-            while(_focusNode != this.editor.$contentElt)
+            while (_focusNode && _focusNode != this.editor.$contentElt)
 
             do {
-                anchorTree.unshift(_anchorNode.parentElement);
-                _anchorNode = _anchorNode.parentElement;
+                anchorTree.unshift(_anchorNode?.parentElement);
+                _anchorNode = _anchorNode?.parentElement;
             }
-            while(_anchorNode != this.editor.$contentElt)
+            while (_anchorNode && _anchorNode != this.editor.$contentElt)
 
             // Walk down tree A until it diverges from tree B
             // Max 128 depth.
