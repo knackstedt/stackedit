@@ -179,17 +179,18 @@ export default (Prism) => {
             lookbehind: true,
             greedy: true,
             inside: {
-                'string': /['‘][^'’]*['’]|["“][^"”]*["”](?=\)$)/,
-                'src': {
+                'string': {
+                    pattern: /(!\[)[^\]]+(?=])/,
+                    lookbehind: true,
+                },
+                'img-src': {
                     pattern: /(\]\()[^('" \t]+(?=[)'" \t])/,
                     lookbehind: true,
-                    inside: {
-                        punctuation: {
-                            pattern: /[\[\]\(\)]/,
-                            greedy: true,
-                            lookbehind: true
-                        }
-                    }
+                },
+                punctuation: {
+                    pattern: /[\[\]\(\)!]/,
+                    greedy: true,
+                    lookbehind: true
                 }
             }
         },
