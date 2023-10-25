@@ -242,7 +242,7 @@ export class Editor extends EventEmittingClass {
     onEditorRenderSection(section) {
         // Render images inline in the editor.
         section.elt.querySelectorAll('.token.img').forEach((imgTokenElt) => {
-            const srcElt = imgTokenElt.querySelector('.token.cl-src');
+            const srcElt = imgTokenElt.querySelector('.img-src');
             if (!srcElt) return;
 
             // Create an img element before the .img.token and wrap both elements
@@ -256,7 +256,7 @@ export class Editor extends EventEmittingClass {
                 };
                 imgElt.src = uri;
                 // Take img size into account
-                const sizeElt = imgTokenElt.querySelector('.token.cl-size');
+                const sizeElt = imgTokenElt.querySelector('.size');
                 if (sizeElt) {
                     const match = sizeElt.textContent.match(/=(\d*)x(\d*)/);
                     if (match[1]) {

@@ -107,90 +107,113 @@ const blockNames = [
 ];
 
 export default (Prism) => {
+
+    const basicRules = {
+        color: Prism.languages.markdown.color,
+        bold: Prism.languages.markdown.bold,
+        italic: Prism.languages.markdown.italic,
+        strike: Prism.languages.markdown.strike,
+        "code-snippet": Prism.languages.markdown['code-snippet'],
+    }
+
     Prism.languages.insertBefore('markdown', 'title', {
         'h6': {
-            pattern: /^######[ \t]*?.+$/gm,
+            pattern: /^[ ]{0,3}######[ \t]*?.+$/gm,
             lookbehind: true,
-            greedy: true,
-            inside: {
-                'cl cl-hash': new RegExp(`^#`),
-            }
+            greedy: true
         },
         'h5': {
-            pattern: /^#####[ \t]*?.+$/gm,
+            pattern: /^[ ]{0,3}#####[ \t]*?.+$/gm,
             lookbehind: true,
-            greedy: true,
-            inside: {
-                'cl cl-hash': new RegExp(`^#`),
-            }
+            greedy: true
         },
         'h4': {
-            pattern: /^####[ \t]*?.+$/gm,
+            pattern: /^[ ]{0,3}####[ \t]*?.+$/gm,
             lookbehind: true,
-            greedy: true,
-            inside: {
-                'cl cl-hash': new RegExp(`^#`),
-            }
+            greedy: true
         },
         'h3': {
-            pattern: /^###[ \t]*?.+$/gm,
+            pattern: /^[ ]{0,3}###[ \t]*?.+$/gm,
             lookbehind: true,
-            greedy: true,
-            inside: {
-                'cl cl-hash': new RegExp(`^#`),
-            }
+            greedy: true
         },
         'h2': {
-            pattern: /^##[ \t]*?.+$/gm,
+            pattern: /^[ ]{0,3}##[ \t]*?.+$/gm,
             lookbehind: true,
-            greedy: true,
-            inside: {
-                'cl cl-hash': new RegExp(`^#`),
-            }
+            greedy: true
         },
         'h1': {
-            pattern: /^#[ \t]*?.+$/gm,
+            pattern: /^[ ]{0,3}#[ \t]*?.+$/gm,
             lookbehind: true,
-            greedy: true,
-            inside: {
-                'cl cl-hash': new RegExp(`^#`),
-            }
+            greedy: true
         },
 
     });
 
     Prism.languages.insertBefore('markdown', 'url', {
         'img-url': {
-            // pattern: /.*/g,
-
             // [![<label>](<imgurl>)](<linkurl>)
             pattern: /\[!\[[^\]]+\]\([^)]+\)\]\([^)]+\)/g,
             lookbehind: true,
             greedy: true,
             inside: {
-                'cl cl-title': /['‘][^'’]*['’]|["“][^"”]*["”](?=\)$)/,
-                'cl cl-src': {
+                'string': /['‘][^'’]*['’]|["“][^"”]*["”](?=\)$)/,
+                'src': {
+                    pattern: /(\)\]\()[^('" \t]+(?=[)'" \t])/,
+                    lookbehind: true
+                },
+                'img-src': {
                     pattern: /(\]\()[^('" \t]+(?=[)'" \t])/,
-                    lookbehind: true,
+                    lookbehind: true
+                },
+                'punctuation': {
+                    pattern: /[\[\]\(\)]/,
+                    greedy: true,
+                    lookbehind: true
                 }
             },
             alias: "token img"
         },
         'img': {
-            // pattern: /.*/g,
             pattern: /!\[[^\]]+\]\([^)]+\)/g,
             lookbehind: true,
             greedy: true,
-            alias: "token",
             inside: {
-                'cl cl-title': /['‘][^'’]*['’]|["“][^"”]*["”](?=\)$)/,
-                'cl cl-src': {
+                'string': /['‘][^'’]*['’]|["“][^"”]*["”](?=\)$)/,
+                'src': {
                     pattern: /(\]\()[^('" \t]+(?=[)'" \t])/,
                     lookbehind: true,
+                    inside: {
+                        punctuation: {
+                            pattern: /[\[\]\(\)]/,
+                            greedy: true,
+                            lookbehind: true
+                        }
+                    }
+                }
+            }
+        },
+        'link': {
+            pattern: /\[[^\]]+\]\([^)]+\)/g,
+            lookbehind: true,
+            greedy: true,
+            inside: {
+                'string': /['‘][^'’]*['’]|["“][^"”]*["”](?=\)$)/,
+                'src': {
+                    pattern: /(\]\()[^('" \t]+(?=[)'" \t])/,
+                    lookbehind: true,
+                    inside: {
+                        punctuation: {
+                            pattern: /[\[\]\(\)]/,
+                            greedy: true,
+                            lookbehind: true
+                        }
+                    }
                 }
             }
         }
     });
+    Prism.languages.markdown.url.inside = Prism.languages.markdown['img-url'].inside;
 
     Prism.languages.insertBefore('markdown', 'comment', {
         'image-spinner': {
@@ -256,48 +279,53 @@ export default (Prism) => {
 
     // Add inside highlighting to the header levels
     for (let i = 1; i <= 6; i++) {
-        Prism.languages.markdown['h' + i].inside.color = Prism.languages.markdown.color;
-        Prism.languages.markdown['h' + i].inside.bold = Prism.languages.markdown.bold;
-        Prism.languages.markdown['h' + i].inside.italic = Prism.languages.markdown.italic;
-        Prism.languages.markdown['h' + i].inside.strike = Prism.languages.markdown.strike;
+        Prism.languages.markdown['h' + i].inside = {
+            ...basicRules,
+            hash: /#+/
+        }
     }
 
-    const tableCell = /(?:\\.|``(?:[^`\r\n]|`(?!`))+``|`[^`\r\n]+`|[^\\|\r\n`])+/.source;
-    const tableRow = /\|?__(?:\|__)+\|?(?:(?:\n|\r\n?)|(?![\s\S]))/.source.replace(/__/g, function () { return tableCell; });
-    const tableLine = /\|?[ \t]*:?-{3,}:?[ \t]*(?:\|[ \t]*:?-{3,}:?[ \t]*)+\|?(?:\n|\r\n?)/.source;
-
-    Prism.languages.insertBefore('markdown', 'table', {
-        'table1': {
-            pattern: RegExp('^' + tableRow + tableLine + '(?:' + tableRow + ')*', 'm'),
+    Prism.languages.insertBefore('markdown', 'comment', {
+        'table-test': {
+            // Regex match does not work as we need to match the closing </span> tag.
+            // pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*?<\/span>/g,
+            pattern: /\s{0,3}\|(?:[^|]+\|)+\n(?:\s{0,3}\|\s*(?:-+\s*\|)+)(?:\s{0,3}\|(?:[^|]+\|)+\n)+/s,
+            lookbehind: true,
+            greedy: false,
             inside: {
-                'table-data-rows': {
-                    pattern: RegExp('^(' + tableRow + tableLine + ')(?:' + tableRow + ')*$'),
+                'header-row': {
+                    pattern: /^\s{0,3}\|(?:[^|\n]+\|)+\n(?=\s{0,3}\|\s*(?:-+\s*\|)+)/s,
                     lookbehind: true,
+                    greedy: false,
                     inside: {
-                        'table-data': {
-                            pattern: RegExp(tableCell),
-                            inside: Prism.languages.markdown
+                        'cell': {
+                            pattern: /(?<=\|)[^|]+(?=\|)/,
+                            lookbehind: true,
+                            greedy: false,
+                            inside: basicRules
                         },
-                        'cl cl-pipe': /\|/
+                        'pipe': /\|/
                     }
                 },
-                'table-line': {
-                    pattern: RegExp('^(' + tableRow + ')' + tableLine + '$'),
+                'table-row': {
+                    pattern: /\n\s{0,3}\|(?:[^|\n]+\|)+(?=\n|$)/s,
                     lookbehind: true,
+                    greedy: false,
                     inside: {
-                        'cl cl-pipe': /\|/,
-                        'cl-title-separator': /:?-{3,}:?/
+                        'cell': {
+                            pattern: /(?<=\|)[^|]+(?=\|)/,
+                            lookbehind: true,
+                            greedy: false,
+                            inside: basicRules
+                        },
+                        'pipe': /\|/
                     }
                 },
-                'table-header-row': {
-                    pattern: RegExp('^' + tableRow + '$'),
+                'break-row': {
+                    pattern: /\s{0,3}\|\s*(?:-+\s*\|)+/,
                     inside: {
-                        'table-header': {
-                            pattern: RegExp(tableCell),
-                            alias: 'important',
-                            inside: Prism.languages.markdown
-                        },
-                        'cl cl-pipe': /\|/
+                        'pipe': /\|/,
+                        'dash': /\-+/,
                     }
                 }
             }
@@ -312,10 +340,16 @@ export default (Prism) => {
         },
     });
 
+    Prism.languages.markdown['code-snippet'].inside = {
+        punctuation: {
+            pattern: /`/,
+            greedy: true,
+            lookbehind: true
+        }
+    }
 
     const _lmc = Prism.languages.markdown.code.find(c => !!c.inside)?.inside['code-block'];
-    _lmc && (_lmc.alias = "prism");
-    console.log(_lmc)
+    _lmc && (_lmc.alias = "prism"); // add 'prism' class to code-blocks
 
     /**
      * All known whitespace characters are matched so when
@@ -415,6 +449,14 @@ export default (Prism) => {
     //         inside: blockInner
     //     }
     // })
+
+    Prism.languages.insertBefore('markdown', 'hr', {
+        "linebreak": {
+            pattern: /^[ ]{0,3}---/,
+            greedy: true,
+            lookbehind: true
+        },
+    });
 
     // Make indentation act like it's monospace chars
     Prism.languages.insertBefore('markdown', 'comment', {

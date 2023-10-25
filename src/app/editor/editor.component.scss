@@ -55,6 +55,7 @@
         --prism-builtin-color: #9cdcfe;
         --prism-ts-keyword-color: #c586c0;
         --prism-ts-punctuation-color: #ccc;
+        --prism-url-color: #569cd6;
     }
 
     .light {
@@ -93,7 +94,27 @@
         --prism-builtin-color: #800000;
         --prism-ts-keyword-color: #af00db;
         --prism-ts-punctuation-color: #333;
+        --prism-url-color: #0000ff;
     }
+
+    // .table-test {
+    //     color: red;
+    //     .header-row {
+    //         color: green;
+    //         .cell {
+    //             color: purple
+    //         }
+    //     }
+    //     .table-row {
+    //         color: blue;
+    //         .cell {
+    //             color: pink
+    //         }
+    //     }
+    //     .break-row {
+    //         color: orange
+    //     }
+    // }
 }
 
 .contents {
@@ -112,7 +133,8 @@
 
     .editor {
         overflow: auto;
-        font-family: var(--stackedit-font-family);
+        // font-family: var(--stackedit-font-family);
+        font-family: var(--stackedit-font-family-mono);
         background-color: var(--editor-background-color);
         cursor: text;
         contain: content;
@@ -174,7 +196,7 @@
         }
 
         .cledit-section {
-            font-family: inherit;
+            font-family: var(--stackedit-font-family-mono);
 
             // ???
             span {
@@ -421,7 +443,7 @@
         a {
             color: var(--md-anchor-color);
             text-decoration: underline;
-            // text-decoration-skip: ink
+            text-decoration-skip: ink
         }
 
         a:focus,
@@ -660,16 +682,8 @@
             font-style: italic
         }
 
-        .cl-hash,
-        .cl,
-        .hr,
-        .email,
-        .url,
-        .img,
-        .imgref,
-        .link,
-        .linkref,
-        .comment {
+        .hash,
+        .hr {
             color: var(--text-muted-color);
         }
 
@@ -753,35 +767,26 @@
             font-size: .75em
         }
 
-        .cl,
         .hr {
             font-style: normal;
             font-weight: 400
         }
 
-        .em,
-        .em .cl {
+        .em {
             font-style: italic
         }
 
         .strong,
-        .strong .cl,
         .term {
             font-weight: 600
         }
 
-        .cl-del-text {
+        .strikethrough-text {
             text-decoration: line-through
         }
 
-        .cl-mark-text {
-            background-color: #f8f840;
-            color: #000
-        }
-
-        .cl-underlined-text,
-        .email,
-        .url {
+        .underlined-text,
+        .email {
             text-decoration: underline
         }
 
@@ -797,29 +802,6 @@
             bottom: -.25em;
             font-size: smaller;
             position: relative
-        }
-
-        .img .cl-underlined-text,
-        .imgref .cl-underlined-text,
-        .link .cl-underlined-text,
-        .linkref .cl-underlined-text {
-            color: var(--text-color)
-        }
-
-        .cl-title {
-            color: var(--text-color)
-        }
-
-        &--inline .cl-toc,
-        &--inline .h1,
-        &--inline .h2,
-        &--inline .h3,
-        &--inline .h4,
-        &--inline .h5,
-        &--inline .h6,
-        &--inline .h11,
-        &--inline .h22 {
-            font-size: inherit
         }
     }
 
@@ -978,10 +960,21 @@
             color: #a67f59
         }
 
-        .token.url {
-            // color: #40a6ff
+        .token.img-src,
+        .token.src {
+            color: var(--prism-url-color);
             text-decoration: underline;
             text-decoration-color: #40a6ff88;
+        }
+
+        .token.dash,
+        .token.pipe {
+            color: var(--prism-punctuation-color)
+        }
+        .token.break-row {
+            .token.dash {
+
+            }
         }
 
         .token.atrule {
