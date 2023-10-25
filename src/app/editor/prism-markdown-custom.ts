@@ -1,3 +1,11 @@
+/**
+ * This file controls the editor syntax highlighting.
+ *
+ * The order keys are assigned is _important_!
+ * The parser checks if a regex matches based on the order of the key in the containing object.
+ */
+
+
 const scanSpan = (text: string) => {
     // TODO: preprocess inline span syntax highlighting
     // <span style="">{...}</span>
@@ -153,44 +161,32 @@ export default (Prism) => {
     Prism.languages.insertBefore('markdown', 'url', {
         'img-url': {
             // [![<label>](<imgurl>)](<linkurl>)
-            pattern: /\[!\[[^\]]+\]\([^)]+\)\]\([^)]+\)/g,
+            pattern: /\[!\[[^\]\n]+?\]\((?:\([^\)\n]+?\)|[^\(\)\n]+?)+?\)\]\([^\)\n]+?\)/,
+            // pattern: /\[!\[[^\]]+\]\(/,
             lookbehind: true,
             greedy: true,
             inside: {
-                'string': {
-                    pattern: /(!\[)[^\]]+(?=])/,
-                    lookbehind: true,
-                },
                 'src': {
-                    pattern: /(\)\]\()[^('" \t]+(?=[)'" \t])/,
-                    lookbehind: true
-                },
-                'img-src': {
-                    pattern: /(\]\()[^('" \t]+(?=[)'" \t])/,
-                    lookbehind: true
-                },
-                'punctuation': {
-                    pattern: /[\[\]\(\)!]/,
-                    greedy: true,
+                    pattern: /(\()(?:\([^\)\r\n]+\)|[^\(\)\r\n])+?(?=\)$)/,
                     lookbehind: true
                 }
             },
-            alias: "token img"
+            alias: "token"
         },
         'img': {
-            pattern: /!\[[^\]]+\]\([^)]+\)/g,
+            pattern: /!\[[^\]\r\n]+\]\((?:\([^\)\r\n]+\)|[^\(\)\r\n])+?\)/,
             lookbehind: true,
             greedy: true,
             inside: {
                 'string': {
-                    pattern: /(!\[)[^\]]+(?=])/,
+                    pattern: /(!\[)[^\]\r\n]+(?=\])/,
                     lookbehind: true,
                 },
                 'img-src': {
-                    pattern: /(\]\()[^('" \t]+(?=[)'" \t])/,
+                    pattern: /(\]\()[^\r\n]+(?=\))/s,
                     lookbehind: true,
                 },
-                punctuation: {
+                'punctuation': {
                     pattern: /[\[\]\(\)!]/,
                     greedy: true,
                     lookbehind: true
@@ -198,7 +194,7 @@ export default (Prism) => {
             }
         },
         'link': {
-            pattern: /\[[^\]]+\]\([^)]+\)/g,
+            pattern: /\[[^\]]+?\]\([^)]+?\)/g,
             lookbehind: true,
             greedy: true,
             inside: {
@@ -207,7 +203,7 @@ export default (Prism) => {
                     pattern: /(\]\()[^('" \t]+(?=[)'" \t])/,
                     lookbehind: true,
                     inside: {
-                        punctuation: {
+                        'punctuation': {
                             pattern: /[\[\]\(\)]/,
                             greedy: true,
                             lookbehind: true
@@ -217,7 +213,14 @@ export default (Prism) => {
             }
         }
     });
-    Prism.languages.markdown.url.inside = Prism.languages.markdown['img-url'].inside;
+
+    // Order of assignment is quite important
+    Prism.languages.markdown['img-url'].inside.img = Prism.languages.markdown['img'];
+    Prism.languages.markdown['img-url'].inside.punctuation = {
+        pattern: /[\[\]\(\)!]/,
+        greedy: true,
+        lookbehind: true
+    };
 
     Prism.languages.insertBefore('markdown', 'comment', {
         'image-spinner': {
@@ -290,7 +293,7 @@ export default (Prism) => {
     }
 
     Prism.languages.insertBefore('markdown', 'comment', {
-        'table-test': {
+        'table': {
             // Regex match does not work as we need to match the closing </span> tag.
             // pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*?<\/span>/g,
             pattern: /\s{0,3}\|(?:[^|]+\|)+\n(?:\s{0,3}\|\s*(?:-+\s*\|)+)(?:\s{0,3}\|(?:[^|]+\|)+\n)+/s,
