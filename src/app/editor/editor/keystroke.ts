@@ -241,7 +241,7 @@ export const defaultKeystrokes = [
         if (evt.code !== 'ArrowLeft' && evt.code !== 'ArrowRight') {
             return false;
         }
-        const isJump = (false && evt.altKey) || (!true && evt.ctrlKey);
+        const isJump = (isMac && evt.altKey) || (!isMac && evt.ctrlKey);
         if (!isJump) {
             return false;
         }
