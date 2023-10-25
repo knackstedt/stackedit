@@ -157,7 +157,10 @@ export default (Prism) => {
             lookbehind: true,
             greedy: true,
             inside: {
-                'string': /['‘][^'’]*['’]|["“][^"”]*["”](?=\)$)/,
+                'string': {
+                    pattern: /(!\[)[^\]]+(?=])/,
+                    lookbehind: true,
+                },
                 'src': {
                     pattern: /(\)\]\()[^('" \t]+(?=[)'" \t])/,
                     lookbehind: true
@@ -167,7 +170,7 @@ export default (Prism) => {
                     lookbehind: true
                 },
                 'punctuation': {
-                    pattern: /[\[\]\(\)]/,
+                    pattern: /[\[\]\(\)!]/,
                     greedy: true,
                     lookbehind: true
                 }
