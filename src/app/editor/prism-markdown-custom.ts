@@ -346,6 +346,17 @@ export default (Prism) => {
                 }
             }
         },
+        'blockquote': {
+            pattern: /(^|\n)\s*>.+?(?=\n|$)/s,
+            lookbehind: true,
+            greedy: true,
+            inside: {
+                'punctuation': /(^|\n)\s*>/,
+                'content': {
+                    pattern: /.+/
+                }
+            }
+        },
         'injection-fence': {
             pattern: /\`\`\`<injected>(?:.+?)<\/injected>\s*\`\`\`/s,
             greedy: true,
@@ -361,25 +372,26 @@ export default (Prism) => {
             }
         },
         'check-list': {
-            pattern: /^\s+-\s+\[[Xx ]?\]\s+.+$/s,
+            pattern: /^\s+[-*]\s+\[[Xx ]?\]\s+.+$/s,
             lookbehind: true,
             greedy: true,
             inside: {
-                'punctuation': /(\n|^)\s+-\s+\[[Xx ]?\]/,
+                'punctuation': /(\n|^)\s+[-*]\s+\[[Xx ]?\]/,
                 ...basicRules
             }
         },
         'bullet-list': {
-            pattern: /^\s+-\s+.+$/s,
+            pattern: /^\s+[-*]\s+.+$/s,
             lookbehind: true,
             greedy: true,
             inside: {
-                'punctuation': /(\n|^)\s+-/,
+                'punctuation': /(\n|^)\s+[-*]/,
                 ...basicRules
             }
         }
     });
     Prism.languages.markdown['span-styled'].inside.content.inside.color = Prism.languages.markdown['span-styled'];
+    Prism.languages.markdown['blockquote'].inside.content.inside = Prism.languages.markdown;
 
     // Add inside highlighting to the header levels
     for (let i = 1; i <= 6; i++) {

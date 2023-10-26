@@ -56,6 +56,7 @@
         --prism-ts-keyword-color: #c586c0;
         --prism-ts-punctuation-color: #ccc;
         --prism-url-color: #569cd6;
+        --prism-table-header-color: #d7ba7d;
     }
 
     .light {
@@ -95,6 +96,7 @@
         --prism-ts-keyword-color: #af00db;
         --prism-ts-punctuation-color: #333;
         --prism-url-color: #0000ff;
+        --prism-table-header-color: #800000;
     }
 }
 
@@ -637,16 +639,24 @@
             font-family: var(--stackedit-font-family-mono);
         }
 
-        .code:not(.code-snippet), .pre, .table {
+        .code:not(.code-snippet),
+        .pre,
+        .table-block,
+        .blockquote {
             background-color: var(--code-background-color);
             padding: 6px 12px;
             border-radius: 5px;
+            display: inline-block !important;
         }
 
-        .code:not(.code-snippet) {
-            // Inline block to handle background correctly
-            display: inline-block !important;
+        .code:not(.code-snippet),
+        .blockquote {
             width: 100%;
+        }
+
+        .blockquote {
+            color: var(--md-blockquote-color);
+            border-left: 7px solid var(--md-blockquote-border-color);
         }
 
         .pre {
@@ -904,6 +914,10 @@
         .token.image-spinner {
             color: #0000;
             // background-image: url();
+        }
+        .token.table-block .header-row {
+            color: var(--prism-table-header-color);
+            font-weight: 600;
         }
 
         .namespace {
