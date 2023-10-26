@@ -968,13 +968,9 @@
         }
 
         .token.dash,
+        .token.colon,
         .token.pipe {
             color: var(--prism-punctuation-color)
-        }
-        .token.break-row {
-            .token.dash {
-
-            }
         }
 
         .token.atrule {

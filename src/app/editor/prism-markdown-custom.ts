@@ -296,7 +296,7 @@ export default (Prism) => {
         'table-block': {
             // Regex match does not work as we need to match the closing </span> tag.
             // pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*?<\/span>/g,
-            pattern: /\s{0,3}\|(?:[^|]+\|)+\n(?:\s{0,3}\|\s*(?:-+\s*\|)+)(?:\s{0,3}\|(?:[^|]+\|)+\n)+/s,
+            pattern: /\s{0,3}\|(?:[^|]+\|)+\n(?:\s{0,3}\|\s*(?::?-+:?\s*\|)+)(?:\s{0,3}\|(?:[^|]+\|)+\n)+/s,
             lookbehind: true,
             greedy: false,
             inside: {
@@ -329,10 +329,11 @@ export default (Prism) => {
                     }
                 },
                 'break-row': {
-                    pattern: /\s{0,3}\|\s*(?:-+\s*\|)+/,
+                    pattern: /\s{0,3}\|\s*(?::?-+:?\s*\|)+/,
                     inside: {
                         'pipe': /\|/,
                         'dash': /\-+/,
+                        'colon': /:/,
                     }
                 }
             }
