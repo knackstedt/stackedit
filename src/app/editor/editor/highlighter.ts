@@ -64,9 +64,8 @@ export class Highlighter extends EventEmittingClass {
     }, 25)
 
     parseSections(content: string, isInit = false) {
-        if (this.isComposing && !this.cancelComposition) {
+        if (this.isComposing && !this.cancelComposition)
             return this.sectionList;
-        }
 
         this.cancelComposition = false;
         const newSectionList: Section[] = (this.editor.options.sectionParser
@@ -149,11 +148,13 @@ export class Highlighter extends EventEmittingClass {
         };
 
         const newSectionEltList = document.createDocumentFragment();
+
         modifiedSections.forEach((section) => {
             section.forceHighlighting = false;
             highlight(section);
             newSectionEltList.appendChild(section.elt);
         });
+
         this.editor.watcher.noWatch(() => {
             if (isInit) {
                 this.contentElt.innerHTML = '';

@@ -85,7 +85,7 @@ const blockquoteBlockTypeMap = createFlagMap([
     'blockquote_open',
 ]);
 const tableBlockTypeMap = createFlagMap([
-    'table_open',
+    'table_open'
 ]);
 const deflistBlockTypeMap = createFlagMap([
     'dl_open',
@@ -119,11 +119,13 @@ export default {
 
         Object.keys(startSectionBlockTypeMap).forEach((type) => {
             const rule = converter.renderer.rules[type] || converter.renderer.renderToken;
+
             converter.renderer.rules[type] = (tokens, idx, opts, env, self) => {
                 if (tokens[idx]['sectionDelimiter']) {
                     // Add section delimiter
                     return htmlSectionMarker + rule.call(converter.renderer, tokens, idx, opts, env, self);
                 }
+
                 return rule.call(converter.renderer, tokens, idx, opts, env, self);
             };
         });
@@ -163,33 +165,31 @@ export default {
                 text: '',
                 data,
             };
-            for (; i < maxLine; i += 1) {
+
+            // Limit the execution of this lookup.
+            for (; i < maxLine && i < 1000000; i += 1) {
                 section.text += `${lines[i]}\n`;
             }
-            if (section) {
-                parsingCtx.sections.push(section);
-            }
+
+            parsingCtx.sections.push(section);
         }
+
         markdownState.tokens.forEach((token, index) => {
             // index === 0 means there are empty lines at the begining of the file
-            if (token.level === 0 && startSectionBlockTypeMap[token.type] === true) {
+            if (token.level === 0 && startSectionBlockTypeMap[token.type]) {
                 if (index > 0) {
                     token['sectionDelimiter'] = true;
                     addSection(token.map[0]);
                 }
-                if (listBlockTypeMap[token.type] === true) {
-                    data = 'list';
-                } else if (blockquoteBlockTypeMap[token.type] === true) {
-                    data = 'blockquote';
-                } else if (tableBlockTypeMap[token.type] === true) {
-                    data = 'table';
-                } else if (deflistBlockTypeMap[token.type] === true) {
-                    data = 'deflist';
-                } else {
-                    data = 'main';
-                }
+
+                if (listBlockTypeMap[token.type])            data = 'list';
+                else if (blockquoteBlockTypeMap[token.type]) data = 'blockquote';
+                else if (tableBlockTypeMap[token.type])      data = 'table';
+                else if (deflistBlockTypeMap[token.type])    data = 'deflist';
+                else                                         data = 'main';
             }
         });
+
         addSection(lines.length);
         return parsingCtx;
     },
@@ -212,13 +212,14 @@ export default {
 
         const { tokens } = parsingCtx.markdownState;
 
-        const html = parsingCtx.converter.renderer.render(
+        const html: string = parsingCtx.converter.renderer.render(
             tokens,
             parsingCtx.converter.options,
             parsingCtx.markdownState.env,
         );
 
         const htmlSectionList = html.split(htmlSectionMarker);
+
         if (htmlSectionList[0] === '') {
             htmlSectionList.shift();
         }

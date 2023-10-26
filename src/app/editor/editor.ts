@@ -33,21 +33,22 @@ export class SectionDesc {
     public previewDimension: SectionDimension;
     public tocDimension: SectionDimension;
 
-    // public ulid = ulid();
+    public previewText: string;
+    public textToPreviewDiffs: [0 | 1 | -1, string][];
+
+    public ulid = ulid();
 
     constructor(
         public section: Section,
         public previewElt: HTMLElement,
         public tocElt: HTMLElement,
-        public html
+        public html: string
     ) {
         this.editorElt = section.elt;
-        // if (previewElt)
-        //     previewElt.setAttribute("ulid", this.ulid);
-        // if (tocElt)
-        //     tocElt.setAttribute("ulid", this.ulid);
-        // if (section.elt)
-        //     section.elt.setAttribute("ulid", this.ulid);
+
+        previewElt?.setAttribute("ulid", this.ulid);
+        tocElt?.setAttribute("ulid", this.ulid);
+        section?.elt?.setAttribute("ulid", this.ulid);
     }
 }
 
@@ -167,7 +168,6 @@ export class Editor extends EventEmittingClass {
                 if (scrollMode == "editor" || lastScrollEvent + scrollDebounceTime < Date.now()) {
                     scrollMode = "editor";
                     lastScrollEvent = Date.now();
-                    // console.log("A");
                     onScroll(evt);
                 }
             });
@@ -175,7 +175,6 @@ export class Editor extends EventEmittingClass {
                 if (scrollMode == "preview" || lastScrollEvent + scrollDebounceTime < Date.now()) {
                     scrollMode = "preview";
                     lastScrollEvent = Date.now();
-                    // console.log("B");
                     onScroll(evt);
                 }
             });
@@ -275,14 +274,10 @@ export class Editor extends EventEmittingClass {
                 imgElt.onload = () => {
                     imgElt.style.display = '';
 
-                    // TODO figure out why this delay is needed
-                    // setTimeout(() => {
-                        // this.measureSectionDimensions(false, true);
-                        sectionUtils.measureSectionDimensions(this);
-                        this.previewCtxMeasured = this.previewCtx;
+                    sectionUtils.measureSectionDimensions(this);
+                    this.previewCtxMeasured = this.previewCtx;
 
-                        this.restoreScrollPosition();
-                    // }, 0);
+                    this.restoreScrollPosition();
                 };
                 imgElt.src = uri;
                 // Take img size into account
@@ -305,19 +300,6 @@ export class Editor extends EventEmittingClass {
             imgTokenWrapper.appendChild(imgTokenElt);
         });
 
-        section.elt.querySelectorAll('.injection-fence').forEach((fenceElement: HTMLElement) => {
-            const insertWrapper = document.createElement('div');
-            insertWrapper.className = 'token injection-portal';
-            insertWrapper.setAttribute("source", '');
-
-            // fenceElement.setAttribute('source', fenceElement.textContent);
-            const insertion = fenceElement.textContent.replace(/^```<injected>\n?|<\/injected>\s*```$/g, '');
-
-            insertWrapper.innerHTML = insertion;//htmlSanitizer.sanitizeHtml(insertion);
-            fenceElement.insertAdjacentElement('beforebegin', insertWrapper);
-            // insertWrapper.appendChild(fenceElement);
-        });
-
         section.elt.querySelectorAll('.image-spinner').forEach((fenceElement: HTMLElement) => {
             const insertWrapper = document.createElement('div');
             insertWrapper.className = 'img-spinner';
@@ -326,93 +308,6 @@ export class Editor extends EventEmittingClass {
             fenceElement.insertAdjacentElement('beforebegin', insertWrapper);
             fenceElement.remove();
         });
-
-
-        // section.elt.querySelectorAll('.code-block').forEach((imgTokenElt) => {
-
-        //     // Create an img element before the .img.token and wrap both elements
-        //     // into a .token.img-wrapper
-        //     const imgElt = document.createElement('div');
-
-        //     const imgTokenWrapper = document.createElement('span');
-        //     imgTokenWrapper.className = 'token img-wrapper';
-        //     imgTokenElt.parentNode.insertBefore(imgTokenWrapper, imgTokenElt);
-        //     imgTokenWrapper.appendChild(imgElt);
-        //     imgTokenWrapper.appendChild(imgTokenElt);
-        // });
-
-        // ! Experimental
-        // if (this.ngEditor.useMonacoEditor) {
-        //     section.elt.querySelectorAll('.code-block').forEach((fenceElement: HTMLElement) => {
-        //         console.log("bootstrap monaco ediotr")
-        //         fenceElement.parentElement.classList.add("vscode-injected");
-        //         const language = fenceElement.parentElement.querySelector('.code-language').textContent;
-
-        //         const insertWrapper = document.createElement('div');
-        //         insertWrapper.classList.add('injected-monaco-editor');
-        //         insertWrapper.style.display = "block";
-        //         insertWrapper.style.width = "100%";
-
-        //         const getHeight = () => {
-
-        //         }
-
-        //         insertWrapper.style.height = "500px";
-        //         const settings = {
-        //             theme: "vs-dark",
-        //             automaticLayout: true,
-        //             colorDecorators: true,
-        //             folding: true,
-        //             fontSize: 16,
-        //             // fontFamily: 'Dr',
-        //             scrollbar: {
-        //                 alwaysConsumeMouseWheel: false,
-        //             },
-        //             smoothScrolling: true,
-        //             mouseWheelScrollSensitivity: 2,
-        //             scrollBeyondLastLine: false,
-        //             value: fenceElement.textContent,
-        //             language: language || 'auto'
-        //         };
-        //         const editor = self['monaco'].editor.create(insertWrapper, settings);
-        //         insertWrapper.setAttribute("source", fenceElement.textContent);
-        //         insertWrapper.setAttribute("contenteditable", "false");
-        //         insertWrapper['_editor'] = editor;
-
-        //         // disable click handler so contenteditable
-        //         // doesn't try to handle the click event
-        //         // Disable onmouseup to prevent our own listener from changing the selection
-        //         // insertWrapper.onkeyup =
-        //         insertWrapper.onkeyup = (evt) => {
-        //             // evt.preventDefault();
-        //             evt.stopPropagation();
-        //         }
-
-        //         insertWrapper.onkeydown = (evt) => {
-        //             // evt.preventDefault();
-        //             evt.stopPropagation();
-        //         }
-
-        //         insertWrapper.onclick =
-        //         insertWrapper.onmouseup = (evt: any) => {
-        //             evt.preventDefault();
-        //             evt.stopPropagation()
-        //         }
-
-        //         editor.getModel().onDidChangeContent(() => {
-        //             const text = editor.getValue();
-        //             const cleanedText = text.replace(/\\n/gm, '\n')
-        //                                     .replace(/\\"/gm, '"');
-
-        //             insertWrapper.setAttribute("source", cleanedText);
-        //             // TODO: handle text change event passively
-        //             this.clEditor.onMutationObserved([]);
-        //         });
-
-        //         fenceElement.insertAdjacentElement('beforebegin', insertWrapper);
-        //         fenceElement.remove();
-        //     });
-        // }
     }
 
     makePatches() {
@@ -502,16 +397,19 @@ export class Editor extends EventEmittingClass {
 
         let result;
 
-        this.previewCtxMeasured?.sectionDescList.some((sectionDesc, sectionIdx) => {
-            if (scrollTop >= sectionDesc[dimensionKey].endOffset) {
+        this.previewCtxMeasured?.sectionDescList.find((sectionDesc, sectionIdx) => {
+            if (!sectionDesc[dimensionKey]) return false;
+
+            if (scrollTop >= (sectionDesc[dimensionKey].topOffset + sectionDesc[dimensionKey].height)) {
                 return false;
             }
-            const posInSection = (scrollTop - sectionDesc[dimensionKey].startOffset) /
+            const posInSection = (scrollTop - sectionDesc[dimensionKey].topOffset) /
                 (sectionDesc[dimensionKey].height || 1);
 
             result = {
+                sectionDesc,
                 sectionIdx,
-                posInSection,
+                posInSection
             };
             return true;
         });
@@ -523,22 +421,18 @@ export class Editor extends EventEmittingClass {
      * Restore the scroll position from the current file content state.
      */
     restoreScrollPosition(scrollPosition?) {
+        const sectionDesc: SectionDesc = this.previewCtxMeasured?.sectionDescList[scrollPosition?.sectionIdx];
+        if (!sectionDesc) return;
 
-        if (!scrollPosition || !this.previewCtxMeasured)
-            return;
+        const editorScrollTop = sectionDesc.editorDimension.topOffset +
+            (sectionDesc.editorDimension.height * scrollPosition.posInSection);
 
-        const sectionDesc = this.previewCtxMeasured.sectionDescList[scrollPosition.sectionIdx];
-        if (sectionDesc) {
-            const editorScrollTop = sectionDesc.editorDimension.startOffset +
-                (sectionDesc.editorDimension.height * scrollPosition.posInSection);
+        this.editorElt.scrollTop = editorScrollTop;
 
-            (this.editorElt as HTMLElement).scrollTop = Math.floor(editorScrollTop);
+        const previewScrollTop = sectionDesc.previewDimension.topOffset +
+            (sectionDesc.previewDimension.height * scrollPosition.posInSection);
 
-            const previewScrollTop = sectionDesc.previewDimension.startOffset +
-                (sectionDesc.previewDimension.height * scrollPosition.posInSection);
-
-            (this.previewElt.parentNode as HTMLElement).scrollTop = Math.floor(previewScrollTop);
-        }
+        this.previewElt.parentElement.scrollTop = previewScrollTop;
     }
 
     /**
@@ -554,7 +448,7 @@ export class Editor extends EventEmittingClass {
         }
         let offset = editorOffset;
         let previewOffset = 0;
-        sectionDescList.some((sectionDesc) => {
+        sectionDescList.find((sectionDesc) => {
             if (!sectionDesc.textToPreviewDiffs) {
                 previewOffset = null;
                 return true;
@@ -583,7 +477,7 @@ export class Editor extends EventEmittingClass {
         }
         let offset = previewOffset;
         let editorOffset = 0;
-        sectionDescList.some((sectionDesc) => {
+        sectionDescList.find((sectionDesc) => {
             if (!sectionDesc.textToPreviewDiffs) {
                 editorOffset = null;
                 return true;
@@ -684,6 +578,7 @@ export class Editor extends EventEmittingClass {
      */
     async refreshPreview() {
         const sectionDescList: SectionDesc[] = [];
+
         let sectionPreviewElt;
         let sectionTocElt;
         let sectionIdx = 0;
@@ -700,6 +595,7 @@ export class Editor extends EventEmittingClass {
                 if (item[0] === 0) {
                     let sectionDesc = this.previewCtx.sectionDescList[sectionDescIdx] as SectionDesc;
                     sectionDescIdx++;
+
                     if (sectionDesc.editorElt !== section.elt) {
                         // Force textToPreviewDiffs computation
                         sectionDesc = new SectionDesc(
@@ -709,6 +605,7 @@ export class Editor extends EventEmittingClass {
                             sectionDesc.html,
                         );
                     }
+
                     sectionDescList.push(sectionDesc);
                     previewHtml += sectionDesc.html;
                     sectionIdx++;
@@ -776,7 +673,6 @@ export class Editor extends EventEmittingClass {
                     previewHtml += html;
                     sectionDescList.push(new SectionDesc(section, sectionPreviewElt, sectionTocElt, html));
                 }
-
             }
 
             // Mark the item as having been rastered
@@ -812,7 +708,7 @@ export class Editor extends EventEmittingClass {
         await Promise.all(loadedPromises);
 
         // Debounce if sections have already been measured
-        this.measureSectionDimensions(!!this.previewCtxMeasured);
+        this.measureSectionDimensions(!!this.previewCtxMeasured, true);
     }
 
     /**
