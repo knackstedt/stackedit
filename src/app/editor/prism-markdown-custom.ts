@@ -116,47 +116,49 @@ const blockNames = [
 
 export default (Prism) => {
 
-    const basicRules = {
-        color: Prism.languages.markdown.color,
-        bold: Prism.languages.markdown.bold,
-        italic: Prism.languages.markdown.italic,
-        strike: Prism.languages.markdown.strike,
-        "code-snippet": Prism.languages.markdown['code-snippet'],
-    }
+    const spanStyled = {
+        // Regex match does not work as we need to match the closing </span> tag.
+        // pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*?<\/span>/g,
+        pattern: {
+            /**
+             * Instead we implement the exec method that Prism ultimately calls.
+             * Return `null` if there are no matches, or the first match in the
+             * format of a regex exec result.
+             */
+            exec: (str: string) => {
+                const root = scanSpan(str);
+                const match = root.children[0];
 
-    Prism.languages.insertBefore('markdown', 'title', {
-        'h6': {
-            pattern: /^[ ]{0,3}######[ \t]*?.+$/gm,
-            lookbehind: true,
-            greedy: true
-        },
-        'h5': {
-            pattern: /^[ ]{0,3}#####[ \t]*?.+$/gm,
-            lookbehind: true,
-            greedy: true
-        },
-        'h4': {
-            pattern: /^[ ]{0,3}####[ \t]*?.+$/gm,
-            lookbehind: true,
-            greedy: true
-        },
-        'h3': {
-            pattern: /^[ ]{0,3}###[ \t]*?.+$/gm,
-            lookbehind: true,
-            greedy: true
-        },
-        'h2': {
-            pattern: /^[ ]{0,3}##[ \t]*?.+$/gm,
-            lookbehind: true,
-            greedy: true
-        },
-        'h1': {
-            pattern: /^[ ]{0,3}#[ \t]*?.+$/gm,
-            lookbehind: true,
-            greedy: true
-        },
+                if (!match)
+                    return null;
 
-    });
+                const res = [match].map(m => str.slice(m.outerStartIndex, m.outerEndIndex));
+
+                res['index'] = match?.outerStartIndex;
+                res['input'] = str;
+                res['groups'] = { foo: 'bar' };
+                return res;
+            }
+        },
+        lookbehind: true,
+        greedy: false,
+        inside: {
+            "color-hex": {
+                pattern: /#(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})(?=[^A-Fa-f0-9])/,
+                lookbehind: true,
+                greedy: true
+            },
+            "content": {
+                pattern: /(?<=<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">).+(?=<\/span>)/,
+                lookbehind: true,
+                greedy: true,
+                inside: Prism.languages.markdown
+            },
+            ['special-attr']: Prism.languages.markdown['special-attr'],
+            punctuation: Prism.languages.markdown.punctuation,
+            tag: Prism.languages.markdown.tag
+        }
+    };
 
     Prism.languages.insertBefore('markdown', 'url', {
         'img-url': {
@@ -198,7 +200,10 @@ export default (Prism) => {
             lookbehind: true,
             greedy: true,
             inside: {
-                'string': /['‘][^'’]*['’]|["“][^"”]*["”](?=\)$)/,
+                'string': {
+                    pattern: /(\[)[^\]\r\n]+(?=\])/,
+                    lookbehind: true,
+                },
                 'src': {
                     pattern: /(\]\()[^('" \t]+(?=[)'" \t])/,
                     lookbehind: true,
@@ -209,9 +214,77 @@ export default (Prism) => {
                             lookbehind: true
                         }
                     }
+                },
+                'punctuation': {
+                    pattern: /[\[\]\(\)]/,
+                    greedy: true,
+                    lookbehind: true
                 }
             }
         }
+    });
+
+    Prism.languages.markdown['code-snippet'].inside = {
+        punctuation: {
+            pattern: /`/,
+            greedy: true,
+            lookbehind: true
+        }
+    }
+
+    Prism.languages.insertBefore('markdown', 'hr', {
+        "linebreak": {
+            pattern: /^[ ]{0,3}---/,
+            greedy: true,
+            lookbehind: true
+        },
+    });
+
+    Prism.languages.insertBefore('markdown', 'comment', { 'span-styled': spanStyled });
+    const basicRules = {
+        color: Prism.languages.markdown.color,
+        bold: Prism.languages.markdown.bold,
+        italic: Prism.languages.markdown.italic,
+        strike: Prism.languages.markdown.strike,
+        'code-snippet': Prism.languages.markdown['code-snippet'],
+        'span-styled': Prism.languages.markdown['span-styled'],
+        'img-url': Prism.languages.markdown['img-url'],
+        'img': Prism.languages.markdown['img'],
+        'link': Prism.languages.markdown['link']
+    }
+
+    Prism.languages.insertBefore('markdown', 'title', {
+        'h6': {
+            pattern: /^[ ]{0,3}######[ \t]*?.+$/gm,
+            lookbehind: true,
+            greedy: true
+        },
+        'h5': {
+            pattern: /^[ ]{0,3}#####[ \t]*?.+$/gm,
+            lookbehind: true,
+            greedy: true
+        },
+        'h4': {
+            pattern: /^[ ]{0,3}####[ \t]*?.+$/gm,
+            lookbehind: true,
+            greedy: true
+        },
+        'h3': {
+            pattern: /^[ ]{0,3}###[ \t]*?.+$/gm,
+            lookbehind: true,
+            greedy: true
+        },
+        'h2': {
+            pattern: /^[ ]{0,3}##[ \t]*?.+$/gm,
+            lookbehind: true,
+            greedy: true
+        },
+        'h1': {
+            pattern: /^[ ]{0,3}#[ \t]*?.+$/gm,
+            lookbehind: true,
+            greedy: true
+        },
+
     });
 
     // Order of assignment is quite important
@@ -228,71 +301,6 @@ export default (Prism) => {
             lookbehind: true,
             greedy: true
         },
-        'span-styled': {
-            // Regex match does not work as we need to match the closing </span> tag.
-            // pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*?<\/span>/g,
-            pattern: {
-                /**
-                 * Instead we implement the exec method that Prism ultimately calls.
-                 * Return `null` if there are no matches, or the first match in the
-                 * format of a regex exec result.
-                 */
-                exec: (str: string) => {
-                    const root = scanSpan(str);
-                    const match = root.children[0];
-
-                    if (!match)
-                        return null;
-
-                    const res = [match].map(m => str.slice(m.outerStartIndex, m.outerEndIndex));
-
-                    res['index'] = match?.outerStartIndex;
-                    res['input'] = str;
-                    res['groups'] = { foo: 'bar'};
-                    return res;
-                }
-            },
-            lookbehind: true,
-            greedy: false,
-            inside: {
-                "color-hex": {
-                    pattern: /#(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})(?=[^A-Fa-f0-9])/,
-                    lookbehind: true,
-                    greedy: true
-                },
-                "content": {
-                    pattern: /(?<=<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">).+(?=<\/span>)/,
-                    lookbehind: true,
-                    greedy: true,
-                    inside: Prism.languages.markdown,
-                    // inside: {
-                    //     url: Prism.languages.markdown.url,
-                    //     bold: Prism.languages.markdown.bold,
-                    //     italic: Prism.languages.markdown.italic,
-                    //     strike: Prism.languages.markdown.strike,
-                    //     'code-snippet': Prism.languages.markdown['code-snippet'],
-                    //     'span-styled': Prism.languages.markdown.color,
-                    //     img: Prism.languages.markdown.img,
-                    //     'img-url': Prism.languages.markdown['img-url']
-                    // }
-                },
-                ['special-attr']: Prism.languages.markdown['special-attr'],
-                punctuation: Prism.languages.markdown.punctuation,
-                tag: Prism.languages.markdown.tag
-            }
-        }
-    });
-    Prism.languages.markdown['span-styled'].inside.content.inside.color = Prism.languages.markdown['span-styled'];
-
-    // Add inside highlighting to the header levels
-    for (let i = 1; i <= 6; i++) {
-        Prism.languages.markdown['h' + i].inside = {
-            ...basicRules,
-            hash: /#+/
-        }
-    }
-
-    Prism.languages.insertBefore('markdown', 'comment', {
         'table-block': {
             // Regex match does not work as we need to match the closing </span> tag.
             // pattern: /<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">.*?<\/span>/g,
@@ -337,155 +345,52 @@ export default (Prism) => {
                     }
                 }
             }
-        }
-    });
-
-    Prism.languages.insertBefore('markdown', 'comment', {
+        },
         'injection-fence': {
             pattern: /\`\`\`<injected>(?:.+?)<\/injected>\s*\`\`\`/s,
             greedy: true,
             lookbehind: true
         },
-    });
-
-    Prism.languages.markdown['code-snippet'].inside = {
-        punctuation: {
-            pattern: /`/,
+        'number-list': {
+            pattern: /^\s+\d\.\s+.+$/s,
+            lookbehind: true,
             greedy: true,
-            lookbehind: true
+            inside: {
+                'punctuation': /(\n|^)\s+\d\./,
+                ...basicRules
+            }
+        },
+        'check-list': {
+            pattern: /^\s+-\s+\[[Xx ]?\]\s+.+$/s,
+            lookbehind: true,
+            greedy: true,
+            inside: {
+                'punctuation': /(\n|^)\s+-\s+\[[Xx ]?\]/,
+                ...basicRules
+            }
+        },
+        'bullet-list': {
+            pattern: /^\s+-\s+.+$/s,
+            lookbehind: true,
+            greedy: true,
+            inside: {
+                'punctuation': /(\n|^)\s+-/,
+                ...basicRules
+            }
+        }
+    });
+    Prism.languages.markdown['span-styled'].inside.content.inside.color = Prism.languages.markdown['span-styled'];
+
+    // Add inside highlighting to the header levels
+    for (let i = 1; i <= 6; i++) {
+        Prism.languages.markdown['h' + i].inside = {
+            ...basicRules,
+            hash: /#+/
         }
     }
 
     const _lmc = Prism.languages.markdown.code.find(c => !!c.inside)?.inside['code-block'];
     _lmc && (_lmc.alias = "prism"); // add 'prism' class to code-blocks
-
-    /**
-     * All known whitespace characters are matched so when
-     * whitespace visibility is enabled we can visualize them
-     *
-     * ? Is this problematic for non-latin languages
-     */
-    const invisibleChars: [string, number][] = [
-        [ "CHARACTER TABULATION",         0x0009 ],
-        [ "SPACE",                        0x0020 ],
-        [ "NO-BREAK SPACE",               0x00A0 ],
-        [ "SOFT HYPHEN",                  0x00AD ],
-        [ "COMBINING GRAPHEME JOINER",    0x034F ],
-        [ "ARABIC LETTER MARK",           0x061C ],
-        [ "HANGUL CHOSEONG FILLER",       0x115F ],
-        [ "HANGUL JUNGSEONG FILLER",      0x1160 ],
-        [ "KHMER VOWEL INHERENT AQ",      0x17B4 ],
-        [ "KHMER VOWEL INHERENT AA",      0x17B5 ],
-        [ "MONGOLIAN VOWEL SEPARATOR",    0x180E ],
-        [ "EN QUAD",                      0x2000 ],
-        [ "EM QUAD",                      0x2001 ],
-        [ "EN SPACE",                     0x2002 ],
-        [ "EM SPACE",                     0x2003 ],
-        [ "THREE-PER-EM SPACE",           0x2004 ],
-        [ "FOUR-PER-EM SPACE",            0x2005 ],
-        [ "SIX-PER-EM SPACE",             0x2006 ],
-        [ "FIGURE SPACE",                 0x2007 ],
-        [ "PUNCTUATION SPACE",            0x2008 ],
-        [ "THIN SPACE",                   0x2009 ],
-        [ "HAIR SPACE",                   0x200A ],
-        [ "ZERO WIDTH SPACE",             0x200B ],
-        [ "ZERO WIDTH NON-JOINER",        0x200C ],
-        [ "ZERO WIDTH JOINER",            0x200D ],
-        [ "LEFT-TO-RIGHT MARK",           0x200E ],
-        [ "RIGHT-TO-LEFT MARK",           0x200F ],
-        [ "NARROW NO-BREAK SPACE",        0x202F ],
-        [ "MEDIUM MATHEMATICAL SPACE",    0x205F ],
-        [ "WORD JOINER",                  0x2060 ],
-        [ "FUNCTION APPLICATION",         0x2061 ],
-        [ "INVISIBLE TIMES",              0x2062 ],
-        [ "INVISIBLE SEPARATOR",          0x2063 ],
-        [ "INVISIBLE PLUS",               0x2064 ],
-        [ "INHIBIT SYMMETRIC SWAPPING",   0x206A ],
-        [ "ACTIVATE SYMMETRIC SWAPPING",  0x206B ],
-        [ "INHIBIT ARABIC FORM SHAPING",  0x206C ],
-        [ "ACTIVATE ARABIC FORM SHAPING", 0x206D ],
-        [ "NATIONAL DIGIT SHAPES",        0x206E ],
-        [ "NOMINAL DIGIT SHAPES",         0x206F ],
-        [ "IDEOGRAPHIC SPACE",            0x3000 ],
-        [ "BRAILLE PATTERN BLANK",        0x2800 ],
-        [ "HANGUL FILLER",                0x3164 ],
-        [ "ZERO WIDTH NO-BREAK SPACE",    0xFEFF ],
-        [ "HALFWIDTH HANGUL FILLER",      0xFFA0 ],
-        [ "MUSICAL SYMBOL NULL NOTEHEAD", 0x1D159 ],
-        [ "MUSICAL SYMBOL BEGIN BEAM",    0x1D173 ],
-        [ "MUSICAL SYMBOL END BEAM",      0x1D174 ],
-        [ "MUSICAL SYMBOL BEGIN TIE",     0x1D175 ],
-        [ "MUSICAL SYMBOL END TIE",       0x1D176 ],
-        [ "MUSICAL SYMBOL BEGIN SLUR",    0x1D177 ],
-        [ "MUSICAL SYMBOL END SLUR",      0x1D178 ],
-        [ "MUSICAL SYMBOL BEGIN PHRASE",  0x1D179 ],
-        [ "MUSICAL SYMBOL END PHRASE",    0x1D17A ],
-    ]
-
-    // const blockInner = {
-    //     "label": {
-    //         pattern: /^\s*?!!!\s*?[a-z]+?\s*?(?:"[^"]+?"|'[^']+?'|`[^`]+?`)/,
-    //         greedy: true,
-    //         lookbehind: true,
-    //         inside: {
-    //             "string": {
-    //                 pattern: /(?:"[^"]+?"|'[^']+?'|`[^`]+?`)/,
-    //                 greedy: true,
-    //                 lookbehind: true,
-    //             },
-    //             "type": {
-    //                 pattern: /(?<=!!!)\s*?[a-z]+?\s/,
-    //                 greedy: true,
-    //                 lookbehind: true,
-    //             },
-    //             "punctuation": {
-    //                 pattern: /['"`]|^\s*!!!/,
-    //                 greedy: true,
-    //                 lookbehind: true,
-    //             },
-    //         }
-    //     },
-    //     rest: Prism.languages.markdown
-    // };
-
-    // const blockParsers = {};
-    // blockNames.forEach(name => {
-    //     blockParsers["block-" + name] = {
-    //         pattern: new RegExp(`^\\s*?!!!\\s*?${name}\\s*?(?:"[^"]+?"|'[^']+?'|\`[^\`]+?\`).+(?=\\n[ ]{4}|\\n)`, 'is'),
-    //         greedy: true,
-    //         lookbehind: true,
-    //         inside: blockInner
-    //     }
-    // })
-
-    Prism.languages.insertBefore('markdown', 'hr', {
-        "linebreak": {
-            pattern: /^[ ]{0,3}---/,
-            greedy: true,
-            lookbehind: true
-        },
-    });
-
-    // Make indentation act like it's monospace chars
-    Prism.languages.insertBefore('markdown', 'comment', {
-        "indent-space": {
-            pattern: /(^|\n)[ ]+/,
-            greedy: true,
-            lookbehind: true
-        },
-        // ...blockParsers
-    });
-
-    Prism.languages.insertBefore('markdown', 'comment',
-        invisibleChars.map(([name, code]) => {
-            const className = name.replace(/ /g, '-').toLowerCase();
-            return {
-                [className]: {
-                    pattern: new RegExp(`\\u\{${code.toString(16)}\}`, 'u'),
-                }
-            };
-        })
-        .reduce((a, b) => ({ ...a, ...b }), {}));
 
     Prism.hooks.add('wrap', function (env) {
         // Render a custom img element
