@@ -404,57 +404,14 @@ export default (Prism) => {
     const _lmc = Prism.languages.markdown.code.find(c => !!c.inside)?.inside['code-block'];
     _lmc && (_lmc.alias = "prism"); // add 'prism' class to code-blocks
 
-    Prism.hooks.add('wrap', function (env) {
-        // Render a custom img element
-        // if (env.type == 'img-url') {
-        //     // [![<label>](<imgurl>)](<linkurl>)
-        //     const { label, imgurl, linkurl } = env.content?.match(/\[!\[(?<label>[^\]]*)\]\((?<imgurl>[^\)]+)\)\]\((?<linkurl>[^\)]+)\)/)?.groups || {};
-        //     // const data = env.content?.match(/"token content">(?<label>[^<]+)<\/span>\]\(<span class="token url">(?<url>[^<]+)/)?.groups;
-        //     env.tag = "a";
-
-        //     // [![<label>](<imgurl>)](<linkurl>)
-
-        //     env.attributes.source = env.content; //`[![${label}](${url})]()`;
-        //     // env.attributes.src = linkurl;
-        //     // env.attributes.target = linkurl;
-        //     env.content = `<img src="${imgurl}">`;
-        // }
-        // else if (env.type == 'img') {
-        //     const { label, link } = env.content?.match(/\[(?<label>[^\]]*)\]\((?<link>[^\)]+)\)/)?.groups || {};
-        //     env.tag = "img";
-
-        //     env.attributes.source = `[![${label}](${link})`;
-        //     env.attributes.src = link;
-        //     env.content = "";
-        // }
-        // else if (env.type == 'url') {
-
-        //     // urls come through 2 times in parsing.
-        //     // The first time, we don't have the right object
-        //     // so we wait until it's semantically correct before
-        //     // we transform it into an actual anchor element.
-        //     if (env.content.startsWith("[<span class=\"token content\">")) {
-        //         const data = env.content?.match(/"token content">(?<label>[^<]+)<\/span>\]\(<span class="token url">(?<url>[^<]+)/)?.groups;
-        //         const label = data?.label;
-        //         const url = data?.url;
-
-        //         env.tag = "a";
-        //         env.attributes.href = url;
-        //         env.attributes.target = '_blank';
-        //         // env.attributes.source = env.content;
-        //         env.attributes.source = `[${label}](${url})`;
-        //         env.content = label;
-        //     }
-        // }
-
-
-        // if (env.type == 'color-hex') {
-        //     const color = env.content;//.match(/#(?<color>[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})(?=[^A-Fa-f0-9])/)?.groups || {};
-        //     console.log(color)
-        //     if (color)
-        //         env.attributes.style="color: " + color;
-        //         // env.content = env.content.replace(/class=\"token color-hex\"/, `class="token color-hex" style="color: #${color}"`);
-        // }
+    Prism.hooks.add('wrap', (env: {
+        attributes: { [key: string]: string },
+        classes: string[],
+        content: string,
+        language: string,
+        tag: string,
+        type: string
+    }) => {
         if (env.type == 'span-styled') {
 
             const { style } = env.content
@@ -462,7 +419,13 @@ export default (Prism) => {
                     .match(/style="(?<style>[^"]+?)"/)?.groups || {};
 
             if (style)
-                env.attributes.style = style;
+                env.attributes['style'] = style;
+        }
+        else if (env.type == 'code') {
+            // Questionable mermaid diagram detection
+            if (env.content.match(/^<span class="token punctuation">```<\/span><span class="token code-language">mermaid<\/span>/)) {
+                env.classes.push("mermaid");
+            }
         }
     });
 }
