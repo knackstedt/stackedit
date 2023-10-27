@@ -10,6 +10,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ng serve --port 8080 --ssl",
+    "prebuild": "cd src && sed -i -e \"s/__VERSION__/$(npm version --json | jq \".[\\\"ngx-stackedit\\\"]\" | tr -d '\"')/g\" ./app/editor/editor.component.ts",
     "build": "ng build --project package"
   },
   "dependencies": {
