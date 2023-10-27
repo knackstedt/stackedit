@@ -145,13 +145,13 @@ export default (extensionSvc) => {
         });
 
         // Transform task spans into checkboxes
-        elt.querySelectorAll('span.task-list-item-checkbox').forEach((spanElt) => {
+        elt.querySelectorAll('.task-list-item-checkbox').forEach((spanElt: HTMLElement) => {
             const target = spanElt.parentElement as HTMLElement;
             const label = target.textContent.replace(/^[☑☐]\s?/, '');
-            const isChecked = spanElt.classList.contains("checked");
-            target.classList.add("checkbox")
+            const isChecked = spanElt.getAttribute("checked") != null;
 
-            target.innerHTML = `<input type="checkbox" ${isChecked ? 'checked' : ''}><label> ${label}</label>`;
+            console.log(isChecked)
+            target.innerHTML = `<input type="checkbox" ${isChecked ? 'checked="true"' : ''}><label> ${label}</label>`;
         });
     });
 };
