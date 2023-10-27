@@ -104,10 +104,36 @@ export class StackEditorComponent {
 
     /**
      * What mode should the editor be in.
-     * - Possible values are `edit` | `view`
+     * - Possible values are `edit` | `view` | `viewonly`
      * - Default `edit`
+     * view mode **disables** the editor view & toolbar.
      */
-    @Input() mode: "edit" | "view" = "edit";
+    @Input() mode: "edit" | "view" | "viewonly" = "edit";
+    /**
+     * Should the table of contents be viewable?
+     * `true` shown by default
+     * `false` hidden by default
+     * `"off"` disable the TOC altogether
+     *
+     * Default `false`
+     */
+    @Input() showToc: boolean | "off" = false;
+    /**
+     * Controls whether the preview is open on initialization
+     * `true` visible
+     * `false` hidden
+     * `"off"` disabled
+     * Default `true`
+     */
+    @Input() showPreview: boolean | "off" = true;
+
+    /**
+     * Controls whether the mermaid insert button is visible
+     * `true` visible
+     * `false` hidden
+     * Default `true`
+     */
+    @Input() showMermaid: boolean = true;
 
     @Input() showLineNumbers = false;
     @Input() allowImageUpload = true;
@@ -138,7 +164,6 @@ export class StackEditorComponent {
 
     editorSvc: Editor;
     public options: StackEditConfig = {};
-    public showTOC = false;
 
     private resizeChecker;
     private width = 0;

@@ -1,40 +1,24 @@
-<!-- Filter: https://css-tricks.com/gooey-effect/ -->
-<svg style="visibility: hidden; position: absolute; pointer-events: none;" width="0" height="0" xmlns="http://www.w3.org/2000/svg"
-    version="1.1">
-    <defs>
-        <filter id="goo">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="1" result="blur" />
-            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -9" result="goo" />
-            <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-        </filter>
-    </defs>
-</svg>
-
-
-<app-toolbar [style.flex]="'0 0 ' + (mode == 'edit' ? 44 : 0) + 'px'"></app-toolbar>
+<app-toolbar [style.flex]="'0 0 ' + (mode != 'viewonly' ? 44 : 0) + 'px'"></app-toolbar>
 
 <div
     class="contents"
-    [style.--1]=""
 >
     <div
         class="editor markdown-highlighting"
         [class.linenumbers]="showLineNumbers"
-        [style.flex]="'1 1 50%'"
-        [style.display]="mode == 'view' ? 'none' : 'flex'"
+        [class.hidden]="mode != 'edit'"
+        [class.expand]="showPreview == 'off' || !showPreview"
+        [class.show-toc]="showToc && showToc != 'off'"
         (click)="editorSvc.clEditor.focus()"
         (pointerenter)="editorSvc.editorIsActive = true"
         (pointerleave)="editorSvc.editorIsActive = false"
     >
         <!-- <div class="editor__inner markdown-highlighting"></div> -->
     </div>
-    <div
-        [style.display]="mode == 'view' ? 'none' : 'flex'"
-        [style.flex]="'0 0 ' + 2 + 'px'"
-    >
-    </div>
     <div class="preview"
-        [style.flex]="'1 1 50%'"
+        [class.hidden]="showPreview == 'off' || !showPreview"
+        [class.expand]="mode != 'edit'"
+        [class.show-toc]="showToc && showToc != 'off'"
     >
         <div class="preview__inner-1">
             <div class="preview__inner-2"></div>
@@ -43,8 +27,7 @@
     <!-- TODO: -->
     <div
         class="toc"
-        [style.--display]="mode == 'view' ? 'none' : 'none'"
-        [style.width]="!showTOC ? '0px' : '240px'"
+        [style.width]="(showToc == 'off' || !showToc)  ? '0px' : '240px'"
     >
         <div class="toc__inner"></div>
     </div>

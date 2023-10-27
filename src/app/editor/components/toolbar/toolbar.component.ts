@@ -369,6 +369,16 @@ export class ToolbarComponent {
     }
 
     toggleTOC() {
-        this.stackEditor.showTOC = !this.stackEditor.showTOC;
+        this.stackEditor.showToc = !this.stackEditor.showToc;
+    }
+    toggleEditor() {
+        this.stackEditor.mode = this.stackEditor.mode == 'view' ? 'edit' : 'view';
+        if (this.stackEditor.mode == 'view' && !this.stackEditor.showPreview)
+            this.stackEditor.showPreview = !this.stackEditor.showPreview;
+    }
+    togglePreview() {
+        this.stackEditor.showPreview = !this.stackEditor.showPreview;
+        if (this.stackEditor.mode == 'view' && !this.stackEditor.showPreview)
+            this.stackEditor.mode = this.stackEditor.mode == 'view' ? 'edit' : 'view';
     }
 }

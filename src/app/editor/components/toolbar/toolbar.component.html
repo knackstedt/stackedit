@@ -99,8 +99,10 @@
 <mat-icon (click)="insertCodeBlock()" [class.reflect]="cursorIsInCode" matTooltip="Code block">data_object</mat-icon>
 
 <!-- Mermaid Diagrams... -->
-<mat-icon [ngx-menu]="diagramMenu" [ngx-menu-config]="{ customClass: ['mermaid-menu'] }" matTooltip="Diagrams">account_tree</mat-icon>
+<mat-icon *ngIf="stackEditor.showMermaid" [ngx-menu]="diagramMenu" [ngx-menu-config]="{ customClass: ['mermaid-menu'] }" matTooltip="Diagrams">account_tree</mat-icon>
 
-<!-- <span style="flex: 1"></span> -->
+<span style="flex: 1"></span>
 
-<!-- <mat-icon (click)="toggleTOC()" matTooltip="Table of Contents">toc</mat-icon> -->
+<mat-icon *ngIf="stackEditor.showToc != 'off'" (click)="toggleTOC()" matTooltip="Table of Contents">toc</mat-icon>
+<mat-icon *ngIf="stackEditor.mode != 'viewonly'" (click)="toggleEditor()" matTooltip="Toggle Editor">markdown</mat-icon>
+<mat-icon *ngIf="stackEditor.showPreview != 'off'" (click)="togglePreview()" matTooltip="Toggle Preview">preview</mat-icon>

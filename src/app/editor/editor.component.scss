@@ -111,13 +111,27 @@
     height: 100%;
     width: 100%;
     overflow: hidden;
+    position: relative;
 }
 
 
 :host ::ng-deep {
+    .editor, .preview {
+        // Take off 1 px to have a slight space between panels
+        width: calc(50% - 1px);
+        position: absolute;
+        transition: width 200ms ease, left 200ms ease, right 200ms ease;
+        contain: content;
 
-    .monaco-editor {
-        display: block !important;
+        &.expand {
+            width: 100%;
+            &.show-toc {
+                width: calc(100% - 240px);
+            }
+        }
+        &.show-toc {
+            width: calc(calc(50% - 1px) - 120px);
+        }
     }
 
     .editor {
@@ -126,15 +140,14 @@
         font-family: var(--stackedit-font-family-mono);
         background-color: var(--editor-background-color);
         cursor: text;
-        contain: content;
         flex-direction: column;
-        // padding: 28px 24px 24px;
         padding: 10px 24px 0px;
-        width: 100%;
         margin: 0;
         white-space: pre-wrap;
         word-break: break-word;
         word-wrap: break-word;
+        height: 100%;
+        left: 0;
 
         &.linenumbers {
             padding: 10px 24px 38px 64px;
@@ -207,15 +220,19 @@
         .hide {
             display: none
         }
+
+        &.hidden {
+            left: -50%
+        }
     }
 
     .preview {
         background-color: var(--preview-background-color);
-        overflow: hidden;
-        contain: content;
         line-height: 24px;
+        height: 100%;
+        right: 0;
+        overflow: hidden;
 
-        &,
         .preview__inner-1 {
             width: 100%;
             height: 100%
@@ -230,15 +247,24 @@
             min-width: 100%;
             overflow-x: auto;
         }
+
+        &.hidden {
+            right: -50%
+        }
+
+        &.show-toc:not(.hidden) {
+            right: 240px
+        }
     }
 
     .toc {
-
+        position: absolute;
         transition: width 200ms ease;
-        overflow: hidden;
+        right: 0;
+        width: 240px;
 
-        .toc__inner {
-            width: 240px;
+        &.hidden {
+            right: -240px
         }
     }
 
@@ -744,8 +770,9 @@
     // Used for rendering mermaid diagrams in some capacity
     .hidden-rendering-container {
         position: absolute;
-        width: 500px;
-        left: -1000px
+        width: 900px;
+        min-height: 400px;
+        left: -100vw;
     }
 
     .toc__inner {
