@@ -57,58 +57,34 @@ export default (extensionSvc) => {
     extensionSvc.onInitConverter(0, (markdown: MarkdownIt, options) => {
         markdown.set({
             html: true,
-            breaks: !!options.breaks,
-            linkify: !!options.linkify,
-            typographer: !!options.typographer,
+            breaks: true,
+            linkify: true,
+            typographer: true,
             langPrefix: 'prism language-',
         });
 
         markdown.core.ruler.enable(coreBaseRules);
 
         const blockRules = blockBaseRules.slice();
-        if (!options.fence) {
-            blockRules.splice(blockRules.indexOf('fence'), 1);
-        }
-        if (!options.table) {
-            blockRules.splice(blockRules.indexOf('table'), 1);
-        }
         markdown.block.ruler.enable(blockRules);
 
         const inlineRules = inlineBaseRules.slice();
         const inlineRules2 = inlineBaseRules2.slice();
-        if (!options.del) {
-            inlineRules.splice(blockRules.indexOf('strikethrough'), 1);
-            inlineRules2.splice(blockRules.indexOf('strikethrough'), 1);
-        }
         markdown.inline.ruler.enable(inlineRules);
         markdown.inline.ruler2.enable(inlineRules2);
 
-        if (options.abbr) {
-            markdown.use(markdownitAbbr);
-        }
-        if (options.deflist) {
-            markdown.use(markdownitDeflist);
-        }
-        if (options.footnote) {
-            markdown.use(markdownitFootnote);
-        }
         if (options.imgsize) {
             // TODO: Restore this without having a stroke
             // >> Module not found: Error: Can't resolve 'fs' in '/home/knackstedt/source/@dotglitch/stackedit/node_modules/markdown-it-imsize/lib/imsize/types'
             // markdown.use(markdownitImgsize);
         }
-        if (options.mark) {
-            markdown.use(markdownitMark);
-        }
-        if (options.sub) {
-            markdown.use(markdownitSub);
-        }
-        if (options.sup) {
-            markdown.use(markdownitSup);
-        }
-        if (options.tasklist) {
-            markdown.use(markdownitTasklist);
-        }
+        markdown.use(markdownitAbbr);
+        markdown.use(markdownitDeflist);
+        markdown.use(markdownitFootnote);
+        markdown.use(markdownitMark);
+        markdown.use(markdownitSub);
+        markdown.use(markdownitSup);
+        markdown.use(markdownitTasklist);
         markdown.use(markdownitAnchor);
 
 
@@ -150,7 +126,6 @@ export default (extensionSvc) => {
             const label = target.textContent.replace(/^[☑☐]\s?/, '');
             const isChecked = spanElt.getAttribute("checked") != null;
 
-            console.log(isChecked)
             target.innerHTML = `<input type="checkbox" ${isChecked ? 'checked="true"' : ''}><label> ${label}</label>`;
         });
     });
