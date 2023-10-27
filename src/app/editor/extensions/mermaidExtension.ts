@@ -65,19 +65,24 @@ const render = async (elt) => {
     init();
     const svgId = `mermaid-svg-${ulid()}`;
 
-    mermaid.mermaidAPI.renderAsync(svgId, elt.textContent, () => {
-        while (elt.firstChild) {
-            elt.removeChild(elt.lastChild);
-        }
+    // Trigger this slightly out-of sync to allow
+    // the rest of the startup sequences to settle.
+    setTimeout(() => {
+        mermaid.mermaidAPI.renderAsync(svgId, elt.textContent, () => {
+            while (elt?.firstChild) {
+                elt.removeChild(elt.lastChild);
+            }
 
-        const el = containerElt.querySelector('#' + svgId)
-        elt.appendChild(el);
-    }, containerElt)
-        .catch(e => {
-            // In the event of an invalid mermaid chart, render the section with an error message.
-            elt.innerHTML = `<pre>${e.message}</pre>`;
-        });
+            const el = containerElt.querySelector('#' + svgId)
+            elt.appendChild(el);
+        }, containerElt)
+            .catch(e => {
+                // In the event of an invalid mermaid chart, render the section with an error message.
+                elt.innerHTML = `<pre>${e.message}</pre>`;
+                // if (e.message == "Cannot read properties of null (reading 'firstChild')")
+            });
 
+    }, 0)
 };
 
 export default (extensionSvc) => {
