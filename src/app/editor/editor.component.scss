@@ -24,7 +24,7 @@
         --preview-background-color: #1f2123;
         --text-color: #efefef;
         --text-header-color: #ceceff;
-        --selection-color: var(--primary-color);
+        --selection-color: #264f78;
         --code-background-color: #2b2b2b;
         --blockquote-background-color: #2b2b2b;
         --table-header-color: #0d47a1;
@@ -67,7 +67,7 @@
         --preview-background-color: #f3f3f3;
         --text-color: #121212;
         --text-header-color: #121244;
-        --selection-color: var(--primary-color);
+        --selection-color: #42a5f5;
         --code-background-color: #ebebeb;
         --blockquote-background-color: #ebebeb;
         --table-header-color: #42a5f5;
@@ -173,7 +173,8 @@
         }
 
         *::selection {
-            background-color: #264f78 !important;
+            // background-color: # !important;
+            background-color: var(--selection-color) !important;
             // Should be the color when the page has focus
             // background-color: #3a3d41 !important;
         }
@@ -464,7 +465,10 @@
                     display: inline-block;
                     overflow: hidden;
 
-                    font-family: 'Material Icons Outlined';
+                    font-family: 'Material Symbols Outlined',
+                        'Material Icons Outlined',
+                        'Material Symbols',
+                        'Material Icons';
                     font-weight: 600;
                     font-size: 19px;
                     line-height: 20px;
