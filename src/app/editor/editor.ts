@@ -514,6 +514,10 @@ export class Editor extends EventEmittingClass {
 
                 if (item[0] === 0) {
                     let sectionDesc = this.previewCtx.sectionDescList[sectionDescIdx] as SectionDesc;
+
+                    // ??? This occurs rarely
+                    if (!sectionDesc) continue;
+
                     sectionDescIdx++;
 
                     if (sectionDesc.editorElt !== section.elt) {
