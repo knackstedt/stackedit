@@ -10,10 +10,7 @@
         [class.expand]="showPreview == 'off' || !showPreview"
         [class.show-toc]="showToc && showToc != 'off'"
         (click)="editorSvc.clEditor.focus()"
-        (pointerenter)="editorSvc.editorIsActive = true"
-        (pointerleave)="editorSvc.editorIsActive = false"
     >
-        <!-- <div class="editor__inner markdown-highlighting"></div> -->
     </div>
     <div class="preview"
         [class.hidden]="showPreview == 'off' || !showPreview"

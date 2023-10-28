@@ -4,7 +4,6 @@ import markdownConversionSvc from './markdownConversionSvc';
 import sectionUtils, { SectionDimension } from './editor/sectionUtils';
 import { VanillaMirror } from './editor/vanilla-mirror';
 import { EventEmittingClass, findContainer, debounce } from './editor/utils';
-import { makePatchableText } from './diffUtils';
 import { StackEditorComponent } from './editor.component';
 import Prism from './prism';
 import MarkdownIt from 'markdown-it';
@@ -61,13 +60,6 @@ export class Editor extends EventEmittingClass {
     instantPreview = true;
     tokens;
 
-    markerKeys;
-    markerIdxMap;
-    previousPatchableText;
-    currentPatchableText;
-    isChangePatch;
-    contentId;
-
     // Other object;
     parsingCtx: any;
     conversionCtx: any;
@@ -78,9 +70,6 @@ export class Editor extends EventEmittingClass {
     previewCtxWithDiffs: any;
     sectionList: Section[];
     selectionRange: any;
-    previewSelectionRange: any;
-    previewSelectionStartOffset: any;
-    editorIsActive = false;
 
     converter: MarkdownIt;
 
@@ -115,33 +104,6 @@ export class Editor extends EventEmittingClass {
             this.clEditor = new VanillaMirror(this.ngEditor, editorElt, editorElt.parentNode as any);
 
             this.clEditor.on('contentChanged', (text, diffs, sectionList) => {
-                const oldContent = {
-                    comments: {},
-                    discussions: {},
-                    hash: 0,
-                    id: null,
-                    properties: "\n",
-                    text: "\n",
-                    type: "content"
-                };
-
-                // last char must be a `\n`.
-                // TODO: This is probably not right
-                const sanitizedText = `${text}\n`.replace(/\n\n$/, '\n');
-                const newContent = {
-                    ...structuredClone(oldContent),
-                    text: sanitizedText,
-                };
-                if (!this.isChangePatch) {
-                    this.previousPatchableText = this.currentPatchableText;
-                    this.currentPatchableText = makePatchableText(newContent, this.markerKeys, this.markerIdxMap);
-                }
-                else {
-                    // Take a chance to restore discussion offsets on undo/redo
-                    newContent.text = this.currentPatchableText;
-                }
-                this.isChangePatch = false;
-
                 this.parsingCtx = {
                     ...this.parsingCtx,
                     sectionList,
@@ -151,19 +113,16 @@ export class Editor extends EventEmittingClass {
             });
 
 
-            // Manually handle scroll events
-            // const onScroll = (e) => {
-            //     e.preventDefault();
-            //     this.restoreScrollPosition(this.getScrollPosition(this.editorIsActive ? editorElt : previewElt));
-            // };
-            const onScroll = (e) => {
-                e.preventDefault();
-                this.restoreScrollPosition(this.getScrollPosition(this.editorIsActive ? editorElt : previewElt));
-            };
-
             let scrollMode: "editor" | "preview";
             let lastScrollEvent = 0;
             const scrollDebounceTime = 500;
+
+            // Manually handle scroll events
+            const onScroll = (e) => {
+                e.preventDefault();
+                this.restoreScrollPosition(this.getScrollPosition(scrollMode == 'editor' ? editorElt : previewElt));
+            };
+
             editorElt.addEventListener('scroll', evt => {
                 if (scrollMode == "editor" || lastScrollEvent + scrollDebounceTime < Date.now()) {
                     scrollMode = "editor";
@@ -206,6 +165,9 @@ export class Editor extends EventEmittingClass {
             }, 10);
 
             window.addEventListener('resize', this.refreshScrollSync);
+            // Need to listen to focus because resize events that occur
+            // when the tab isn't focused may not always fire.
+            window.addEventListener('focus', this.refreshScrollSync);
 
             this.clEditor.selectionMgr.on('selectionChanged', (start, end, selectionRange) => {
                 newSelectionRange = selectionRange;
@@ -225,6 +187,7 @@ export class Editor extends EventEmittingClass {
     destroy() {
         this.clEditor.destroy();
         window.removeEventListener('resize', this.refreshScrollSync);
+        window.removeEventListener('focus', this.refreshScrollSync);
     }
 
     onGetOptions(listener: Function) {
@@ -310,37 +273,6 @@ export class Editor extends EventEmittingClass {
         });
     }
 
-    makePatches() {
-        const diffs = this.diffMatchPatch.diff_main(this.previousPatchableText, this.currentPatchableText);
-        return this.diffMatchPatch.patch_make(this.previousPatchableText, diffs);
-    }
-
-    applyPatches(patches) {
-        const newPatchableText = this.diffMatchPatch.patch_apply(patches, this.currentPatchableText)[0];
-        let result = newPatchableText;
-        // if (markerKeys.length) {
-        //     // Strip text markers
-        //     result = result.replace(new RegExp(`[\ue000-${String.fromCharCode((0xe000 + markerKeys.length) - 1)}]`, 'g'), '');
-        // }
-        // Expect a `contentChanged` event
-        if (result !== this.clEditor.getContent()) {
-            this.previousPatchableText = this.currentPatchableText;
-            this.currentPatchableText = newPatchableText;
-            this.isChangePatch = true;
-        }
-        return result;
-    }
-
-    reversePatches(patches) {
-        const result = this.diffMatchPatch.patch_deepCopy(patches).reverse();
-        result.forEach((patch) => {
-            patch.diffs.forEach((diff) => {
-                diff[0] = -diff[0];
-            });
-        });
-        return result;
-    }
-
     initClEditorInternal(opts) {
         const content = {
             comments: {},
@@ -365,20 +297,8 @@ export class Editor extends EventEmittingClass {
             const options = {
                 selectionStart: contentState.selectionStart,
                 selectionEnd: contentState.selectionEnd,
-                patchHandler: {
-                    makePatches: this.makePatches.bind(this),
-                    applyPatches: this.applyPatches.bind(this),
-                    reversePatches: this.reversePatches.bind(this),
-                },
                 ...opts
             };
-
-            if (this.contentId !== content.id) {
-                this.contentId = content.id;
-                this.currentPatchableText = makePatchableText(content, this.markerKeys, this.markerIdxMap);
-                this.previousPatchableText = this.currentPatchableText;
-                options.content = content.text;
-            }
 
             this.clEditor.init(options);
         }
