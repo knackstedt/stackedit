@@ -363,11 +363,11 @@ export default (Prism) => {
             lookbehind: true
         },
         'number-list': {
-            pattern: /^\s+\d\.\s+.+$/s,
+            pattern: /^\s+\d+\.\s+.+$/s,
             lookbehind: true,
             greedy: true,
             inside: {
-                'punctuation': /(\n|^)\s+\d\./,
+                'punctuation': /(\n|^)\s+\d+\./,
                 ...basicRules
             }
         },
