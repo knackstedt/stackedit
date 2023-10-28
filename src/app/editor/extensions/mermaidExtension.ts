@@ -1,7 +1,7 @@
-import mermaid from 'mermaid';
+import mermaid, { MermaidConfig } from 'mermaid';
 import { ulid } from 'ulidx';
 
-const config = {
+const config: MermaidConfig = {
     logLevel: 5,
     startOnLoad: false,
     arrowMarkerAbsolute: false,
@@ -9,7 +9,7 @@ const config = {
     securityLevel: "strict",
     wrap: true,
     htmlLabels: true,
-    markdown: true,
+    fontSize: 20,
     themeVariables: {
         primaryColor: '#464646',
         primaryTextColor: '#fff',
@@ -46,7 +46,6 @@ const config = {
         leftPadding: 75,
         gridLineStartPadding: 35,
         fontSize: 11,
-        fontFamily: '"Open-Sans", "sans-serif"',
         numberSectionStyles: 4,
         axisFormat: '%Y-%m-%d',
     },
