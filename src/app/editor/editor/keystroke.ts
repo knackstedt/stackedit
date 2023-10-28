@@ -178,6 +178,8 @@ export const defaultKeystrokes = [
             let num = parseInt(prevNumber);
             if (Number.isNaN(num))
                 num = 1;
+            else
+                num++;
             prefix = num + '. ';
         }
         if (isCheckList) prefix = '- [ ] ';
