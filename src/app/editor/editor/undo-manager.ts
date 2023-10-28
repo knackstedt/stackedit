@@ -2,13 +2,20 @@ import DiffMatchPatch from 'diff-match-patch';
 import { EventEmittingClass, debounce } from './utils';
 import { VanillaMirror } from './vanilla-mirror';
 
+type Patch = {
+    length1: number,
+    length2: number,
+    start1: number,
+    start2: number,
+    diffs: [-1 | 0 | 1, string][]
+}
 
 class State {
-    patches: any[];
+    patches: Patch[];
 
-    constructor(private undoManager: UndoManager) {
-
-    }
+    constructor(
+        private undoManager: UndoManager
+    ) { }
 
     // TODO: This is wired poorly, rewrite.
     addToUndoStack() {
@@ -24,15 +31,16 @@ class State {
     }
 }
 
+// Why is this a separate class?
 class StateMgr {
-    currentTime;
-    lastTime;
-    lastMode;
-    currentMode;
+    currentTime: number;
+    lastTime: number;
+    lastMode: 'typing' | 'single';
+    currentMode: 'typing' | 'single';
 
-    constructor(private undoManager: UndoManager) {
-
-    }
+    constructor(
+        private undoManager: UndoManager
+    ) { }
 
     isBufferState() {
         this.currentTime = Date.now();
@@ -41,7 +49,7 @@ class StateMgr {
             this.currentTime - this.lastTime < this.undoManager.options.bufferStateUntilIdle;
     }
 
-    setDefaultMode(mode) {
+    setDefaultMode(mode: "typing" | "single") {
         this.currentMode = this.currentMode || mode;
     }
 
@@ -60,11 +68,13 @@ class StateMgr {
 export class UndoManager extends EventEmittingClass {
     diffMatchPatch = new DiffMatchPatch();
     selectionMgr;
-    undoStack = [];
-    redoStack = [];
-    currentState;
-    previousPatches = [];
-    currentPatches = [];
+    undoStack: State[] = [];
+    redoStack: State[] = [];
+    currentState: State;
+    previousPatches: Patch[] = [];
+    currentPatches: Patch[] = [];
+
+    stateMgr = new StateMgr(this);
 
     get canUndo () { return this.undoStack.length != 0 };
     get canRedo () { return this.redoStack.length != 0 };
@@ -72,43 +82,29 @@ export class UndoManager extends EventEmittingClass {
     options = {
         undoStackMaxSize: 200,
         bufferStateUntilIdle: 1000,
-        patchHandler: {
-            makePatches(oldContent, newContent, diffs) {
-                return this.diffMatchPatch.patch_make(oldContent, diffs);
-            },
-            applyPatches(patches, content) {
-                return this.diffMatchPatch.patch_apply(patches, content)[0];
-            },
-            reversePatches(patches) {
-                const reversedPatches = this.diffMatchPatch.patch_deepCopy(patches).reverse();
-                reversedPatches.forEach((patch) => {
-                    patch.diffs.forEach((diff) => {
-                        diff[0] = -diff[0];
-                    });
-                });
-                return reversedPatches;
-            },
-        },
     }
 
-    constructor(private editor: VanillaMirror, options?) {
+    constructor(
+        private editor: VanillaMirror,
+        options?: {
+            undoStackMaxSize: number,
+            bufferStateUntilIdle: number
+        }
+    ) {
         super();
 
-        this.options = { ...options || {} };
+        this.options = { ...options || {} as any };
         this.selectionMgr = editor.selectionMgr;
-        if (!this.currentState) {
-            this.currentState = new State(this);
-        }
+        this.currentState = this.currentState || new State(this);
     }
 
-    stateMgr = new StateMgr(this);
-    setCurrentMode = (mode) => {
+    setCurrentMode(mode) {
         this.stateMgr.currentMode = mode;
     };
     setDefaultMode = this.stateMgr.setDefaultMode.bind(this)
 
-    addDiffs = (oldContent, newContent, diffs) => {
-        const patches = this.options.patchHandler.makePatches(oldContent, newContent, diffs);
+    addDiffs(oldContent: string, newContent, diffs) {
+        const patches = this.diffMatchPatch.patch_make(oldContent, diffs);
         patches.forEach(patch => this.currentPatches.push(patch));
     };
 
@@ -134,15 +130,22 @@ export class UndoManager extends EventEmittingClass {
         this.$trigger('undoStateChange');
     });
 
-    restoreState(patchesParam, isForward = false) {
+    restoreState(patchesParam: Patch[], isForward = false) {
         let patches = patchesParam;
         // Update editor
         const content = this.editor.getContent();
         if (!isForward) {
-            patches = this.options.patchHandler.reversePatches(patches);
+            patches = this.diffMatchPatch.patch_deepCopy(patches).reverse();
+            patches.forEach((patch) => {
+                patch.diffs.forEach((diff) => {
+                    // TODO: This might be a bug.
+                    // @ts-ignore
+                    diff[0] = -diff[0];
+                });
+            });
         }
 
-        const newContent = this.options.patchHandler.applyPatches(patches, content);
+        const newContent = this.diffMatchPatch.patch_apply(patches, content)[0];
         const newContentText = newContent.text || newContent;
         const range = this.editor.setContent(newContentText, true);
         const selection = newContent.selection || {
@@ -160,9 +163,8 @@ export class UndoManager extends EventEmittingClass {
 
     undo() {
         const state = this.undoStack.pop();
-        if (!state) {
-            return;
-        }
+        if (!state) return;
+
         this.saveCurrentPatches();
         this.currentState.addToRedoStack();
         this.restoreState(this.currentState.patches);
@@ -172,9 +174,8 @@ export class UndoManager extends EventEmittingClass {
 
     redo() {
         const state = this.redoStack.pop();
-        if (!state) {
-            return;
-        }
+        if (!state) return;
+
         this.currentState.addToUndoStack();
         this.restoreState(state.patches, true);
         this.previousPatches = state.patches;
