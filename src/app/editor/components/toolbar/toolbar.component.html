@@ -36,31 +36,31 @@
 </ng-template>
 
 <!-- Bold -->
-<mat-icon (click)="boldText()" [class.reflect]="cursorIsInBold" matTooltip="Bold">format_bold</mat-icon>
+<mat-icon (mousedown)="boldText(); $event.preventDefault()" [class.reflect]="cursorIsInBold" matTooltip="Bold">format_bold</mat-icon>
 <!-- Italic -->
-<mat-icon (click)="italicizeText()" [class.reflect]="cursorIsInItalic" matTooltip="Italic">format_italic</mat-icon>
+<mat-icon (mousedown)="italicizeText(); $event.preventDefault()" [class.reflect]="cursorIsInItalic" matTooltip="Italic">format_italic</mat-icon>
 <!-- Strikethrough -->
-<mat-icon (click)="strikethroughText()" [class.reflect]="cursorIsInStrikethrough" matTooltip="Strikethrough">format_strikethrough</mat-icon>
+<mat-icon (mousedown)="strikethroughText(); $event.preventDefault()" [class.reflect]="cursorIsInStrikethrough" matTooltip="Strikethrough">format_strikethrough</mat-icon>
 <!-- Underscore -->
 <!-- <mat-icon>format_underlined</mat-icon> -->
 
 <!-- Quote -->
-<mat-icon (click)="blockQuoteText()" [class.reflect]="cursorIsInBlockquote" matTooltip="Blockquote">format_quote</mat-icon>
+<mat-icon (mousedown)="blockQuoteText(); $event.preventDefault()" [class.reflect]="cursorIsInBlockquote" matTooltip="Blockquote">format_quote</mat-icon>
 <!-- Link -->
 <mat-icon
     matTooltip="Insert a Link"
     [class.reflect]="cursorIsInLink"
-    (click)="openLinkDialog()"
+    (mousedown)="openLinkDialog(); $event.preventDefault()"
 >
     link
 </mat-icon>
 
 <!-- Ordered list -->
-<mat-icon (click)="insertOrderedList()" [class.reflect]="cursorIsInOrderedList" matTooltip="Ordered List">format_list_numbered</mat-icon>
+<mat-icon (mousedown)="insertOrderedList(); $event.preventDefault()" [class.reflect]="cursorIsInOrderedList" matTooltip="Ordered List">format_list_numbered</mat-icon>
 <!-- Unordered list -->
-<mat-icon (click)="insertList()" [class.reflect]="cursorIsInList" matTooltip="Unordered list">format_list_bulleted</mat-icon>
+<mat-icon (mousedown)="insertList(); $event.preventDefault()" [class.reflect]="cursorIsInList" matTooltip="Unordered list">format_list_bulleted</mat-icon>
 <!-- Checklist -->
-<mat-icon (click)="insertCheckList()" [class.reflect]="cursorIsInChecklist" matTooltip="Checklist">rule</mat-icon>
+<mat-icon (mousedown)="insertCheckList(); $event.preventDefault()" [class.reflect]="cursorIsInChecklist" matTooltip="Checklist">rule</mat-icon>
 
 <!-- Table -->
 <mat-icon [ngx-tooltip]="tablePopup" [ngx-tooltip-config]="{ triggers: ['click'], position: 'bottom' }" [class.reflect]="cursorIsInTable">table_chart</mat-icon>
@@ -87,22 +87,40 @@
 <!-- Image -->
 <mat-icon
     matTooltip="Insert an image"
-    (click)="openImageDialog()"
+    (mousedown)="openImageDialog(); $event.preventDefault()"
 >
     add_photo_alternate
 </mat-icon>
 
 
 <!-- Inline code -->
-<mat-icon (click)="insertInlineCode()" [class.reflect]="cursorIsInInlineCode" matTooltip="Inline highlight">code</mat-icon>
+<mat-icon (mousedown)="insertInlineCode(); $event.preventDefault()" [class.reflect]="cursorIsInInlineCode" matTooltip="Inline highlight">code</mat-icon>
 <!-- Code Block -->
-<mat-icon (click)="insertCodeBlock()" [class.reflect]="cursorIsInCode" matTooltip="Code block">data_object</mat-icon>
+<mat-icon (mousedown)="insertCodeBlock(); $event.preventDefault()" [class.reflect]="cursorIsInCode" matTooltip="Code block">data_object</mat-icon>
 
 <!-- Mermaid Diagrams... -->
 <mat-icon *ngIf="stackEditor.showMermaid" [ngx-menu]="diagramMenu" [ngx-menu-config]="{ customClass: ['mermaid-menu'] }" matTooltip="Diagrams">account_tree</mat-icon>
 
 <span style="flex: 1"></span>
 
-<mat-icon *ngIf="stackEditor.showToc != 'off'" (click)="toggleTOC()" matTooltip="Table of Contents">toc</mat-icon>
-<mat-icon *ngIf="stackEditor.mode != 'viewonly'" (click)="toggleEditor()" matTooltip="Toggle Editor">markdown</mat-icon>
-<mat-icon *ngIf="stackEditor.showPreview != 'off'" (click)="togglePreview()" matTooltip="Toggle Preview">preview</mat-icon>
+<mat-icon
+    *ngIf="stackEditor.showToc != 'off'"
+    (mousedown)="toggleTOC(); $event.preventDefault()"
+    matTooltip="Table of Contents"
+>
+    toc
+</mat-icon>
+<mat-icon
+    *ngIf="stackEditor.showPreview != 'off' && stackEditor.mode != 'viewonly'"
+    (mousedown)="toggleEditor(); $event.preventDefault()"
+    matTooltip="Toggle Editor"
+>
+    markdown
+</mat-icon>
+<mat-icon
+    *ngIf="stackEditor.showPreview != 'off'"
+    (mousedown)="togglePreview(); $event.preventDefault()"
+    matTooltip="Toggle Preview"
+>
+    preview
+</mat-icon>
