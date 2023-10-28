@@ -58,8 +58,9 @@ import 'prismjs/components/prism-tsx';
 import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-uri';
 import 'prismjs/components/prism-yaml';
-import custom from './prism-markdown-custom';
-custom(Prism);
+
+import customMarkdown from './custom-markdown';
+customMarkdown(Prism);
 
 const keywordSupport = {
     "import": {
@@ -122,13 +123,7 @@ const keywordSupport = {
                 lookbehind: true
             }
         }
-    },
-    // "require": {
-    //     pattern: /import/,
-    //     greedy: true,
-    //     lookbehind: true
-    // },
-    // ...blockParsers
+    }
 };
 
 Prism.languages.insertBefore('typescript', 'keyword', keywordSupport);

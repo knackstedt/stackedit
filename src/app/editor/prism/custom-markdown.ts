@@ -5,48 +5,46 @@
  * The parser checks if a regex matches based on the order of the key in the containing object.
  */
 
+type treeNode = {
+    parent: Omit<treeNode, 'parent'>,
+    children: treeNode[],
+    depth: number,
+    nodeAttributes: {
+        [key: string]: string;
+    },
+
+    /**
+     * The index of the opening `<` in the span tag
+     * e.g.
+     * foobar <span color="">...</span>
+     *        ^
+     */
+    outerStartIndex: number,
+    /**
+     * The index of the first character of content in the span tag
+     * e.g.
+     * foobar <span color="">...</span>
+     *                       ^
+     */
+    innerStartIndex: number,
+    /**
+     * The index of the last character inside of the span tag
+     * e.g.
+     * foobar <span color="">...</span>
+     *                         ^
+     */
+    innerEndIndex: number,
+    /**
+     * The index of the final terminating '>' of the span tag.
+     * e.g.
+     * foobar <span color="">...</span>
+     *                                ^
+     */
+    outerEndIndex: number,
+};
 
 const scanSpan = (text: string) => {
-    // TODO: preprocess inline span syntax highlighting
-    // <span style="">{...}</span>
     let spanDepth = 0;
-    type treeNode = {
-        parent: Omit<treeNode, 'parent'>,
-        children: treeNode[],
-        depth: number,
-        nodeAttributes: {
-            [key: string]: string;
-        },
-
-        /**
-         * The index of the opening `<` in the span tag
-         * e.g.
-         * foobar <span color="">...</span>
-         *        ^
-         */
-        outerStartIndex: number,
-        /**
-         * The index of the first character of content in the span tag
-         * e.g.
-         * foobar <span color="">...</span>
-         *                       ^
-         */
-        innerStartIndex: number,
-        /**
-         * The index of the last character inside of the span tag
-         * e.g.
-         * foobar <span color="">...</span>
-         *                         ^
-         */
-        innerEndIndex: number,
-        /**
-         * The index of the final terminating '>' of the span tag.
-         * e.g.
-         * foobar <span color="">...</span>
-         *                                ^
-         */
-        outerEndIndex: number,
-    };
 
     const rootNode = {
         depth: 0,
@@ -55,17 +53,17 @@ const scanSpan = (text: string) => {
         innerStartIndex: 0,
         innerEndIndex: text.length,
         outerEndIndex: text.length
-    };
+    } as treeNode;
     let spanTree: treeNode = rootNode as any;
 
     for (let i = 0; i < text.length; i++) {
         // Only do semantic checking when an opening angle bracket is encountered
-        if (text[i] != '<') continue;
+        if (text.charCodeAt(i) != 0x3c) continue;
 
         const chunk = text.slice(i);
 
         // Encountered the start of a node
-        if (chunk.match(/^<\s*?span\s*?style=/)) {
+        if (chunk.match(/^<\s*?span\s+?style\s*?=/)) {
             spanDepth++;
 
             const tagMatch = chunk.match(/^<\s*?span([\s]*?style\s*?=\s*?(?<style>"[^"]+"|'[']+'))\s*?[^>]*?>/);
