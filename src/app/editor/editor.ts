@@ -1,5 +1,4 @@
 import DiffMatchPatch from 'diff-match-patch';
-import htmlSanitizer from './libs/htmlSanitizer';
 import markdownConversionSvc from './markdownConversionSvc';
 import sectionUtils, { SectionDimension } from './editor/sectionUtils';
 import { VanillaMirror } from './editor/vanilla-mirror';
@@ -10,6 +9,7 @@ import MarkdownIt from 'markdown-it';
 import markdownGFM from './extensions/markdownExtension';
 import { ulid } from 'ulidx';
 import { Section } from './editor/highlighter';
+import dompurify from 'dompurify';
 
 const allowDebounce = (action, wait) => {
     let timeoutId;
@@ -233,7 +233,9 @@ export class Editor extends EventEmittingClass {
             const imgElt = document.createElement('img');
             imgElt.style.display = 'none';
             const uri = srcElt.textContent;
-            if (true || !/^unsafe/.test(htmlSanitizer.sanitizeUri(uri, true))) {
+            // TODO: sanitize URIs?
+            // Also add support for URI whitelists.
+            if (true) {
                 imgElt.onload = () => {
                     imgElt.style.display = '';
 
@@ -546,7 +548,7 @@ export class Editor extends EventEmittingClass {
                     this.tocElt.removeChild(sectionTocElt);
                 }
                 else if (item[0] === 1) {
-                    const html = htmlSanitizer.sanitizeHtml(this.conversionCtx.htmlSectionList[sectionIdx]);
+                    const html = dompurify.sanitize(this.conversionCtx.htmlSectionList[sectionIdx]);
                     sectionIdx++;
 
                     // Create preview section element
