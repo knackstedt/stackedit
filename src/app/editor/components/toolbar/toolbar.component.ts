@@ -30,7 +30,7 @@ import { LinkInsertComponent } from './link-insert/link-insert.component';
 export class ToolbarComponent {
     get editor() { return this.stackEditor.editorSvc.clEditor }
     get wrapSelection() {
-        return this.editor.wrapSelection.bind(this.editor);
+        return this.editor.wrapSelection.bind(this.editor) as typeof this.editor.wrapSelection;
     }
 
     // 2D array of color hex codes that show up for the color picker.
@@ -371,11 +371,13 @@ export class ToolbarComponent {
     toggleTOC() {
         this.stackEditor.showToc = !this.stackEditor.showToc;
     }
+
     toggleEditor() {
         this.stackEditor.mode = this.stackEditor.mode == 'view' ? 'edit' : 'view';
         if (this.stackEditor.mode == 'view' && !this.stackEditor.showPreview)
             this.stackEditor.showPreview = !this.stackEditor.showPreview;
     }
+
     togglePreview() {
         this.stackEditor.showPreview = !this.stackEditor.showPreview;
         if (this.stackEditor.mode == 'view' && !this.stackEditor.showPreview)
