@@ -21,7 +21,6 @@ export class VanillaMirror extends EventEmittingClass {
     value = '';
     lastTextContent = '';
     get $contentElt() { return this.editorElt };
-    get $scrollElt() { return this.scrollElt };
 
     watcher = new Watcher(this, this.onMutationObserved.bind(this));
     highlighter = new Highlighter(this);
@@ -41,24 +40,14 @@ export class VanillaMirror extends EventEmittingClass {
         "linkReferenceStyle": "full"
     });
 
-    private windowKeydownListener;
-    private windowMouseListener;
-    private windowResizeListener;
-
-    private scrollElt: HTMLElement
-
     constructor(
         public ngEditor: StackEditorComponent,
-        private editorElt: HTMLElement,
-        private scrollEltOpt: HTMLElement
+        private editorElt: HTMLElement
     ) {
         super();
 
         window['editor'] = this;
 
-        this.scrollElt = scrollEltOpt || editorElt;
-
-        // editorElt.setAttribute('tabindex', '0'); // To have focus even when disabled
         this.toggleEditable(true);
 
         // Disable escaping
@@ -68,18 +57,12 @@ export class VanillaMirror extends EventEmittingClass {
         editorElt.addEventListener('keydown', this.keydownHandler((evt) => this.onKeyDown(evt)));
         editorElt.addEventListener('paste', (evt) => this.onPaste(evt));
 
-        editorElt.addEventListener('focus', () => this.$trigger('focus'));
-        editorElt.addEventListener('blur', () => this.$trigger('blur'));
-
         // Mouseup can happen outside the editor element
         editorElt.addEventListener('mouseup', this.onMouseUp);
 
-        document.addEventListener("selectionchange", () => {
-            this.selectionMgr.updateCursorCoordinates(true);
-        })
-
         // Resize provokes cursor coordinate changes
         window.addEventListener('resize', this.onWindowResize);
+        document.addEventListener("selectionchange", this.onSelectionChange);
 
         this.addKeystroke(defaultKeystrokes);
 
@@ -90,6 +73,7 @@ export class VanillaMirror extends EventEmittingClass {
         this.watcher.stopWatching();
 
         window.removeEventListener('resize', this.onWindowResize);
+        document.removeEventListener("selectionchange", this.onSelectionChange);
     }
 
     toggleEditable(isEditable: boolean) {
@@ -155,6 +139,10 @@ export class VanillaMirror extends EventEmittingClass {
         this.selectionMgr.updateCursorCoordinates();
     }).bind(this)
 
+    onSelectionChange: () => void = (() => {
+        this.selectionMgr.updateCursorCoordinates(true);
+    }).bind(this)
+
     init(opts: any = {}) {
         opts.content = ``;
 
@@ -169,7 +157,6 @@ export class VanillaMirror extends EventEmittingClass {
             ...opts
         };
         this.options = options;
-        this.undoMgr = new UndoManager(this, options);
 
         if (options.content !== undefined) {
             this.lastTextContent = options.content.toString();
@@ -188,7 +175,7 @@ export class VanillaMirror extends EventEmittingClass {
         }
 
         if (options.scrollTop !== undefined) {
-            this.scrollElt.scrollTop = options.scrollTop;
+            this.editorElt.scrollTop = options.scrollTop;
         }
     }
 
@@ -668,13 +655,14 @@ export class VanillaMirror extends EventEmittingClass {
 
     /**
      * Wrap the current selection in text
-     *
      */
     wrapSelection(before = '', after = '', indent?: number, insertNewline = false) {
         const { selectionStart, selectionEnd } = this.selectionMgr;
         const text = this.getContent() as string;
 
-        const { lineStart, lineEnd, line } = selectionStart == selectionEnd ? this.getLine(selectionStart, text) : {} as any;
+        const { lineStart, lineEnd, line } = (selectionStart == selectionEnd)
+            ? this.getLine(selectionStart, text)
+            : {} as any;
 
         const startIndex = lineStart ?? Math.min(selectionStart, selectionEnd);
         const endIndex = lineEnd ?? Math.max(selectionStart, selectionEnd);
@@ -684,16 +672,18 @@ export class VanillaMirror extends EventEmittingClass {
         let postString = text.slice(endIndex);
 
         // Check if this is a duplicate invocation that should remove the decoration effect
-        if (preString.endsWith(before) && postString.startsWith(after)) {
-            // Strip out the symbols
+        const isRemoval = preString.endsWith(before) && postString.startsWith(after);
+
+        if (isRemoval) {
+            // Strip out the previously added before and after text
             preString = preString.slice(0, preString.length - before.length);
             postString = postString.slice(after.length);
 
-            // Move the selection to what it will be after removing the text
-            this.selectionMgr.selectionStart += before.length;
-            this.selectionMgr.selectionEnd += before.length;
+            // Move the selection to what was before adding the text
+            this.selectionMgr.selectionStart -= before.length;
+            this.selectionMgr.selectionEnd -= before.length;
 
-            // Clear before and after to re-use the result logic.
+            // Clear before and after for re-use of the update logic.
             before = '';
             after = '';
             indent = null;
@@ -708,7 +698,10 @@ export class VanillaMirror extends EventEmittingClass {
 
         if (indent) {
             // Indent all lines in the selection
-            updatedSelection = selectionText.split('\n').map(l => ''.padStart(indent, ' ') + l).join('\n');
+            updatedSelection = selectionText
+                .split('\n')
+                .map(l => ''.padStart(indent, ' ') + l)
+                .join('\n');
         }
 
         if (insertNewline && before) {
@@ -725,7 +718,8 @@ export class VanillaMirror extends EventEmittingClass {
             postString;
 
         this.setContent(patchedText);
-        this.selectionMgr.setSelectionStartEnd(startIndex + before.length, endIndex + after.length);
+
+        this.selectionMgr.setSelectionStartEnd(this.selectionMgr.selectionStart, this.selectionMgr.selectionEnd);
     }
 
     /**

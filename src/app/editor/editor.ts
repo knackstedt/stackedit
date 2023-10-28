@@ -101,7 +101,7 @@ export class Editor extends EventEmittingClass {
         ].filter(e => !!e)).then((extensions) => {
             this.converter = markdownConversionSvc.createConverter();
             this.initConverter(this.converter, ngEditor.options.markdownIt);
-            this.clEditor = new VanillaMirror(this.ngEditor, editorElt, editorElt.parentNode as any);
+            this.clEditor = new VanillaMirror(this.ngEditor, editorElt);
 
             this.clEditor.on('contentChanged', (text, diffs, sectionList) => {
                 this.parsingCtx = {
