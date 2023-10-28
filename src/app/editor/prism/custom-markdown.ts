@@ -399,8 +399,12 @@ export default (Prism) => {
         }
     }
 
-    const _lmc = Prism.languages.markdown.code.find(c => !!c.inside)?.inside['code-block'];
-    _lmc && (_lmc.alias = "prism"); // add 'prism' class to code-blocks
+    const codeBlockRule = Prism.languages.markdown.code.find(c => !!c.inside)?.inside['code-block'];
+    if (codeBlockRule) {
+        codeBlockRule.pattern =
+            /^(```.*(?:\n|\r\n?))[\s\S]+?(?:\n|\r\n?)(?=^```$)/m
+        codeBlockRule.alias = "prism"; // add 'prism' class to code-blocks
+    }
 
     Prism.hooks.add('wrap', (env: {
         attributes: { [key: string]: string },
