@@ -1,3 +1,4 @@
+import markdownConversionSvc from '../markdownConversionSvc';
 import { EventEmittingClass, debounce } from './utils';
 import { VanillaMirror } from './vanilla-mirror';
 
@@ -8,6 +9,8 @@ export class Section {
 
     // AFAIK nothing ever sets this
     forceHighlighting = false;
+
+    monaco;
 
     constructor(text: string | any) {
         this.text = text.text === undefined ? text : text.text;
@@ -68,9 +71,11 @@ export class Highlighter extends EventEmittingClass {
             return this.sectionList;
 
         this.cancelComposition = false;
-        const newSectionList: Section[] = (this.editor.options.sectionParser
-            ? this.editor.options.sectionParser(content)
-            : [content])
+
+        const { editorSvc } = this.editor.ngEditor;
+        editorSvc.parsingCtx = markdownConversionSvc.parseSections(editorSvc.converter, content);
+
+        const newSectionList: Section[] = editorSvc.parsingCtx.sections
             .map(sectionText => new Section(sectionText));
 
         let modifiedSections: Section[] = [];
