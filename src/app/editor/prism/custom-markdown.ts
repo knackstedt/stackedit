@@ -335,7 +335,7 @@ export default (Prism) => {
             }
         },
         'blockquote': {
-            pattern: /(^|\n)\s*>.+?(?=\n|$)/s,
+            pattern: /(^|\n)\s*>.+?(?=\n\s*\n|$)/s,
             lookbehind: true,
             greedy: true,
             inside: {
