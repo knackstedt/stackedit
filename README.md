@@ -13,7 +13,7 @@
 >  * Improved dark & light mode support
 >  * Packaging for Angular component distribution
 
-https://stackedit.io/
+https://dotglitch.dev/#/StackEdit
 
 <!-- ### Ecosystem
 
@@ -21,6 +21,81 @@ https://stackedit.io/
 - NEW! Embed StackEdit in any website with [stackedit.js](https://github.com/benweet/stackedit.js)
 - NEW! [Chrome extension](https://chrome.google.com/webstore/detail/ajehldoplanpchfokmeempkekhnhmoha) that uses stackedit.js
 - [Community](https://community.stackedit.io/) -->
+
+### Quickstart
+
+##### Install
+
+```bash
+    npm i -S ngx-stackedit
+```
+
+##### Import
+
+```ts
+import { Component } from '@angular/core';
+import { StackEditorComponent } from 'ngx-stackedit';
+
+@Component({
+    selector: 'app-example',
+    template: `
+<ngx-stackedit
+    [(value)]="defaultValue"
+    mode="viewonly"
+    (onImageUpload)="onImageUpload($event)"
+/>
+    `,
+    imports: [
+        StackEditorComponent
+    ],
+    standalone: true
+})
+export class ExampleBasicComponent {
+
+    defaultValue = `
+Lorem **ipsum** _dolor_ sit amet, consectetur adipiscing elit, sed do _eiusmod tempor incididunt_ \
+ut labore et dolore magna ~~aliqua~~. Ut enim ad minim veniam, quis nostrud exercitation \
+ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in \
+_reprehenderit_ in <span style="color: #ff0000">voluptate</span> velit esse cillum \
+dolore eu fugiat nulla pariatur. Excepteur sint ~~occaecat cupidatat~~ non proident, \
+sunt in culpa qui **officia deserunt mollit** anim id est laborum.
+    `;
+
+    // Sample for handling an image upload event
+    onImageUpload(evt: { data: FileList, stackEditor: StackEditorComponent }) {
+        const formData = new FormData();
+
+        Object.keys(evt.data).forEach(k => {
+            const file: {
+                lastModified: number,
+                lastModifiedDate: Date,
+                name: string,
+                size: number,
+                type: string;
+            } = evt.data[k];
+
+            const parts = file.name.split('.');
+            const name = parts.slice(0, -1).join('.') + '-' + ulid() + '.' + parts.slice(-1)[0];
+            formData.append(name, file as any);
+        });
+        formData.append("data", JSON.stringify({
+            path,
+            scope: this.asset.dto + '.' + this.asset.id,
+            autoRename: true
+        }));
+
+        const url = `/api/files/upload`;
+
+        const { files } = await this.fetch.post<{ files: {url: string, name: string}[] }>(url, formData);
+
+        evt.stackEditor.finalizeImageUpload({
+            label: files[0].name,
+            link: files[0].url
+        });
+    }
+}
+
+```
 
 ### Developing
 
