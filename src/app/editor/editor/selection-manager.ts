@@ -45,7 +45,10 @@ export class SelectionMgr extends EventEmittingClass {
         }
 
         range.setStart(startContainer.node, startContainer.offset);
-        range.setEnd(endContainer.node, endContainer.offset);
+        range.setEnd(
+            endContainer?.node || startContainer.node,
+            endContainer?.offset || startContainer.offset
+        );
 
         return range;
     };
