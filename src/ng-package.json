@@ -18,6 +18,7 @@
         "markdown-it-sub",
         "markdown-it-sup",
         "mermaid",
+        "monaco-editor",
         "prismjs",
         "turndown"
     ]
