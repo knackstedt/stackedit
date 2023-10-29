@@ -1,8 +1,8 @@
 {
   "name": "stackedit",
-  "version": "6.0.0",
+  "version": "0.0.0",
   "description": "Free, open-source, full-featured Markdown editor",
-  "author": "Benoit Schweblin",
+  "author": "Andrew Knackstedt",
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/knackstedt/stackedit/issues"
@@ -10,7 +10,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ng serve --port 8080 --ssl",
-    "dev:tauri": "ng serve --port 8080",
+    "dev:tauri": "ng serve --port 8081",
     "prebuild": "cd src && sed -i -e \"s/__VERSION__/$(npm version --json | jq \".[\\\"ngx-stackedit\\\"]\" | tr -d '\"')/g\" ./app/editor/editor.component.ts",
     "build": "ng build --project package",
     "build:tauri": "ng build --project dotglitch",
@@ -29,7 +29,7 @@
     "@angular/platform-browser": "^17.0.0-next.4",
     "@angular/platform-browser-dynamic": "^17.0.0-next.4",
     "@angular/service-worker": "^17.0.0-next.4",
-    "@dotglitch/ngx-common": "^1.0.29",
+    "@dotglitch/ngx-common": "^1.0.31",
     "@fontsource/fira-mono": "^5.0.8",
     "@fontsource/fira-sans": "^5.0.17",
     "@fontsource/material-symbols-outlined": "^5.0.16",
@@ -47,6 +47,7 @@
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "^1.0.0",
     "mermaid": "^9.4.3",
+    "monaco-editor": "^0.40.0",
     "prismjs": "^1.29.0",
     "rxjs": "7.8.1",
     "tslib": "^2.3.0",
