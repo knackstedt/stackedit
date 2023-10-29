@@ -69,7 +69,12 @@
             "csp": null
         },
         "updater": {
-            "active": false
+            "active": true,
+            "endpoints": [
+                "https://cdn.dotglitch.dev/stackedit/{{target}}/{{arch}}/{{current_version}}"
+            ],
+            "dialog": true,
+            "pubkey": "YOUR_UPDATER_SIGNATURE_PUBKEY_HERE"
         },
         "windows": [
             {
