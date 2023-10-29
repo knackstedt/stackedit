@@ -469,37 +469,6 @@ export class Editor extends EventEmittingClass {
         })
     }
 
-    initClEditorInternal(opts) {
-        const content = {
-            comments: {},
-            discussions: {},
-            hash: 0,
-            id: null,
-            properties: "\n",
-            text: "\n",
-            type: "content"
-        };
-
-        if (content) {
-            const contentState = {
-                hash: 0,
-                id: null,
-                scrollPosition: null,
-                selectionEnd: 0,
-                selectionStart: 0,
-                type: "contentState"
-            };
-
-            const options = {
-                selectionStart: contentState.selectionStart,
-                selectionEnd: contentState.selectionEnd,
-                ...opts
-            };
-
-            this.clEditor.init(options);
-        }
-    }
-
     /**
      * Get an object describing the position of the scroll bar in the file.
      */
@@ -648,7 +617,8 @@ export class Editor extends EventEmittingClass {
         const maxScrollTop = scrollerElt.scrollHeight - scrollerElt.offsetHeight;
         if (scrollTop < 0) {
             scrollTop = 0;
-        } else if (scrollTop > maxScrollTop) {
+        }
+        else if (scrollTop > maxScrollTop) {
             scrollTop = maxScrollTop;
         }
     }
@@ -669,8 +639,11 @@ export class Editor extends EventEmittingClass {
 
                 return `<div class="prism language-markdown">${highlighted}</div>`;
             },
+            selectionStart: 0,
+            selectionEnd: 0,
         };
-        this.initClEditorInternal(options);
+
+        this.clEditor.init(options);
         this.restoreScrollPosition();
     }
 
