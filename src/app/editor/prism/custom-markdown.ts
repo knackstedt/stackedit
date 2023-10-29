@@ -102,16 +102,6 @@ const scanSpan = (text: string) => {
     return rootNode;
 }
 
-const blockNames = [
-    'tip',
-    'warning',
-    'important',
-    'example',
-    'note',
-    'info',
-    'question'
-];
-
 export default (Prism) => {
 
     const spanStyled = {
@@ -147,7 +137,7 @@ export default (Prism) => {
                 greedy: true
             },
             "content": {
-                pattern: /(?<=<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">).+(?=<\/span>)/,
+                pattern: /(?:<span style="color: #(?:[A-Fa-f0-9]{3}|[A-Fa-f0-9]{4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})">).+(?=<\/span>)/,
                 lookbehind: true,
                 greedy: true,
                 inside: Prism.languages.markdown
@@ -312,7 +302,7 @@ export default (Prism) => {
                     greedy: false,
                     inside: {
                         'cell': {
-                            pattern: /(?<=\|)[^|]+(?=\|)/,
+                            pattern: /(\|)[^|]+(?=\|)/,
                             lookbehind: true,
                             greedy: false,
                             inside: basicRules
@@ -326,7 +316,7 @@ export default (Prism) => {
                     greedy: false,
                     inside: {
                         'cell': {
-                            pattern: /(?<=\|)[^|]+(?=\|)/,
+                            pattern: /(\|)[^|]+(?=\|)/,
                             lookbehind: true,
                             greedy: false,
                             inside: basicRules
@@ -399,12 +389,18 @@ export default (Prism) => {
         }
     }
 
-    const codeBlockRule = Prism.languages.markdown.code.find(c => !!c.inside)?.inside['code-block'];
+    // Bypass the Prism wrapper on `code`
+    // This disables markdown language prism highlighting
+    // which is faster for us when we use the Monaco editor
+    Prism.languages.markdown['code_custom'] = Prism.languages.markdown.code;
+    const codeBlockRule = Prism.languages.markdown['code_custom'].find(c => !!c.inside)?.inside['code-block'];
     if (codeBlockRule) {
         codeBlockRule.pattern =
-            /^(```.*(?:\n|\r\n?))[\s\S]+?(?:\n|\r\n?)(?=^```$)/m
+            /^(```.*(?:\n|\r\n?))[\s\S]+?(?:\n|\r\n?)(?=^```\n?$)/m
         codeBlockRule.alias = "prism"; // add 'prism' class to code-blocks
+        codeBlockRule.inside = undefined;
     }
+    Prism.languages.markdown.code = undefined;
 
     Prism.hooks.add('wrap', (env: {
         attributes: { [key: string]: string },
@@ -423,7 +419,7 @@ export default (Prism) => {
             if (style)
                 env.attributes['style'] = style;
         }
-        else if (env.type == 'code') {
+        else if (env.type == 'code_custom') {
             // Questionable mermaid diagram detection
             if (env.content.match(/^<span class="token punctuation">```<\/span><span class="token code-language">mermaid<\/span>/)) {
                 env.classes.push("mermaid");

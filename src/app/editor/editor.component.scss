@@ -116,6 +116,7 @@
 
 
 :host ::ng-deep {
+    --monaco-line-height: 22px;
     .editor, .preview {
         // Take off 1 px to have a slight space between panels
         width: calc(50% - 1px);
@@ -224,6 +225,44 @@
 
         &.hidden {
             left: -50%
+        }
+
+        .editor-underlay,
+        .editor-overlay-1,
+        .editor-overlay-2 {
+            position: absolute;
+            top: 0;
+            right: 0;
+            left: 0;
+        }
+
+        .code-block {
+            display: block !important;
+
+            overflow: hidden;
+            white-space: pre;
+            padding-bottom: calc(19px + var(--monaco-line-height));
+
+            line-height: var(--monaco-line-height);
+        }
+
+        .editor-overlay-1 {
+            .monaco-container {
+                position: absolute;
+                display: block;
+            }
+            // .monaco-editor {
+            //     border-radius: 6px;
+            //     .overflow-guard .margin,
+            //     .margin-view-overlays {
+            //         border-bottom-left-radius: 6px;
+            //         border-top-left-radius: 6px;
+            //     }
+            //     .decorationsOverviewRuler {
+            //         border-bottom-right-radius: 6px;
+            //         border-top-right-radius: 6px;
+            //     }
+            // }
         }
     }
 
@@ -612,11 +651,11 @@
         -moz-osx-font-smoothing: auto;
         font-weight: 400;
 
-        .code, .tag, .pre, .entity, .table {
+        .code_custom, .tag, .pre, .entity, .table {
             font-family: var(--stackedit-font-family-mono);
         }
 
-        .code:not(.code-snippet),
+        .code_custom:not(.code-snippet),
         .pre,
         .table-block,
         .blockquote {
@@ -626,7 +665,7 @@
             display: inline-block !important;
         }
 
-        .code:not(.code-snippet),
+        .code_custom:not(.code-snippet),
         .blockquote {
             width: 100%;
         }
