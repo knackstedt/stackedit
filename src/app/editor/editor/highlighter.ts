@@ -1,4 +1,5 @@
 import markdownConversionSvc from '../markdownConversionSvc';
+import Prism from '../prism';
 import { EventEmittingClass, debounce } from './utils';
 import { VanillaMirror } from './vanilla-mirror';
 
@@ -65,6 +66,12 @@ export class Highlighter extends EventEmittingClass {
             e.setAttribute("data-linenumber", i+1);
         });
     }, 25)
+
+    sectionHighlighter(section: Section) {
+        const highlighted = Prism.highlight(section.text, Prism.languages.markdown, 'markdown');
+
+        return `<div class="prism language-markdown">${highlighted}</div>`;
+    }
 
     parseSections(content: string, isInit = false) {
         if (this.isComposing && !this.cancelComposition)
@@ -142,7 +149,7 @@ export class Highlighter extends EventEmittingClass {
 
         // TODO: All of the rendering logic for the editor should be unified.
         const highlight = (section: Section) => {
-            const initialMarkup = this.editor.options.sectionHighlighter(section) as string;
+            const initialMarkup = this.sectionHighlighter(section) as string;
             const html = initialMarkup.replace(/\n/g, this.lfHtml);
 
             const sectionElt = document.createElement('div');

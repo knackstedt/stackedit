@@ -1,16 +1,17 @@
 import DiffMatchPatch from 'diff-match-patch';
-import markdownConversionSvc, { htmlSectionMarker } from './markdownConversionSvc';
+import MarkdownIt from 'markdown-it';
+import { ulid } from 'ulidx';
+import dompurify from 'dompurify';
+import type * as Monaco from 'monaco-editor';
+
+import Prism from './prism';
+import markdownConversionSvc from './markdownConversionSvc';
 import sectionUtils, { SectionDimension } from './editor/sectionUtils';
 import { VanillaMirror } from './editor/vanilla-mirror';
 import { EventEmittingClass, findContainer, debounce } from './editor/utils';
 import { StackEditorComponent } from './editor.component';
-import Prism from './prism';
-import MarkdownIt from 'markdown-it';
 import markdownGFM from './extensions/markdownExtension';
-import { ulid } from 'ulidx';
 import { Section } from './editor/highlighter';
-import dompurify from 'dompurify';
-import type * as Monaco from 'monaco-editor';
 import { waitForMonacoInstall } from './monaco';
 import { initEditor } from './monaco/mermaid-tokenizer';
 
@@ -120,7 +121,11 @@ export class Editor extends EventEmittingClass {
         ].filter(e => !!e)).then((extensions) => {
             this.converter = markdownConversionSvc.createConverter();
             this.initConverter(this.converter, ngEditor.options.markdownIt);
-            this.clEditor = new VanillaMirror(this.ngEditor, editorElt.querySelector('.editor-inner'));
+            this.clEditor = new VanillaMirror(
+                this.ngEditor,
+                editorElt.querySelector('.editor-inner'),
+                this.ngEditor.value
+                );
 
             let scrollMode: "editor" | "preview";
             let lastScrollEvent = 0;
@@ -129,7 +134,9 @@ export class Editor extends EventEmittingClass {
             // Manually handle scroll events
             const onScroll = (e) => {
                 e.preventDefault();
-                this.restoreScrollPosition(this.getScrollPosition(scrollMode == 'editor' ? editorElt : previewElt));
+                this.restoreScrollPosition(
+                    this.getScrollPosition(scrollMode == 'editor' ? editorElt : previewElt)
+                );
             };
 
             editorElt.addEventListener('scroll', evt => {
@@ -162,10 +169,7 @@ export class Editor extends EventEmittingClass {
             let newSectionList;
             let newSelectionRange;
             this.clEditor.on('contentChanged', (text, diffs, sectionList) => {
-                this.parsingCtx = {
-                    ...this.parsingCtx,
-                    sectionList,
-                };
+                this.parsingCtx.sectionList = sectionList;
                 newSectionList = sectionList;
                 onEditorChanged(!this.instantPreview);
             });
@@ -632,18 +636,7 @@ export class Editor extends EventEmittingClass {
         this.previewCtxWithDiffs = null;
         this.$trigger('previewCtxWithDiffs', null);
 
-        // This is the CL Editor for the text input
-        const options = {
-            sectionHighlighter: (section) => {
-                const highlighted = Prism.highlight(section.text, Prism.languages.markdown, 'markdown');
-
-                return `<div class="prism language-markdown">${highlighted}</div>`;
-            },
-            selectionStart: 0,
-            selectionEnd: 0,
-        };
-
-        this.clEditor.init(options);
+        this.clEditor.init();
         this.restoreScrollPosition();
     }
 

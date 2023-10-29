@@ -1,5 +1,7 @@
 import DiffMatchPatch from 'diff-match-patch';
 import TurndownService from 'turndown/lib/turndown.browser.umd';
+import type * as Monaco from 'monaco-editor';
+
 import { UndoManager } from './undo-manager';
 import { Watcher } from './watcher';
 import { EventEmittingClass, debounce } from './utils';
@@ -7,12 +9,8 @@ import { Highlighter } from './highlighter';
 import { SelectionMgr } from './selection-manager';
 import { defaultKeystrokes } from './keystroke';
 import { StackEditorComponent } from '../editor.component';
-import type * as Monaco from 'monaco-editor';
 
 export class VanillaMirror extends EventEmittingClass {
-
-    // TODO: Type this
-    options: any;
 
     ignoreUndo = false;
     noContentFix = false;
@@ -20,7 +18,6 @@ export class VanillaMirror extends EventEmittingClass {
     $markers = {};
     $keystrokes = [];
     value = '';
-    lastTextContent = '';
     get $contentElt() { return this.editorElt };
 
     watcher = new Watcher(this, this.onMutationObserved.bind(this));
@@ -48,7 +45,8 @@ export class VanillaMirror extends EventEmittingClass {
 
     constructor(
         public ngEditor: StackEditorComponent,
-        private editorElt: HTMLElement
+        private editorElt: HTMLElement,
+        private lastTextContent: string
     ) {
         super();
 
@@ -176,40 +174,12 @@ export class VanillaMirror extends EventEmittingClass {
         }
     }).bind(this)
 
-    init(opts: any = {}) {
-        opts.content = ``;
-
-        const options = {
-            sectionHighlighter(section) {
-                return section.text
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/\u00a0/g, ' ');
-            },
-            sectionDelimiter: '',
-            ...opts
-        };
-        this.options = options;
-
-        if (options.content !== undefined) {
-            this.lastTextContent = options.content.toString();
-            if (this.lastTextContent.slice(-1) !== '\n') {
-                this.lastTextContent += '\n';
-            }
-        }
-
+    init() {
         const sectionList = this.highlighter.parseSections(this.lastTextContent, true);
         this.$trigger('contentChanged', this.lastTextContent, [0, this.lastTextContent], sectionList);
-        if (options.selectionStart !== undefined && options.selectionEnd !== undefined) {
-            this.setSelection(options.selectionStart, options.selectionEnd);
-        }
-        else {
-            this.selectionMgr.saveSelectionState();
-        }
 
-        if (options.scrollTop !== undefined) {
-            this.editorElt.scrollTop = options.scrollTop;
-        }
+        this.setSelection(0, 0);
+        this.selectionMgr.saveSelectionState();
     }
 
     getNodeAndOffsetAtIndex(index: number): { node: Node, offset: number } {
