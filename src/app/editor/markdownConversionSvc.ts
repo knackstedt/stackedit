@@ -6,7 +6,7 @@ import MarkdownIt from 'markdown-it';
  * This provides the HTML rendering for markdown preview content.
  */
 
-const htmlSectionMarker = '\uF111\uF222\uF333\uF444';
+export const htmlSectionMarker = '\uF111\uF222\uF333\uF444';
 const diffMatchPatch = new DiffMatchPatch();
 
 // Create aliases for syntax highlighting
