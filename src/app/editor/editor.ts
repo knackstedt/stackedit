@@ -83,6 +83,8 @@ export class Editor extends EventEmittingClass {
     initConverterListeners = [];
     sectionPreviewListeners = [];
 
+    imageElementCache: { [key: string]: HTMLElement } = {};
+
     overlay1: HTMLElement;
     overlay2: HTMLElement;
     underlay: HTMLElement;
@@ -252,54 +254,82 @@ export class Editor extends EventEmittingClass {
         section.elt.querySelectorAll('.token.img').forEach((imgTokenElt) => {
             const srcElt = imgTokenElt.querySelector('.img-src');
             if (!srcElt) return;
+            // TODO: sanitize URIs?
+            // Also add support for URI whitelists.
 
             // Create an img element before the .img.token and wrap both elements
             // into a .token.img-wrapper
             const imgElt = document.createElement('img');
             imgElt.style.display = 'none';
             const uri = srcElt.textContent;
-            // TODO: sanitize URIs?
-            // Also add support for URI whitelists.
-            if (true) {
-                imgElt.onload = () => {
-                    imgElt.style.display = '';
 
-                    sectionUtils.measureSectionDimensions(this);
-                    this.previewCtxMeasured = this.previewCtx;
-                    this.sectionList?.forEach(s => s.monaco?.['_resize']());
+            imgElt.onload = () => {
+                imgElt.style.display = '';
+
+                sectionUtils.measureSectionDimensions(this);
+                this.previewCtxMeasured = this.previewCtx;
+                this.sectionList?.forEach(s => s.monaco?.['_resize']());
+                this.restoreScrollPosition();
+
+                const width = imgElt.offsetWidth;
+                const height = imgElt.offsetHeight;
+
+                if (height > 30) {
+                    imgElt.parentElement.classList.add("img-block")
+                }
+
+                const rsObserver = new ResizeObserver(() => {
                     this.restoreScrollPosition();
-
-                    const width = imgElt.offsetWidth;
-                    const height = imgElt.offsetHeight;
-
-                    if (height > 30) {
-                        imgElt.parentElement.classList.add("img-block")
-                    }
-
-                    const rsObserver = new ResizeObserver(() => {
-                        this.restoreScrollPosition();
-                    });
-                    rsObserver.observe(imgElt, { box: 'border-box' });
-                };
-                imgElt.src = uri;
-                // Take img size into account
-                const sizeElt = imgTokenElt.querySelector('.size');
-                if (sizeElt) {
-                    const match = sizeElt.textContent.match(/=(\d*)x(\d*)/);
-                    if (match[1]) {
-                        imgElt.width = parseInt(match[1], 10);
-                    }
-                    if (match[2]) {
-                        imgElt.height = parseInt(match[2], 10);
-                    }
+                });
+                rsObserver.observe(imgElt, { box: 'border-box' });
+            };
+            imgElt.src = uri;
+            // Take img size into account
+            const sizeElt = imgTokenElt.querySelector('.size');
+            if (sizeElt) {
+                const match = sizeElt.textContent.match(/=(\d*)x(\d*)/);
+                if (match[1]) {
+                    imgElt.width = parseInt(match[1], 10);
+                }
+                if (match[2]) {
+                    imgElt.height = parseInt(match[2], 10);
                 }
             }
+
+            this.imageElementCache[uri] = imgElt;
 
             const imgTokenWrapper = document.createElement('span');
             imgTokenWrapper.className = 'token img-wrapper';
             imgTokenElt.parentNode.insertBefore(imgTokenWrapper, imgTokenElt);
             imgTokenWrapper.appendChild(imgElt);
             imgTokenWrapper.appendChild(imgTokenElt);
+        });
+
+        let imgCache = {};
+        this.clEditor.highlighter.on('highlighted', () => {
+            Object.entries(this.imageElementCache).forEach(([key, imgElt]) => {
+
+                const cachedImgElt = imgCache[key];
+                if (cachedImgElt) {
+                    // Found a previously loaded image that has just been released
+                    imgElt.parentNode.replaceChild(cachedImgElt, imgElt);
+                }
+                else {
+                    imgCache[key] = imgElt;
+                }
+            });
+            this.imageElementCache = {};
+            // // Eject released images from cache
+            // Object.entries(imgCache).forEach(([src, entries]) => {
+            //     // Filter entries that are not attached to the DOM
+            //     const filteredEntries = entries.filter(imgElt => this.editorElt.contains(imgElt));
+            //     if (filteredEntries.length) {
+            //         imgCache[src] = filteredEntries;
+            //     } else {
+            //         delete imgCache[src];
+            //     }
+            // });
+
         });
 
         section.elt.querySelectorAll('.image-spinner').forEach((fenceElement: HTMLElement) => {
