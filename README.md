@@ -1,17 +1,43 @@
 # ngx-stackedit
 
-[![Build Status](https://img.shields.io/travis/benweet/stackedit.svg?style=flat)](https://travis-ci.org/benweet/stackedit) [![NPM version](https://img.shields.io/npm/v/stackedit.svg?style=flat)](https://www.npmjs.org/package/stackedit)
+[![npm](https://img.shields.io/npm/v/ngx-stackedit.svg)](https://www.npmjs.com/package/ngx-stackedit)
+[![npm](https://img.shields.io/npm/dm/ngx-stackedit.svg)](https://www.npmjs.com/package/ngx-stackedit)
+[![npm downloads](https://img.shields.io/npm/dt/ngx-stackedit.svg)](https://npmjs.org/ngx-stackedit)
+[![GitHub stars](https://img.shields.io/github/stars/knackstedt/stackedit.svg?label=GitHub%20Stars&style=flat)](https://github.com/knackstedt/stackedit)
 
-> Full-featured, open-source Markdown editor based on PageDown, the Markdown library used by Stack Overflow and the other Stack Exchange sites.
-> This is an Angular rewrite of the StackEdit implementation.
->  * Rewrote editor and preview components to use Angular instead of Vue
->  * Rewrote several files to TS
->  * Added support for more inline editor rendering
->  * Upgraded dependencies
->  * Optimized event handling (generically across clEdit)
->  * Improved content parsing on paste (duplicate lines, extra spaces etc.)
->  * Improved dark & light mode support
->  * Packaging for Angular component distribution
+StackEdit Markdown Editor is a full-featured, open-source markdown editor designed to outshine all other embeddable markdown editors. With a range of powerful features and modern styling, it's your ultimate tool for creating beautiful markdown documents.
+
+## Features:
+
+- **Rich Text Editing**: Enjoy a seamless editing experience with real-time Markdown rendering, making it easier than ever to see your content come to life as you type.
+
+- **Syntax Highlighting**: Write and edit code in style with syntax highlighting for various programming languages, ensuring your code looks as good as it works.
+
+- **Color Customization**: Express your creativity by customizing the editor's color scheme to match your unique preferences or brand aesthetics.
+
+- **Mermaid Charts**: Effortlessly integrate Mermaid charts into your documents for visually appealing data visualization.
+
+- **Scroll Syncing**: Experience a fluid writing and reading experience with scroll syncing, keeping your place in your document no matter where you are.
+
+## Installation
+
+To embed this markdown editor into your project, simply follow the installation instructions provided [here](#/quickstart).
+
+## Getting Started
+
+Detailed instructions on how to get started and make the most of StackEdit Markdown Editor can be found in our [documentation](https://github.com/yourrepository/docs).
+
+## Contributing
+
+We welcome contributions from the community to make StackEdit Markdown Editor even more amazing. Please read our [contribution guidelines](https://github.com/yourrepository/contributing) for more information on how to get involved.
+
+## License
+
+This project is licensed under mixed MIT and Apache 2.0 Licenses. See the [LICENSE](https://github.com/knackstedt/stackedit/blob/master/src/app/editor/LICENSE) file for details.
+
+---
+
+StackEdit Markdown Editor - Designed to make you forget about all other markdown editors.
 
 https://dotglitch.dev/#/StackEdit
 
@@ -137,3 +163,6 @@ for the rich-preview of content in the editor panel
     - \`\`\`<injected>{{html content}}</injected>\`\`\`
  - Image upload spinner
     - \`\`\`image-spinner\`\`\`
+
+# Disclaimers
+> This is a massive rewrite of [StackEdit](https://github.com/benweet/stackedit).

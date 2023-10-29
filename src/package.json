@@ -10,16 +10,18 @@
     "email": "andrewk@vivaldi.net",
     "name": "Andrew G. Knackstedt"
   },
-  "description": "Angular re-implementation of StackEdit",
+  "description": "FOSS WYSIWYG Markdown editor. ",
   "keywords": [
     "stackedit",
     "angular",
-    "ngx",
-    "typescript",
-    "ivy",
-    "ng2",
-    "ng",
-    "angular-service"
+    "markdown",
+    "markdown-it",
+    "editor",
+    "viewer",
+    "wysiwyg",
+    "wysiwym",
+    "markdown-editor",
+    "ngx"
   ],
   "peerDependencies": {
     "@angular/common": ">=15.0.0",
@@ -42,6 +44,7 @@
     "markdown-it-pandoc-renderer": "1.2.0",
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "^1.0.0",
+    "monaco-editor": ">=0.40.0",
     "mermaid": "^9.4.3",
     "prismjs": "^1.29.0",
     "turndown": "^7.1.2"

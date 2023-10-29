@@ -6,7 +6,7 @@ import { TooltipDirective, MenuDirective } from '@dotglitch/ngx-common';
 import { MermaidConfig } from 'mermaid';
 
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
-import { StatusbarComponent } from './components/statusbar/statusbar.component';
+// import { StatusbarComponent } from './components/statusbar/statusbar.component';
 
 import { Editor } from './editor';
 import { installMonaco, waitForMonacoInstall } from './monaco';
@@ -97,7 +97,7 @@ export const NGX_STACKEDIT_CONFIG = new InjectionToken<StackEditConfig>('stacked
         TooltipDirective,
         MenuDirective,
         ToolbarComponent,
-        StatusbarComponent
+        // StatusbarComponent
     ],
     standalone: true
 })
