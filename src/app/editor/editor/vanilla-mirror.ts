@@ -29,6 +29,11 @@ export class VanillaMirror extends EventEmittingClass {
     selectionMgr = new SelectionMgr(this);
     undoMgr = new UndoManager(this);
 
+    mouseDownSelectionCoords = {
+        selectionStart: 0,
+        selectionEnd: 0
+    }
+
     turndownService = new TurndownService({
         "headingStyle": "atx",
         "hr": "----------",
@@ -60,6 +65,7 @@ export class VanillaMirror extends EventEmittingClass {
 
         // Mouseup can happen outside the editor element
         editorElt.addEventListener('mouseup', this.onMouseUp);
+        editorElt.addEventListener('mousedown', this.onMouseDown);
 
         // Resize provokes cursor coordinate changes
         window.addEventListener('resize', this.onWindowResize);
@@ -83,8 +89,7 @@ export class VanillaMirror extends EventEmittingClass {
     }
 
     onMouseUp: (evt: MouseEvent) => void = ((evt: MouseEvent) => {
-        const { selectionStart, selectionEnd } = this.selectionMgr;
-        this.selectionMgr.saveSelectionState();
+        const { selectionStart, selectionEnd } = this.mouseDownSelectionCoords;
 
         // If selection is unchanged, deselect the text.
         if (
@@ -93,8 +98,13 @@ export class VanillaMirror extends EventEmittingClass {
         ) {
             this.rebaseSelectionByPixel(evt.clientX, evt.clientY);
         }
+    }).bind(this);
 
-        this.selectionMgr.updateCursorCoordinates(false);
+    onMouseDown: (evt: MouseEvent) => void = ((evt: MouseEvent) => {
+        const { selectionStart, selectionEnd } = this.selectionMgr;
+        this.mouseDownSelectionCoords = {
+            selectionStart, selectionEnd
+        };
     }).bind(this);
 
     onWindowResize: () => void = (() => {
@@ -114,12 +124,12 @@ export class VanillaMirror extends EventEmittingClass {
             selectionEndOffset
         } = this.selectionMgr;
 
-        // console.log({
-        //     selectionStartNode,
-        //     selectionStartOffset,
-        //     selectionEndNode,
-        //     selectionEndOffset
-        // })
+        console.log({
+            selectionStartNode,
+            selectionStartOffset,
+            selectionEndNode,
+            selectionEndOffset
+        })
 
         // Only check if we're in single selection mode.
         if (selectionStart != selectionEnd)
