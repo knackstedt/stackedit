@@ -691,17 +691,22 @@
         .img-wrapper {
             text-wrap: wrap;
             word-break: break-all;
+            .img {
+                padding: 0;
+            }
+
+            img {
+                max-width: 100%;
+                padding: 0 .15em;
+                box-sizing: content-box;
+            }
+
+            &.img-block .token.img::before {
+                // This is the char for newlines apparently.
+                content: "\A";
+            }
         }
 
-        .img-wrapper .img {
-            padding: 0;
-        }
-
-        .img-wrapper img {
-            max-width: 100%;
-            padding: 0 .15em;
-            box-sizing: content-box
-        }
 
         .cl-toc {
             font-size: 2.8em;

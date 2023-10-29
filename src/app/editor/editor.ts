@@ -265,6 +265,13 @@ export class Editor extends EventEmittingClass {
                     this.sectionList?.forEach(s => s.monaco?.['_resize']());
                     this.restoreScrollPosition();
 
+                    const width = imgElt.offsetWidth;
+                    const height = imgElt.offsetHeight;
+
+                    if (height > 30) {
+                        imgElt.parentElement.classList.add("img-block")
+                    }
+
                     const rsObserver = new ResizeObserver(() => {
                         this.restoreScrollPosition();
                     });
