@@ -3,10 +3,14 @@ import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TooltipDirective, MenuDirective } from '@dotglitch/ngx-common';
+import { MermaidConfig } from 'mermaid';
 
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
+import { StatusbarComponent } from './components/statusbar/statusbar.component';
+
 import { Editor } from './editor';
-import { MermaidConfig } from 'mermaid';
+import { installMonaco, waitForMonacoInstall } from './monaco';
+
 type StackEditConfig = Partial<{
     /**
      * Mermaid chart configuration
@@ -92,7 +96,8 @@ export const NGX_STACKEDIT_CONFIG = new InjectionToken<StackEditConfig>('stacked
         MatTooltipModule,
         TooltipDirective,
         MenuDirective,
-        ToolbarComponent
+        ToolbarComponent,
+        StatusbarComponent
     ],
     standalone: true
 })
@@ -179,8 +184,10 @@ export class StackEditorComponent {
         };
     }
 
-    ngAfterViewInit() {
-        this.$el.setAttribute("version", "__VERSION__");
+    async ngAfterViewInit() {
+        installMonaco();
+        await waitForMonacoInstall();
+        this.$el.setAttribute("version", "1.0.36");
 
         const editorElt = this.$el.querySelector('.editor') as HTMLElement;
         const previewElt = this.$el.querySelector('.preview__inner-2') as HTMLElement;

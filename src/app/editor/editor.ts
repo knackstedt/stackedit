@@ -1,5 +1,5 @@
 import DiffMatchPatch from 'diff-match-patch';
-import markdownConversionSvc from './markdownConversionSvc';
+import markdownConversionSvc, { htmlSectionMarker } from './markdownConversionSvc';
 import sectionUtils, { SectionDimension } from './editor/sectionUtils';
 import { VanillaMirror } from './editor/vanilla-mirror';
 import { EventEmittingClass, findContainer, debounce } from './editor/utils';
@@ -10,6 +10,11 @@ import markdownGFM from './extensions/markdownExtension';
 import { ulid } from 'ulidx';
 import { Section } from './editor/highlighter';
 import dompurify from 'dompurify';
+import type * as Monaco from 'monaco-editor';
+import { waitForMonacoInstall } from './monaco';
+import { initEditor } from './monaco/mermaid-tokenizer';
+
+declare const monaco: typeof Monaco;
 
 const allowDebounce = (action, wait) => {
     let timeoutId;
@@ -77,6 +82,12 @@ export class Editor extends EventEmittingClass {
     initConverterListeners = [];
     sectionPreviewListeners = [];
 
+    overlay1: HTMLElement;
+    overlay2: HTMLElement;
+    underlay: HTMLElement;
+
+    focus: "editorContentEditable" | "monaco";
+
     /**
      * Pass the elements to the store and initialize the editor.
      */
@@ -88,8 +99,16 @@ export class Editor extends EventEmittingClass {
     ) {
         super();
 
+        this.overlay1 = editorElt.querySelector(".editor-overlay-1");
+        this.overlay2 = editorElt.querySelector(".editor-overlay-2");
+        this.underlay = editorElt.querySelector(".editor-underlay");
+
         // Enable standard markdown rendering support
         markdownGFM(this);
+
+        waitForMonacoInstall().then(() => {
+            initEditor(window['monaco']);
+        })
 
         Promise.all([
             (!ngEditor.options.disableEmoji)
@@ -101,17 +120,7 @@ export class Editor extends EventEmittingClass {
         ].filter(e => !!e)).then((extensions) => {
             this.converter = markdownConversionSvc.createConverter();
             this.initConverter(this.converter, ngEditor.options.markdownIt);
-            this.clEditor = new VanillaMirror(this.ngEditor, editorElt);
-
-            this.clEditor.on('contentChanged', (text, diffs, sectionList) => {
-                this.parsingCtx = {
-                    ...this.parsingCtx,
-                    sectionList,
-                };
-                newSectionList = sectionList;
-                onEditorChanged(!this.instantPreview);
-            });
-
+            this.clEditor = new VanillaMirror(this.ngEditor, editorElt.querySelector('.editor-inner'));
 
             let scrollMode: "editor" | "preview";
             let lastScrollEvent = 0;
@@ -152,6 +161,15 @@ export class Editor extends EventEmittingClass {
 
             let newSectionList;
             let newSelectionRange;
+            this.clEditor.on('contentChanged', (text, diffs, sectionList) => {
+                this.parsingCtx = {
+                    ...this.parsingCtx,
+                    sectionList,
+                };
+                newSectionList = sectionList;
+                onEditorChanged(!this.instantPreview);
+            });
+
             const onEditorChanged = allowDebounce(() => {
                 if (this.sectionList !== newSectionList) {
                     this.sectionList = newSectionList;
@@ -174,7 +192,8 @@ export class Editor extends EventEmittingClass {
                 onEditorChanged(!this.instantPreview);
             });
 
-            this.clEditor.highlighter.on('sectionHighlighted', (section) => this.onEditorRenderSection(section));
+            this.clEditor.highlighter.on('sectionHighlighted', (section) =>
+                this.onEditorRenderSection(section));
 
             this.measureSectionDimensions(false, true, true);
             this.initClEditor();
@@ -222,7 +241,9 @@ export class Editor extends EventEmittingClass {
         });
     }
 
-    onEditorRenderSection(section) {
+    onEditorRenderSection(s: Section) {
+        const section = s;
+
         // Render images inline in the editor.
         section.elt.querySelectorAll('.token.img').forEach((imgTokenElt) => {
             const srcElt = imgTokenElt.querySelector('.img-src');
@@ -241,8 +262,13 @@ export class Editor extends EventEmittingClass {
 
                     sectionUtils.measureSectionDimensions(this);
                     this.previewCtxMeasured = this.previewCtx;
-
+                    this.sectionList?.forEach(s => s.monaco?.['_resize']());
                     this.restoreScrollPosition();
+
+                    const rsObserver = new ResizeObserver(() => {
+                        this.restoreScrollPosition();
+                    });
+                    rsObserver.observe(imgElt, { box: 'border-box' });
                 };
                 imgElt.src = uri;
                 // Take img size into account
@@ -273,6 +299,167 @@ export class Editor extends EventEmittingClass {
             fenceElement.insertAdjacentElement('beforebegin', insertWrapper);
             fenceElement.remove();
         });
+
+        // Run on next tick to allow for style updates to propagate
+        setTimeout(() => {
+            // return;
+            section.elt.querySelectorAll('.code-block').forEach((cb: HTMLElement) => {
+                const codeBlock = cb;
+                section.elt.classList.add("monaco-injected");
+
+                let language = codeBlock.parentElement.querySelector('.code-language').textContent || 'auto';
+                // Map aliases to known monaco languages
+                language = {
+                    'ts': 'typescript',
+                    'js': 'javascript'
+                }[language] || language;
+
+                const monacoContainer = document.createElement('div');
+                monacoContainer.setAttribute("ulid", section.elt.getAttribute("ulid"));
+                monacoContainer.classList.add("monaco-container");
+
+                // Lookup the closest actual style definition
+                const originalStyles = (() => {
+                    const styleOrder = [
+                        window.getComputedStyle(codeBlock),
+                        window.getComputedStyle(section.elt),
+                        window.getComputedStyle(this.editorElt),
+                        window.getComputedStyle(document.body)
+                    ];
+                    const obj = {};
+                    Object.keys(styleOrder[0]).forEach(key => {
+                        obj[key] = styleOrder[0][key] ||
+                                styleOrder[1][key] ||
+                                styleOrder[2][key] ||
+                                styleOrder[3][key]
+                    });
+                    return obj as CSSStyleDeclaration;
+                })();
+
+                const settings: Monaco.editor.IStandaloneEditorConstructionOptions = {
+                    theme: "vs-dark",
+                    automaticLayout: true,
+                    colorDecorators: true,
+                    lineHeight: 22,
+                    folding: true,
+                    fontFamily: 'var(--stackedit-font-family-mono)',
+                    fontSize: parseInt(originalStyles?.fontSize?.replace('px', '')) || 16,
+                    scrollbar: {
+                        alwaysConsumeMouseWheel: false
+                    },
+                    smoothScrolling: true,
+                    mouseWheelScrollSensitivity: 2,
+                    scrollBeyondLastLine: false,
+                    value: codeBlock.textContent,
+                    language: language
+                };
+                const editor = section.monaco = monaco.editor.create(monacoContainer, settings);
+                const model = editor.getModel();
+
+                // ! Time for untyped bindings.
+                monacoContainer['_editor'] = editor;
+                codeBlock['_editor'] = editor;
+                codeBlock['_monacoContainer'] = monacoContainer;
+                codeBlock['_section'] = section;
+                editor['_resize'] = () => {
+                    // Add 1 extra line to accommodate the scroll bar and other pixel
+                    // imperfect artifacts
+                    monacoContainer.style.height = codeBlock.offsetHeight + (0) + "px";
+                    monacoContainer.style.width = codeBlock.offsetWidth + "px";
+                    monacoContainer.style.top = codeBlock.offsetTop + 'px';
+                    monacoContainer.style.left = codeBlock.offsetLeft + 'px';
+                }
+                editor['_resize']();
+                const rsObserver = new ResizeObserver(editor['_resize']);
+                rsObserver.observe(codeBlock, { box: 'border-box' });
+
+                // Prevent editor click handler from deselecting the element
+                monacoContainer.onclick = evt => {
+                    evt.stopPropagation();
+                    this.focus = "monaco";
+                }
+
+                let lastCursPos: Monaco.Position;
+                const disposables = [
+                    model.onDidChangeContent(() => {
+                        const text = editor.getValue();
+                        const cleanedText = text.replace(/\\n/gm, '\n')
+                        .replace(/\\"/gm, '"');
+
+                        // Handle completely passively.
+                        // Watcher will trigger a rebuild of monaco.
+                        this.clEditor.watcher.noWatch(() => {
+                            codeBlock.textContent = cleanedText;
+
+                            const ulid = section.elt.getAttribute("ulid");
+                            const previewSection = this.previewElt.querySelector(`.cl-preview-section[ulid="${ulid}"]`);
+                            const prismContainer = previewSection.querySelector(".prism");
+                            const lang = prismContainer.classList.value
+                                .split(" ")
+                                .find(v => v.startsWith("language-"))
+                                ?.replace('language-', '');
+
+                            const updated = Prism.highlight(cleanedText, Prism.languages[lang]);
+                            prismContainer.innerHTML = updated
+                        });
+                    }),
+                    editor.onDidChangeCursorPosition(e => {
+                        lastCursPos = e.position;
+
+                        // const sIndex = this.sectionList.findIndex(s => s == section);
+                        // let preText = '';
+                        // this.sectionList.slice(0, sIndex).forEach(s => preText += s.text);
+                        // const baseOffset = preText.length;
+                        // this.clEditor.selectionMgr.setSelectionStartEnd(
+                        //     baseOffset + e.position.lineNumber + e.position.column,
+                        //     baseOffset + e.position.lineNumber + e.position.column
+                        // )
+                    })
+                ];
+
+                editor.onKeyDown(e => {
+                    if (e.altKey || e.shiftKey || e.ctrlKey)
+                        return;
+
+                    if (e.code != "ArrowUp" && e.code != "ArrowDown")
+                        return;
+
+                    const gutter =  editor.getDomNode().querySelector('.margin-view-overlays') as HTMLDivElement;
+
+                    if (e.code == "ArrowUp" && lastCursPos.lineNumber <= 1) {
+                        e.preventDefault();
+                        const node = codeBlock.previousElementSibling.previousElementSibling;
+
+                        const { left, top } = node.getBoundingClientRect();
+                        this.clEditor.rebaseSelectionByPixel(left + gutter.offsetWidth, top);
+                        this.clEditor.focus();
+                        this.focus = "editorContentEditable";
+                        return;
+                    }
+
+                    const text = editor.getValue();
+                    const lines = text.match(/[\r\n]/g).length;
+                    if (e.code == "ArrowDown" && lastCursPos.lineNumber >= lines+1) {
+                        e.preventDefault();
+                        const node = codeBlock.nextElementSibling;
+
+                        const {left, top} = node.getBoundingClientRect();
+                        this.clEditor.rebaseSelectionByPixel(left + gutter.offsetWidth, top);
+                        this.clEditor.focus();
+                        this.focus = "editorContentEditable";
+                        return;
+                    }
+                })
+
+                editor['_dispose'] = () => {
+                    rsObserver.disconnect();
+                    disposables.forEach(d => d.dispose());
+                    editor.dispose();
+                }
+
+                this.overlay1.appendChild(monacoContainer);
+            });
+        })
     }
 
     initClEditorInternal(opts) {
@@ -459,7 +646,6 @@ export class Editor extends EventEmittingClass {
         }
     }
 
-
     /**
      * Initialize the cledit editor with markdown-it section parser and Prism highlighter
      */
@@ -475,12 +661,7 @@ export class Editor extends EventEmittingClass {
                 const highlighted = Prism.highlight(section.text, Prism.languages.markdown, 'markdown');
 
                 return `<div class="prism language-markdown">${highlighted}</div>`;
-
             },
-            sectionParser: (text) => {
-                this.parsingCtx = markdownConversionSvc.parseSections(this.converter, text);
-                return this.parsingCtx.sections;
-            }
         };
         this.initClEditorInternal(options);
         this.restoreScrollPosition();
@@ -517,8 +698,11 @@ export class Editor extends EventEmittingClass {
                 if (item[0] === 0) {
                     let sectionDesc = this.previewCtx.sectionDescList[sectionDescIdx] as SectionDesc;
 
-                    // ??? This occurs rarely
+                    // ??? This occurs sometimes
                     if (!sectionDesc) continue;
+
+                    // Trigger a resize event
+                    sectionDesc.section?.monaco?.['_resize']();
 
                     sectionDescIdx++;
 
@@ -539,6 +723,11 @@ export class Editor extends EventEmittingClass {
                     insertBeforeTocElt = insertBeforeTocElt.nextSibling;
                 }
                 else if (item[0] === -1) {
+                    let sectionDesc = this.previewCtx.sectionDescList[sectionDescIdx] as SectionDesc;
+
+                    // Dispose an injected monaco editor
+                    sectionDesc?.section?.monaco?.['_dispose']();
+
                     sectionDescIdx++;
                     sectionPreviewElt = insertBeforePreviewElt;
                     insertBeforePreviewElt = insertBeforePreviewElt.nextSibling;
@@ -662,6 +851,7 @@ export class Editor extends EventEmittingClass {
         if (restoreScrollPosition) {
             this.restoreScrollPosition();
         }
+        this.sectionList?.forEach(s => s.monaco?.['_resize']());
 
         this.$trigger('previewCtxMeasured', this.previewCtxMeasured);
     }, 500)

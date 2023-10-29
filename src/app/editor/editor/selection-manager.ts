@@ -12,6 +12,12 @@ export class SelectionMgr extends EventEmittingClass {
     selectionStart = 0;
     selectionEnd = 0;
     selectionIsReverse = false;
+
+    selectionStartNode: Node;
+    selectionStartOffset: number;
+    selectionEndNode: Node;
+    selectionEndOffset: number;
+
     cursorCoordinates: {
         top: number,
         height: number,
@@ -20,58 +26,45 @@ export class SelectionMgr extends EventEmittingClass {
 
     adjustScroll;
     oldSelectionRange;
-    selectionEndOffset;
 
     constructor(private editor: VanillaMirror) {
         super();
     }
 
-    findContainer(offset: number) {
-        const result = findContainer(this.contentElt, offset);
-
-        if (result.container.nodeValue == '\n') {
-            const hdLfElt = result.container.parentNode;
-
-            if (
-                hdLfElt.className == 'hd-lf' &&
-                hdLfElt.previousSibling?.tagName == 'BR'
-            ) {
-                result.container = hdLfElt.parentNode;
-                result.offsetInContainer = Array.prototype.indexOf.call(
-                    result.container.childNodes,
-                    result.offsetInContainer === 0 ? hdLfElt.previousSibling : hdLfElt,
-                );
-            }
-        }
-
-        return result;
-    }
-
-    createRange(start, end) {
+    createRange(start: number | { node, offset; }, end: number | { node, offset; }) {
         const range = document.createRange();
         const startContainer = typeof start === 'number'
-            ? this.findContainer(start < 0 ? 0 : start)
+            ? this.editor.getNodeAndOffsetAtIndex(start < 0 ? 0 : start)
             : start;
 
         let endContainer = startContainer;
         if (start !== end) {
             endContainer = typeof end === 'number'
-                ? this.findContainer(end < 0 ? 0 : end)
+                ? this.editor.getNodeAndOffsetAtIndex(end < 0 ? 0 : end)
                 : end;
         }
 
-        range.setStart(startContainer.container, startContainer.offsetInContainer);
-        range.setEnd(endContainer.container, endContainer.offsetInContainer);
+        range.setStart(startContainer.node, startContainer.offset);
+        range.setEnd(endContainer.node, endContainer.offset);
 
         return range;
     };
 
-    debouncedUpdateCursorCoordinates = debounce(() => {
-        const coordinates = this.getCoordinates(
-            this.selectionEnd,
-            null,
-            this.selectionEndOffset,
-        );
+    updateCursorCoordinates(adjustScrollParam = false) {
+        this.adjustScroll = this.adjustScroll || adjustScrollParam;
+
+        const startNodeOffset = this.editor.getNodeAndOffsetAtIndex(this.selectionStart);
+        const endNodeOffset = this.selectionStart == this.selectionEnd
+            ? startNodeOffset
+            : this.editor.getNodeAndOffsetAtIndex(this.selectionEnd);
+
+        const coordinates = this.getCoordinates(endNodeOffset);
+
+        // Keep track of both the start and end offset nodes
+        this.selectionStartNode = startNodeOffset.node;
+        this.selectionStartOffset = startNodeOffset.offset;
+        this.selectionEndNode = endNodeOffset.node;
+        this.selectionEndOffset = endNodeOffset.offset;
 
         // This is the cardinal coordinates of the selection top-left point.
         // ? why is this even here
@@ -114,11 +107,6 @@ export class SelectionMgr extends EventEmittingClass {
             }
         }
         this.adjustScroll = false;
-    });
-
-    updateCursorCoordinates(adjustScrollParam = false, immediate = false) {
-        this.adjustScroll = this.adjustScroll || adjustScrollParam;
-        this.debouncedUpdateCursorCoordinates();
     };
 
     /**
@@ -182,15 +170,12 @@ export class SelectionMgr extends EventEmittingClass {
         return null;
     }
 
-    saveSelectionState(direction: boolean = true, selection?: Selection) {
+    saveSelectionState(selection: Selection = window.getSelection()) {
         if (!this.hasFocus) {
             return null;
         }
 
         let { selectionStart, selectionEnd } = this;
-
-        if (!selection)
-            selection = window.getSelection();
 
         if (selection.rangeCount <= 0) {
             return null;
@@ -310,29 +295,23 @@ export class SelectionMgr extends EventEmittingClass {
         return this.editor.getContent().substring(min, max);
     };
 
-    getCoordinates(inputOffset: number, containerParam, offsetInContainerParam: number) {
-        let container = containerParam;
-        let offsetInContainer = offsetInContainerParam;
+    private getCoordinates(offset: {node, offset}) {
+        const container = offset.node;
+        const offsetInContainer = offset.offset;
 
-        if (!container) {
-            const offset = this.findContainer(inputOffset);
-            ({ container } = offset);
-            ({ offsetInContainer } = offset);
-        }
-
-        let containerElt = container;
+        let containerElt: HTMLElement = container as any;
         if (!containerElt.hasChildNodes() && container.parentNode) {
-            containerElt = container.parentNode;
+            containerElt = container.parentNode as HTMLElement;
         }
 
         let isInvisible = false;
         while (!containerElt.offsetHeight) {
             isInvisible = true;
             if (containerElt.previousSibling) {
-                containerElt = containerElt.previousSibling;
+                containerElt = containerElt.previousSibling as HTMLElement;
             }
             else {
-                containerElt = containerElt.parentNode;
+                containerElt = containerElt.parentNode as HTMLElement;
                 if (!containerElt) {
                     return {
                         top: 0,
@@ -349,32 +328,34 @@ export class SelectionMgr extends EventEmittingClass {
             rect = containerElt.getBoundingClientRect();
         }
         else {
+            const inputOffset = offset['editorOffset'];
             const selectedChar = this.editor.value[inputOffset];
             let startOffset = {
-                container,
-                offsetInContainer,
+                node: container,
+                offset: offsetInContainer,
             };
             let endOffset = {
-                container,
-                offsetInContainer,
+                node: container,
+                offset: offsetInContainer,
             };
             if (inputOffset > 0 && (selectedChar === undefined || selectedChar === '\n')) {
                 left = 'right';
-                if (startOffset.offsetInContainer === 0) {
+                if (startOffset.offset === 0) {
                     // Need to calculate offset-1
                     // TODO: This may be a bug
                     startOffset = inputOffset - 1 as any;
                 }
                 else {
-                    startOffset.offsetInContainer -= 1;
+                    startOffset.offset -= 1;
                 }
             }
-            else if (endOffset.offsetInContainer === container.textContent.length) {
+            else if (endOffset.offset === container.textContent.length) {
+                console.log("This hasn't happened yet")
                 // Need to calculate offset+1
                 // endOffset = inputOffset + 1;
             }
             else {
-                endOffset.offsetInContainer += 1;
+                endOffset.offset += 1;
             }
             const range = this.createRange(startOffset, endOffset);
             rect = range.getBoundingClientRect();

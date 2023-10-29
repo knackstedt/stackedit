@@ -7,6 +7,7 @@ import { Highlighter } from './highlighter';
 import { SelectionMgr } from './selection-manager';
 import { defaultKeystrokes } from './keystroke';
 import { StackEditorComponent } from '../editor.component';
+import type * as Monaco from 'monaco-editor';
 
 export class VanillaMirror extends EventEmittingClass {
 
@@ -82,23 +83,6 @@ export class VanillaMirror extends EventEmittingClass {
     }
 
     onMouseUp: (evt: MouseEvent) => void = ((evt: MouseEvent) => {
-        // if (this.ngEditor.useMonacoEditor && evt.target) {
-        //     const classPath = [
-        //         (evt.target as any).classList?.value,
-        //         (evt.target as any).parentElement?.classList?.value,
-        //         (evt.target as any).parentElement?.parentElement?.classList?.value,
-        //         (evt.target as any).parentElement?.parentElement?.parentElement?.classList?.value,
-        //         (evt.target as any).parentElement?.parentElement?.parentElement?.parentElement?.classList?.value,
-        //         (evt.target as any).parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.classList?.value,
-        //         (evt.target as any).parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.classList?.value,
-        //         (evt.target as any).parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.classList?.value,
-        //         (evt.target as any).parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.classList?.value,
-        //         (evt.target as any).parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.parentElement?.classList?.value,
-        //     ].join('/');
-        //     if (classPath.includes("monaco"))
-        //         return;
-        // }
-
         const { selectionStart, selectionEnd } = this.selectionMgr;
         this.selectionMgr.saveSelectionState();
 
@@ -107,29 +91,7 @@ export class VanillaMirror extends EventEmittingClass {
             selectionStart == this.selectionMgr.lastSelectionStart &&
             selectionEnd == this.selectionMgr.lastSelectionEnd
         ) {
-            let selection = window.getSelection();
-
-            // TODO: There may be a better way to collapse the selection.
-
-            let range;
-            // All webkit browsers support this properly. (incl. Safari)
-            if (typeof document.caretRangeFromPoint == "function") {
-                range = document.caretRangeFromPoint(evt.clientX, evt.clientY);
-                if (range) selection.collapse(range.startContainer, range.startOffset);
-            }
-            // Ugly stepchild named Firefox needs this mess.
-            else if (typeof document['caretPositionFromPoint'] == "function") {
-                range = document['caretPositionFromPoint'](evt.clientX, evt.clientY);
-                if (range) selection.collapse(range.offsetNode, range.offset);
-            }
-            // Fallthrough if we can't get the nearest range to the pointer click.
-            // Occurs in rare edge cases, and would occur if browsers ever actually deprecate
-            // caretRangeFromPoint
-            else if (!range) {
-                selection.collapse(selection.focusNode, selection.focusOffset);
-            }
-
-            this.selectionMgr.saveSelectionState();
+            this.rebaseSelectionByPixel(evt.clientX, evt.clientY);
         }
 
         this.selectionMgr.updateCursorCoordinates(false);
@@ -140,7 +102,68 @@ export class VanillaMirror extends EventEmittingClass {
     }).bind(this)
 
     onSelectionChange: () => void = (() => {
+        this.selectionMgr.saveSelectionState();
         this.selectionMgr.updateCursorCoordinates(true);
+
+        const {
+            selectionStart,
+            selectionStartNode,
+            selectionStartOffset,
+            selectionEnd,
+            selectionEndNode,
+            selectionEndOffset
+        } = this.selectionMgr;
+
+        // console.log({
+        //     selectionStartNode,
+        //     selectionStartOffset,
+        //     selectionEndNode,
+        //     selectionEndOffset
+        // })
+
+        // Only check if we're in single selection mode.
+        if (selectionStart != selectionEnd)
+            return;
+        // Skip if the editor isn't focused
+        if (!this.editorElt.matches(':focus'))
+            return;
+
+        this.ngEditor.editorSvc.focus = "editorContentEditable";
+
+        // Build a tree of nodes up until the section container
+        let node = selectionEndNode.parentElement;
+        const nodeTree = [node];
+        while (node.parentElement && !node.classList.contains("cledit-section"))
+            nodeTree.push(node = node.parentElement);
+
+        const sectionElement = node;
+
+        const codeBlock = sectionElement.querySelector(".code-block");
+        if (codeBlock && nodeTree.includes(codeBlock as any)) {
+            const editor = codeBlock['_editor'] as Monaco.editor.IStandaloneCodeEditor;
+            const text = codeBlock.textContent;
+            const lines = text.split('\n');
+            const preLines = text.slice(0, selectionEnd).split('\n');
+            const lineNo = preLines.length;
+            const colNo = preLines.slice(-1, 1).length;
+
+            // console.log({
+            //     selectionEndOffset,
+            //     lineNo,
+            //     colNo,
+            //     text,
+            //     lines,
+            //     preLines
+            // })
+            this.ngEditor.editorSvc.focus = "monaco";
+            editor.setSelection({
+                startLineNumber: lineNo,
+                startColumn: colNo,
+                endLineNumber: lineNo,
+                endColumn: colNo
+            }, "stackedit");
+            editor.focus();
+        }
     }).bind(this)
 
     init(opts: any = {}) {
@@ -179,26 +202,38 @@ export class VanillaMirror extends EventEmittingClass {
         }
     }
 
-    getNodeAtIndex(index: number): Node {
+    getNodeAndOffsetAtIndex(index: number): { node: Node, offset: number } {
         let i = 0;
         const recursivelyFindNode = (el: HTMLElement) => {
             // This element has a content override, so we'll read that instead.
-            if (el.nodeType == 1 && el.getAttribute('source') != null) {
-                const text = el.getAttribute('source')
-                    .replace(/\\n/gm, '\n')
-                    .replace(/\\"/gm, '"');
-                i += text.length;
-                if (i > index) {
-                    return el;
-                }
-                return null;
-            }
+            // Do we want to skip this? Might be problematic.
+            // if (el.nodeType == 1 && el.getAttribute('source') != null) {
+            //     const text = el.getAttribute('source')
+            //         .replace(/\\n/gm, '\n')
+            //         .replace(/\\"/gm, '"');
+            //     i += text.length;
+            //     if (i >= index) {
+            //         return {
+            //             node: el,
+            //             offset: i
+            //         };
+            //     }
+            //     return null;
+            // }
 
             // This doesn't have children, so we can simply read the textContent
-            else if (el.nodeType != 1 || el.childNodes.length == 0) {
-                i += el.textContent.length;
-                if (i > index) {
-                    return el;
+            if (el.nodeType != 1 || el.childNodes.length == 0) {
+                const cl = el.textContent.length;
+                if (i + cl > index) {
+                    const offset = Math.max(index - i, 0);
+                    return {
+                        node: el,
+                        offset,
+                        editorOffset: index
+                    };
+                }
+                else {
+                    i += cl;
                 }
                 return null;
             }
@@ -208,8 +243,8 @@ export class VanillaMirror extends EventEmittingClass {
                 // @ts-ignore
                 const children = [...el.childNodes];
                 for (let i = 0; i < children.length; i++) {
-                    const el = recursivelyFindNode(children[i]);
-                    if (el) return el;
+                    const res = recursivelyFindNode(children[i]);
+                    if (res) return res;
                 }
             }
             return null;
@@ -258,32 +293,6 @@ export class VanillaMirror extends EventEmittingClass {
     }
 
     onMutationObserved(mutations: MutationRecord[]) {
-
-        // ! Experimental
-        // if (this.ngEditor.useMonacoEditor) {
-        //     // Collect all mutations that occur under a monaco-editor
-        //     const monacoMutations = mutations.filter(m => {
-        //         const nodes = [...m.addedNodes as any, ...m.removedNodes as any];
-
-        //         const monacoElements = nodes.filter(n => {
-        //             const classPath = [
-        //                 n.classList?.value,
-        //                 n.parentElement?.classList?.value,
-        //                 n.parentElement?.parentElement.classList?.value,
-        //                 n.parentElement?.parentElement.parentElement.classList?.value,
-        //                 n.parentElement?.parentElement.parentElement.parentElement.classList?.value,
-        //             ].join('/');
-        //             return classPath.includes("monaco");
-        //         });
-        //         return monacoElements.length > 0;// != nodes.length;
-        //     })
-
-        //     // Skip DOM mutations underneath a monaco-editor
-        //     // instance in the tree.
-        //     if (monacoMutations.length != 0) {
-        //         return;
-        //     }
-        // }
 
         // ? Is this problematic
         // Scroll any mutations into view
@@ -741,5 +750,31 @@ export class VanillaMirror extends EventEmittingClass {
             postString;
 
         this.setContent(patchedText);
+    }
+
+    rebaseSelectionByPixel(x: number, y: number) {
+        let selection = window.getSelection();
+
+        // TODO: There may be a better way to collapse the selection.
+
+        let range;
+        // All webkit browsers support this properly. (incl. Safari)
+        if (typeof document.caretRangeFromPoint == "function") {
+            range = document.caretRangeFromPoint(x, y);
+            if (range) selection.collapse(range.startContainer, range.startOffset);
+        }
+        // Ugly stepchild named Firefox needs this mess.
+        else if (typeof document['caretPositionFromPoint'] == "function") {
+            range = document['caretPositionFromPoint'](x, y);
+            if (range) selection.collapse(range.offsetNode, range.offset);
+        }
+        // Fallthrough if we can't get the nearest range to the pointer click.
+        // Occurs in rare edge cases, and would occur if browsers ever actually deprecate
+        // caretRangeFromPoint
+        else if (!range) {
+            selection.collapse(selection.focusNode, selection.focusOffset);
+        }
+
+        this.selectionMgr.saveSelectionState();
     }
 }
