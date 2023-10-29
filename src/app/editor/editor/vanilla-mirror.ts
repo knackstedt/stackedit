@@ -122,12 +122,12 @@ export class VanillaMirror extends EventEmittingClass {
             selectionEndOffset
         } = this.selectionMgr;
 
-        console.log({
-            selectionStartNode,
-            selectionStartOffset,
-            selectionEndNode,
-            selectionEndOffset
-        })
+        // console.log({
+        //     selectionStartNode,
+        //     selectionStartOffset,
+        //     selectionEndNode,
+        //     selectionEndOffset
+        // })
 
         // Only check if we're in single selection mode.
         if (selectionStart != selectionEnd)
