@@ -208,7 +208,7 @@ export class StackEditorComponent {
     async ngAfterViewInit() {
         installMonaco();
         await waitForMonacoInstall();
-        this.$el.setAttribute("version", "1.0.36");
+        this.$el.setAttribute("version", "__version__");
 
         const editorElt = this.$el.querySelector('.editor') as HTMLElement;
         const previewElt = this.$el.querySelector('.preview__inner-2') as HTMLElement;
