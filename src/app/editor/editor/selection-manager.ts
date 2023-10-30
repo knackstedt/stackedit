@@ -3,7 +3,7 @@ import { VanillaMirror } from './vanilla-mirror';
 
 export class SelectionMgr extends EventEmittingClass {
     get contentElt() { return this.editor.$contentElt };
-    get scrollElt() { return this.editor.$contentElt };
+    get scrollElt() { return this.editor.$contentElt.parentElement };
 
     get hasFocus() { return this.contentElt === document.activeElement };
 
@@ -102,6 +102,8 @@ export class SelectionMgr extends EventEmittingClass {
 
             const { top, height } = this.cursorCoordinates;
             const caretTop = top + height;
+
+            console.log(caretTop, this.scrollElt)
 
             if (caretTop > (this.scrollElt.scrollTop + this.scrollElt.clientHeight) - 24) {
                 this.scrollElt.scrollTo({
