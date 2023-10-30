@@ -2,6 +2,7 @@ import markdownConversionSvc from '../markdownConversionSvc';
 import Prism from '../prism';
 import { EventEmittingClass, debounce } from './utils';
 import { VanillaMirror } from './vanilla-mirror';
+import type * as Monaco from 'monaco-editor';
 
 export class Section {
     text;
@@ -11,7 +12,7 @@ export class Section {
     // AFAIK nothing ever sets this
     forceHighlighting = false;
 
-    monaco;
+    monaco: Monaco.editor.IStandaloneCodeEditor;
 
     get ulid() {
         return this.elt.getAttribute("ulid")
