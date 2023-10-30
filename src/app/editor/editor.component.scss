@@ -116,7 +116,8 @@
 
 
 :host ::ng-deep {
-    --monaco-line-height: 22px;
+    --line-height: 24px;
+
     .editor, .preview {
         // Take off 1 px to have a slight space between panels
         width: calc(50% - 1px);
@@ -185,7 +186,12 @@
         }
 
         * {
-            line-height: var(--stackedit-line-height, 1.4)
+            line-height: var(--line-height, 1.4)
+        }
+
+        .colorpicker-color-decoration,
+        .hc-light .colorpicker-color-decoration {
+            line-height: .8em;
         }
 
         .cledit-section {
@@ -236,14 +242,18 @@
             left: 0;
         }
 
+        .editor-inner {
+            cursor: text;
+        }
+
         .code-block {
             display: block !important;
 
             overflow: hidden;
             white-space: pre;
-            padding-bottom: calc(19px + var(--monaco-line-height));
+            padding-bottom: calc(19px + var(--line-height));
 
-            line-height: var(--monaco-line-height);
+            line-height: var(--line-height);
         }
 
         .editor-overlay-1 {
@@ -650,6 +660,7 @@
         -webkit-font-smoothing: auto;
         -moz-osx-font-smoothing: auto;
         font-weight: 400;
+        cursor: default;
 
         .code_custom, .tag, .pre, .entity, .table {
             font-family: var(--stackedit-font-family-mono);
