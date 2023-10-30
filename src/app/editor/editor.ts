@@ -345,24 +345,33 @@ export class Editor extends EventEmittingClass {
                 monacoContainer.setAttribute("ulid", section.elt.getAttribute("ulid"));
                 monacoContainer.classList.add("monaco-container");
 
-                if (invokableLanguages.includes(language)) {
+                // console.log("lang", language)
+
+                if (this.ngEditor.showCodeRunButton && invokableLanguages.includes(language)) {
                     const runButton = document.createElement('mat-icon');
                     runButton.classList.add("material-icons");
+                    runButton.classList.add("run-button");
                     runButton.innerHTML = "play_arrow";
-                    runButton.onclick = () => {
-                        eval(codeBlock.textContent)
+                    runButton.onclick = async () => {
+                        let res = eval(codeBlock.textContent);
+                        if (typeof res == "function")
+                            res = await res();
+
+                        // ... Do something with the result
                     }
                     monacoContainer.append(runButton);
                 }
 
-                const copyButton = document.createElement('mat-icon');
-                copyButton.classList.add("material-icons");
-                copyButton.classList.add("copy-button");
-                copyButton.innerHTML = "content_copy";
-                copyButton.onclick = () => {
-                    navigator.clipboard.writeText(section.text);
+                if (this.ngEditor.showCodeCopyButton) {
+                    const copyButton = document.createElement('mat-icon');
+                    copyButton.classList.add("material-icons");
+                    copyButton.classList.add("copy-button");
+                    copyButton.innerHTML = "content_copy";
+                    copyButton.onclick = () => {
+                        navigator.clipboard.writeText(section.text);
+                    }
+                    monacoContainer.append(copyButton);
                 }
-                monacoContainer.append(copyButton);
 
 
                 // Lookup the closest actual style definition
@@ -457,15 +466,6 @@ export class Editor extends EventEmittingClass {
                     }),
                     editor.onDidChangeCursorPosition(e => {
                         lastCursPos = e.position;
-
-                        // const sIndex = this.sectionList.findIndex(s => s == section);
-                        // let preText = '';
-                        // this.sectionList.slice(0, sIndex).forEach(s => preText += s.text);
-                        // const baseOffset = preText.length;
-                        // this.clEditor.selectionMgr.setSelectionStartEnd(
-                        //     baseOffset + e.position.lineNumber + e.position.column,
-                        //     baseOffset + e.position.lineNumber + e.position.column
-                        // )
                     })
                 ];
 

@@ -131,6 +131,16 @@ export class StackEditorComponent {
      * Default `true`
      */
     @Input() showPreview: boolean | "off" = true;
+    /**
+     * Controls whether a "run" button is shown for applicable
+     * code blocks in the editor view.
+     */
+    @Input() showCodeRunButton: boolean = false;
+    /**
+     * Controls whether a "copy" button is shown for applicable
+     * code blocks in the editor view.
+     */
+    @Input() showCodeCopyButton: boolean = true;
 
     /**
      * Controls whether the mermaid insert button is visible
