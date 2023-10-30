@@ -12,7 +12,7 @@ import { EventEmittingClass, findContainer, debounce } from './editor/utils';
 import { StackEditorComponent } from './editor.component';
 import markdownGFM from './extensions/markdownExtension';
 import { Section } from './editor/highlighter';
-import { waitForMonacoInstall } from './monaco';
+import { MonacoAliasMap, invokableLanguages, waitForMonacoInstall } from './monaco';
 import { initEditor } from './monaco/mermaid-tokenizer';
 
 declare const monaco: typeof Monaco;
@@ -339,32 +339,31 @@ export class Editor extends EventEmittingClass {
 
                 let language = codeBlock.parentElement.querySelector('.code-language').textContent || 'auto';
                 // Map aliases to known monaco languages
-                language = {
-                    'ts': 'typescript',
-                    'js': 'javascript',
-                    'sh': 'shell',
-                    'bash': 'shell',
-                    'ash': 'shell',
-                    'zsh': 'shell',
-                    'yml': 'yaml',
-                    'rb': 'ruby',
-                    'ps1': 'powershell',
-                    'pwsh': 'powershell',
-                    'py': 'python',
-                    'py2': 'python',
-                    'py3': 'python',
-                    'python2': 'python',
-                    'python3': 'python',
-                    'md': 'markdown',
-                    'c#': 'csharp',
-                    'cs': 'csharp',
-                    'c++': 'cpp',
-                    'h': 'cpp',
-                }[language] || language;
+                language = MonacoAliasMap[language] || language;
 
                 const monacoContainer = document.createElement('div');
                 monacoContainer.setAttribute("ulid", section.elt.getAttribute("ulid"));
                 monacoContainer.classList.add("monaco-container");
+
+                if (invokableLanguages.includes(language)) {
+                    const runButton = document.createElement('mat-icon');
+                    runButton.classList.add("material-icons");
+                    runButton.innerHTML = "play_arrow";
+                    runButton.onclick = () => {
+                        eval(codeBlock.textContent)
+                    }
+                    monacoContainer.append(runButton);
+                }
+
+                const copyButton = document.createElement('mat-icon');
+                copyButton.classList.add("material-icons");
+                copyButton.classList.add("copy-button");
+                copyButton.innerHTML = "content_copy";
+                copyButton.onclick = () => {
+                    navigator.clipboard.writeText(section.text);
+                }
+                monacoContainer.append(copyButton);
+
 
                 // Lookup the closest actual style definition
                 const originalStyles = (() => {
@@ -396,6 +395,9 @@ export class Editor extends EventEmittingClass {
                     fontSize: parseInt(originalStyles?.fontSize?.replace('px', '')) || 16,
                     scrollbar: {
                         alwaysConsumeMouseWheel: false
+                    },
+                    minimap: {
+                        enabled: false
                     },
                     smoothScrolling: true,
                     mouseWheelScrollSensitivity: 2,

@@ -47,3 +47,29 @@ export function waitForMonacoInstall() {
     });
 }
 
+export const MonacoAliasMap = {
+    'ts': 'typescript',
+    'js': 'javascript',
+    'sh': 'shell',
+    'bash': 'shell',
+    'ash': 'shell',
+    'zsh': 'shell',
+    'yml': 'yaml',
+    'rb': 'ruby',
+    'ps1': 'powershell',
+    'pwsh': 'powershell',
+    'py': 'python',
+    'py2': 'python',
+    'py3': 'python',
+    'python2': 'python',
+    'python3': 'python',
+    'md': 'markdown',
+    'c#': 'csharp',
+    'cs': 'csharp',
+    'c++': 'cpp',
+    'h': 'cpp',
+};
+
+export const invokableLanguages = [
+    "javascript"
+]

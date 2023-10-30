@@ -260,6 +260,27 @@
             .monaco-container {
                 position: absolute;
                 display: block;
+
+                mat-icon {
+                    position: absolute;
+                    top: 4px;
+                    right: 4px;
+                    padding: 6px;
+                    z-index: 1;
+                    background-color: var(--blockquote-background-color);
+                    border-radius: 50%;
+                    opacity: .4;
+                    transition: opacity 200ms ease;
+                    cursor: pointer;
+
+                    &:hover {
+                        opacity: 1;
+                    }
+                }
+
+                .run-button {
+                    right: 44px;
+                }
             }
             // .monaco-editor {
             //     border-radius: 6px;

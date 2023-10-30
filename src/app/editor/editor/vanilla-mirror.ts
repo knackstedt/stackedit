@@ -200,22 +200,6 @@ export class VanillaMirror extends EventEmittingClass {
     getNodeAndOffsetAtIndex(index: number): { node: Node, offset: number } {
         let i = 0;
         const recursivelyFindNode = (el: HTMLElement) => {
-            // This element has a content override, so we'll read that instead.
-            // Do we want to skip this? Might be problematic.
-            // if (el.nodeType == 1 && el.getAttribute('source') != null) {
-            //     const text = el.getAttribute('source')
-            //         .replace(/\\n/gm, '\n')
-            //         .replace(/\\"/gm, '"');
-            //     i += text.length;
-            //     if (i >= index) {
-            //         return {
-            //             node: el,
-            //             offset: i
-            //         };
-            //     }
-            //     return null;
-            // }
-
             // This doesn't have children, so we can simply read the textContent
             if (el.nodeType != 1 || el.childNodes.length == 0) {
                 const cl = el.textContent.length;
@@ -250,18 +234,8 @@ export class VanillaMirror extends EventEmittingClass {
 
     getContent(): string {
         const recursivelyCollectChildrenText = (el) => {
-            // This element has a content override, so we'll read that instead.
-            // TODO: Remove this? Probably not needed
-            if (el.nodeType == 1 && el.getAttribute('source') != null) {
-                const text = el.getAttribute('source')
-                    .replace(/\\n/gm, '\n')
-                    .replace(/\\"/gm, '"');
-
-                return text;
-            }
-
             // This doesn't have children, so we can simply read the textContent
-            else if (el.nodeType != 1 || el.childNodes.length == 0) {
+            if (el.nodeType != 1 || el.childNodes.length == 0) {
                 return el.textContent;
             }
 
@@ -289,21 +263,6 @@ export class VanillaMirror extends EventEmittingClass {
     }
 
     onMutationObserved(mutations: MutationRecord[]) {
-
-        // ? Is this problematic
-        // Scroll any mutations into view
-        // mutations.forEach(m => {
-        //     let el: HTMLElement = m.target instanceof HTMLElement ? m.target : m.target.parentElement;
-        //     const bounds = el.getBoundingClientRect();
-
-        //     if (m.target instanceof HTMLElement) {
-
-        //         m.target.scrollIntoView();
-        //     }
-        //     else {
-        //         m.target.parentElement.scrollIntoView()
-        //     }
-        // })
 
         this.watcher.noWatch(() => {
             const removedSections = [];
