@@ -103,7 +103,7 @@ export class SelectionMgr extends EventEmittingClass {
             const { top, height } = this.cursorCoordinates;
             const caretTop = top + height;
 
-            console.log(caretTop, this.scrollElt)
+            // console.log(caretTop, this.scrollElt)
 
             if (caretTop > (this.scrollElt.scrollTop + this.scrollElt.clientHeight) - 24) {
                 this.scrollElt.scrollTo({
