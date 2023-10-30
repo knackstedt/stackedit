@@ -2,7 +2,7 @@ import { Component, EventEmitter, Inject, InjectionToken, Input, Optional, Outpu
 import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TooltipDirective, MenuDirective } from '@dotglitch/ngx-common';
+import { TooltipDirective, MenuDirective, ThemeService } from '@dotglitch/ngx-common';
 import { MermaidConfig } from 'mermaid';
 
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
@@ -10,6 +10,7 @@ import { ToolbarComponent } from './components/toolbar/toolbar.component';
 
 import { Editor } from './editor';
 import { installMonaco, waitForMonacoInstall } from './monaco';
+import { Subscription } from 'rxjs';
 
 type StackEditConfig = Partial<{
     /**
@@ -183,15 +184,25 @@ export class StackEditorComponent {
     private resizeChecker;
     private width = 0;
     private height = 0;
+    private subscriptions: Subscription[];
 
     constructor(
         private readonly viewContainer: ViewContainerRef,
+        private readonly themeService: ThemeService,
         @Optional() @Inject(NGX_STACKEDIT_CONFIG) private config: StackEditConfig = {}
     ) {
         this.options = {
             ...defaults,
             ...config
         };
+
+        this.subscriptions = [
+            this.themeService.subscribe(t => {
+                window['monaco']?.editor.setTheme(
+                    t == "dark" ? "vs-dark" : "vs"
+                );
+            })
+        ]
     }
 
     async ngAfterViewInit() {
@@ -228,6 +239,7 @@ export class StackEditorComponent {
 
     ngOnDestroy() {
         clearInterval(this.resizeChecker);
+        this.subscriptions.forEach(s => s.unsubscribe());
         this.editorSvc.destroy();
     }
 
