@@ -483,6 +483,8 @@ export class Editor extends EventEmittingClass {
                     if (e.code != "ArrowUp" && e.code != "ArrowDown")
                         return;
 
+                    lastCursPos = lastCursPos || editor.getSelection().getPosition();
+
                     const gutter =  editor.getDomNode().querySelector('.margin-view-overlays') as HTMLDivElement;
 
                     if (e.code == "ArrowUp" && lastCursPos.lineNumber <= 1) {
