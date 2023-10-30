@@ -352,7 +352,25 @@ export class Editor extends EventEmittingClass {
                 // Map aliases to known monaco languages
                 language = {
                     'ts': 'typescript',
-                    'js': 'javascript'
+                    'js': 'javascript',
+                    'sh': 'shell',
+                    'bash': 'shell',
+                    'ash': 'shell',
+                    'zsh': 'shell',
+                    'yml': 'yaml',
+                    'rb': 'ruby',
+                    'ps1': 'powershell',
+                    'pwsh': 'powershell',
+                    'py': 'python',
+                    'py2': 'python',
+                    'py3': 'python',
+                    'python2': 'python',
+                    'python3': 'python',
+                    'md': 'markdown',
+                    'c#': 'csharp',
+                    'cs': 'csharp',
+                    'c++': 'cpp',
+                    'h': 'cpp',
                 }[language] || language;
 
                 const monacoContainer = document.createElement('div');
@@ -381,7 +399,7 @@ export class Editor extends EventEmittingClass {
                     theme: "vs-dark",
                     automaticLayout: true,
                     colorDecorators: true,
-                    lineHeight: 22,
+                    lineHeight: 24,
                     folding: true,
                     fontFamily: 'var(--stackedit-font-family-mono)',
                     fontSize: parseInt(originalStyles?.fontSize?.replace('px', '')) || 16,
