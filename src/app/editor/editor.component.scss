@@ -530,6 +530,10 @@
             }
         }
 
+        img {
+            border-radius: 6px;
+        }
+
         input[type="checkbox"] {
             position: absolute;
             left: -500vw;
@@ -747,19 +751,22 @@
         .img-wrapper {
             text-wrap: wrap;
             word-break: break-all;
-            .img {
-                padding: 0;
-            }
 
-            img {
+            .img {
                 max-width: 100%;
                 padding: 0 .15em;
                 box-sizing: content-box;
             }
 
-            &.img-block .token.img::before {
-                // This is the char for newlines apparently.
-                content: "\A";
+            &.img-block {
+                img {
+                    border-radius: 6px;
+                }
+
+                .token.img::before {
+                    // This is the char for newlines apparently.
+                    content: "\A";
+                }
             }
         }
 
