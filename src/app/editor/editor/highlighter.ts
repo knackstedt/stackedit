@@ -13,10 +13,15 @@ export class Section {
 
     monaco;
 
+    get ulid() {
+        return this.elt.getAttribute("ulid")
+    }
+
     constructor(text: string | any) {
         this.text = text.text === undefined ? text : text.text;
         this.data = text.data;
     }
+
     setElement(elt: HTMLDivElement) {
         this.elt = elt;
         elt['section'] = this;

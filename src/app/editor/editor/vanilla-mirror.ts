@@ -145,31 +145,46 @@ export class VanillaMirror extends EventEmittingClass {
             nodeTree.push(node = node.parentElement);
 
         const sectionElement = node;
+        const ulid = sectionElement.getAttribute("ulid");
 
         const codeBlock = sectionElement.querySelector(".code-block");
         if (codeBlock && nodeTree.includes(codeBlock as any)) {
             const editor = codeBlock['_editor'] as Monaco.editor.IStandaloneCodeEditor;
-            const text = codeBlock.textContent;
-            const lines = text.split('\n');
-            const preLines = text.slice(0, selectionEnd).split('\n');
-            const lineNo = preLines.length;
-            const colNo = preLines.slice(-1, 1).length;
+            const text = this.value;
+
+            const sectionIndex = this.ngEditor.editorSvc.sectionList
+                .findIndex(s => s.ulid == ulid);
+            const section = this.ngEditor.editorSvc.sectionList[sectionIndex];
+            const beforeSections = this.ngEditor.editorSvc.sectionList.slice(0, Math.max(0, sectionIndex));
+
+            const preLines = text.slice(0, selectionEnd).match(/[\r\n]/g)?.length || 0;
+            const preSectionLines = beforeSections.map(s => s.text).join('').match(/[\r\n]/g)?.length || 0;
+            const sectionLines = section.text.match(/[\r\n]/g)?.length || 0;
+            let lineNo = preLines - preSectionLines;
+            // Gets the line number of the current selection
+
+            // Round to the beginning/end
+            if (lineNo > sectionLines/2)
+                lineNo = sectionLines;
+            else if (lineNo < sectionLines/2)
+                lineNo = 0;
 
             // console.log({
             //     selectionEndOffset,
             //     lineNo,
-            //     colNo,
-            //     text,
-            //     lines,
-            //     preLines
+            //     preLines,
+            //     preSectionLines
             // })
+
             this.ngEditor.editorSvc.focus = "monaco";
+
             editor.setSelection({
                 startLineNumber: lineNo,
-                startColumn: colNo,
+                startColumn: 0,
                 endLineNumber: lineNo,
-                endColumn: colNo
+                endColumn: 0
             }, "stackedit");
+
             editor.focus();
         }
     }).bind(this)
@@ -236,6 +251,7 @@ export class VanillaMirror extends EventEmittingClass {
     getContent(): string {
         const recursivelyCollectChildrenText = (el) => {
             // This element has a content override, so we'll read that instead.
+            // TODO: Remove this? Probably not needed
             if (el.nodeType == 1 && el.getAttribute('source') != null) {
                 const text = el.getAttribute('source')
                     .replace(/\\n/gm, '\n')

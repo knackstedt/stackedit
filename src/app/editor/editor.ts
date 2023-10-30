@@ -319,17 +319,6 @@ export class Editor extends EventEmittingClass {
                 }
             });
             this.imageElementCache = {};
-            // // Eject released images from cache
-            // Object.entries(imgCache).forEach(([src, entries]) => {
-            //     // Filter entries that are not attached to the DOM
-            //     const filteredEntries = entries.filter(imgElt => this.editorElt.contains(imgElt));
-            //     if (filteredEntries.length) {
-            //         imgCache[src] = filteredEntries;
-            //     } else {
-            //         delete imgCache[src];
-            //     }
-            // });
-
         });
 
         section.elt.querySelectorAll('.image-spinner').forEach((fenceElement: HTMLElement) => {
