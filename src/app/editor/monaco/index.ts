@@ -7,28 +7,28 @@ let isMonacoInstalled = false;
 const installationLocation = '/lib/monaco/vs';
 
 export function installMonaco() {
-    // if (isMonacoInstalled) return;
+    if (isMonacoInstalled) return;
 
-    // // Monaco has a UMD loader that requires this
-    // // Merge with any pre-existing global require objects.
-    // if (!window['require']) window['require'] = {} as any;
-    // if (!window['require']['paths']) window['require']['paths'] = {};
+    // Monaco has a UMD loader that requires this
+    // Merge with any pre-existing global require objects.
+    if (!window['require']) window['require'] = {} as any;
+    if (!window['require']['paths']) window['require']['paths'] = {};
 
-    // window['require']['paths'].vs = installationLocation;
+    window['require']['paths'].vs = installationLocation;
 
-    // const monacoFiles = [
-    //     'loader.js',
-    //     'editor/editor.main.nls.js',
-    //     'editor/editor.main.js',
-    // ];
+    const monacoFiles = [
+        'loader.js',
+        'editor/editor.main.nls.js',
+        'editor/editor.main.js',
+    ];
 
-    // for (let i = 0; i < monacoFiles.length; i++) {
-    //     const script = document.createElement("script");
-    //     script.setAttribute("defer", "");
-    //     script.setAttribute("src", installationLocation + '/' + monacoFiles[i]);
-    //     document.body.append(script);
-    // }
-    // isMonacoInstalled = true;
+    for (let i = 0; i < monacoFiles.length; i++) {
+        const script = document.createElement("script");
+        script.setAttribute("defer", "");
+        script.setAttribute("src", installationLocation + '/' + monacoFiles[i]);
+        document.body.append(script);
+    }
+    isMonacoInstalled = true;
 }
 
 export function waitForMonacoInstall() {
