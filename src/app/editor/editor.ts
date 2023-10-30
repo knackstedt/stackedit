@@ -390,7 +390,9 @@ export class Editor extends EventEmittingClass {
                     colorDecorators: true,
                     lineHeight: 24,
                     folding: true,
-                    fontFamily: 'var(--stackedit-font-family-mono)',
+                    // ! This _cannot_ be used reliably without testing on
+                    // Windows, macOS, AND Linux
+                    // fontFamily: 'var(--stackedit-font-family-mono)',
                     fontSize: parseInt(originalStyles?.fontSize?.replace('px', '')) || 16,
                     scrollbar: {
                         alwaysConsumeMouseWheel: false
