@@ -454,6 +454,8 @@ export class Editor extends EventEmittingClass {
 
                             const ulid = section.elt.getAttribute("ulid");
                             const previewSection = this.previewElt.querySelector(`.cl-preview-section[ulid="${ulid}"]`);
+                            if (!previewSection) return;
+
                             const prismContainer = previewSection.querySelector(".prism");
                             const lang = prismContainer.classList.value
                                 .split(" ")
