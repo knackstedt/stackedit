@@ -97,9 +97,9 @@ export class Editor extends EventEmittingClass {
      */
     constructor(
         private ngEditor: StackEditorComponent,
-        private editorElt: HTMLElement,
-        private previewElt: HTMLElement,
-        private tocElt: HTMLElement
+        public editorElt: HTMLElement,
+        public previewElt: HTMLElement,
+        public tocElt: HTMLElement
     ) {
         super();
 
@@ -337,6 +337,7 @@ export class Editor extends EventEmittingClass {
             section.elt.querySelectorAll('.code-block').forEach((cb: HTMLElement) => {
                 const codeBlock = cb;
                 section.elt.classList.add("monaco-injected");
+                const ulid = section.elt.getAttribute("ulid");
 
                 let language = codeBlock.parentElement.querySelector('.code-language').textContent || 'auto';
                 // Map aliases to known monaco languages
@@ -446,14 +447,15 @@ export class Editor extends EventEmittingClass {
                     model.onDidChangeContent(() => {
                         const text = editor.getValue();
                         const cleanedText = text.replace(/\\n/gm, '\n')
-                        .replace(/\\"/gm, '"');
+                            .replace(/\\"/gm, '"');
+
+                        section.text = cleanedText;
 
                         // Handle completely passively.
                         // Watcher will trigger a rebuild of monaco.
                         this.clEditor.watcher.noWatch(() => {
                             codeBlock.textContent = cleanedText;
 
-                            const ulid = section.elt.getAttribute("ulid");
                             const previewSection = this.previewElt.querySelector(`.cl-preview-section[ulid="${ulid}"]`);
                             const prismContainer = previewSection?.querySelector(".prism");
                             if (!previewSection) return;

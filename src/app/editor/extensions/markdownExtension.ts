@@ -9,6 +9,7 @@ import markdownitSup from 'markdown-it-sup';
 import markdownitTasklist from './libs/markdownItTasklist';
 import markdownitAnchor from './libs/markdownItAnchor';
 import MarkdownIt from 'markdown-it';
+import { Editor } from '../editor';
 
 const coreBaseRules = [
     'normalize',
@@ -50,11 +51,11 @@ const inlineBaseRules2 = [
     'emphasis',
     // 'text_collapse'
 ];
-export default (extensionSvc) => {
-    extensionSvc.onGetOptions((options, properties) => Object
+export default (editorSvc: Editor) => {
+    editorSvc.onGetOptions((options, properties) => Object
         .assign(options, properties.extensions.markdown));
 
-    extensionSvc.onInitConverter(0, (markdown: MarkdownIt, options) => {
+    editorSvc.onInitConverter(0, (markdown: MarkdownIt, options) => {
         markdown.set({
             html: true,
             breaks: true,
@@ -111,23 +112,50 @@ export default (extensionSvc) => {
         };
     });
 
-    extensionSvc.onSectionPreview((elt, options, isEditor) => {
+    editorSvc.onSectionPreview((elt, options, isEditor) => {
         // Highlight with Prism
         elt.querySelectorAll('.prism').forEach((prismElt) => {
             if (!prismElt.$highlightedWithPrism) {
                 Prism.highlightElement(prismElt);
                 prismElt.$highlightedWithPrism = true;
 
+                // Save as piktuuure
+                if (prismElt.classList.contains("language-mermaid")) {
+                    const copyButton = document.createElement('mat-icon');
+                    copyButton.classList.add("material-icons");
+                    copyButton.classList.add("copy-button");
+                    copyButton.innerHTML = "download";
+                    copyButton.onclick = () => {
+                        const ulid = elt.getAttribute("ulid");
+                        const diagram = editorSvc.previewElt.querySelector(`[ulid="${ulid}"] .language-mermaid svg`);
+                        const svg = diagram.outerHTML
+                            .replace(/<br>/g, '<br/>');
 
+                        const blob = new Blob([svg], { type: 'image/svg+xml' });
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
 
-                const copyButton = document.createElement('mat-icon');
-                copyButton.classList.add("material-icons");
-                copyButton.classList.add("copy-button");
-                copyButton.innerHTML = "content_copy";
-                copyButton.onclick = () => {
-                    navigator.clipboard.writeText(prismElt.textContent);
-                };
-                prismElt.parentElement.append(copyButton);
+                        a.download = `mermaid-diagram.svg`;
+                        a.style.position = 'fixed';
+                        a.style.left = '-1000vw';
+                        a.target = '_blank';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+
+                    };
+                    prismElt.parentElement.parentElement.append(copyButton);
+                }
+                else {
+                    const copyButton = document.createElement('mat-icon');
+                    copyButton.classList.add("material-icons");
+                    copyButton.classList.add("copy-button");
+                    copyButton.innerHTML = "content_copy";
+                    copyButton.onclick = () => {
+                        navigator.clipboard.writeText(prismElt.textContent);
+                    };
+                    prismElt.parentElement.append(copyButton);
+                }
             }
         });
 
