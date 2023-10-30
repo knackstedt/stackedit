@@ -14,6 +14,7 @@ import markdownGFM from './extensions/markdownExtension';
 import { Section } from './editor/highlighter';
 import { MonacoAliasMap, invokableLanguages, waitForMonacoInstall } from './monaco';
 import { initEditor } from './monaco/mermaid-tokenizer';
+import { RenderMermaid } from './extensions/mermaidExtension';
 
 declare const monaco: typeof Monaco;
 
@@ -454,16 +455,22 @@ export class Editor extends EventEmittingClass {
 
                             const ulid = section.elt.getAttribute("ulid");
                             const previewSection = this.previewElt.querySelector(`.cl-preview-section[ulid="${ulid}"]`);
+                            const prismContainer = previewSection?.querySelector(".prism");
                             if (!previewSection) return;
 
-                            const prismContainer = previewSection.querySelector(".prism");
-                            const lang = prismContainer.classList.value
-                                .split(" ")
-                                .find(v => v.startsWith("language-"))
-                                ?.replace('language-', '');
+                            const mermaidElement = previewSection.querySelector(".language-mermaid");
+                            if (mermaidElement) {
+                                RenderMermaid(mermaidElement as HTMLElement, cleanedText);
+                            }
+                            else {
+                                const lang = prismContainer.classList.value
+                                    .split(" ")
+                                    .find(v => v.startsWith("language-"))
+                                    ?.replace('language-', '') || "auto";
 
-                            const updated = Prism.highlight(cleanedText, Prism.languages[lang]);
-                            prismContainer.innerHTML = updated
+                                const updated = Prism.highlight(cleanedText, Prism.languages[lang]);
+                                prismContainer.innerHTML = updated;
+                            }
                         });
                     }),
                     editor.onDidChangeCursorPosition(e => {

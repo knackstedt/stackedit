@@ -60,14 +60,14 @@ let init = () => {
     init = () => { };
 };
 
-const render = async (elt) => {
+const render = (elt: HTMLElement, text?: string) => new Promise(r => {
     init();
     const svgId = `mermaid-svg-${ulid()}`;
 
     // Trigger this slightly out-of sync to allow
     // the rest of the startup sequences to settle.
     setTimeout(() => {
-        mermaid.mermaidAPI.renderAsync(svgId, elt.textContent, () => {
+        mermaid.mermaidAPI.renderAsync(svgId, text ?? elt.textContent, () => {
             while (elt?.firstChild) {
                 elt.removeChild(elt.lastChild);
             }
@@ -81,8 +81,8 @@ const render = async (elt) => {
                 // if (e.message == "Cannot read properties of null (reading 'firstChild')")
             });
 
-    }, 0)
-};
+    }, 0);
+});
 
 export default (extensionSvc) => {
 
@@ -96,3 +96,5 @@ export default (extensionSvc) => {
     });
 
 };
+
+export const RenderMermaid = render
