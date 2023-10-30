@@ -117,6 +117,17 @@ export default (extensionSvc) => {
             if (!prismElt.$highlightedWithPrism) {
                 Prism.highlightElement(prismElt);
                 prismElt.$highlightedWithPrism = true;
+
+
+
+                const copyButton = document.createElement('mat-icon');
+                copyButton.classList.add("material-icons");
+                copyButton.classList.add("copy-button");
+                copyButton.innerHTML = "content_copy";
+                copyButton.onclick = () => {
+                    navigator.clipboard.writeText(prismElt.textContent);
+                };
+                prismElt.parentElement.append(copyButton);
             }
         });
 

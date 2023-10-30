@@ -70,6 +70,7 @@ export const MonacoAliasMap = {
     'h': 'cpp',
 };
 
+// .sh.js.ts.py.bat.ps1.rb.lua.r
 export const invokableLanguages = [
     "javascript"
 ]

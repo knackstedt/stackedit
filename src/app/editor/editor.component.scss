@@ -267,6 +267,7 @@
                     right: 4px;
                     padding: 6px;
                     z-index: 1;
+                    font-size: 20px;
                     background-color: var(--blockquote-background-color);
                     border-radius: 50%;
                     opacity: .4;
@@ -314,9 +315,32 @@
             // scroll-behavior: smooth;
         }
 
-        .cl-preview-section ::ng-deep {
+        .cl-preview-section {
             min-width: 100%;
             overflow-x: auto;
+
+
+            pre[class^="language"] {
+                position: relative;
+
+                mat-icon {
+                    position: absolute;
+                    top: 4px;
+                    right: 4px;
+                    padding: 6px;
+                    font-size: 20px;
+                    z-index: 1;
+                    background-color: var(--blockquote-background-color);
+                    border-radius: 50%;
+                    opacity: .4;
+                    transition: opacity 200ms ease;
+                    cursor: pointer;
+
+                    &:hover {
+                        opacity: 1;
+                    }
+                }
+            }
         }
 
         &.hidden {
