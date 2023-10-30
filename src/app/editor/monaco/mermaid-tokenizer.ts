@@ -1,8 +1,8 @@
-// Modified from https://github.com/Yash-Singh1/monaco-mermaid/blob/main/index.ts
+// Cloned from Mermaid's playground sourcecode
 
 import type * as Monaco from 'monaco-editor';
 
-export const initEditor = (monacoEditor: typeof Monaco): void => {
+export const setupMermaidLanguage = (monacoEditor: typeof Monaco): void => {
     monacoEditor.languages.register({ id: 'mermaid' });
     const requirementDiagrams = [
         'requirement',

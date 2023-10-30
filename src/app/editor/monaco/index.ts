@@ -68,6 +68,9 @@ export const MonacoAliasMap = {
     'cs': 'csharp',
     'c++': 'cpp',
     'h': 'cpp',
+    'regex': 'rgx',
+    'pcre': 'rgx',
+    'rx': 'rgx'
 };
 
 // .sh.js.ts.py.bat.ps1.rb.lua.r

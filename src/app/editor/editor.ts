@@ -13,7 +13,8 @@ import { StackEditorComponent } from './editor.component';
 import markdownGFM from './extensions/markdownExtension';
 import { Section } from './editor/highlighter';
 import { MonacoAliasMap, invokableLanguages, waitForMonacoInstall } from './monaco';
-import { initEditor } from './monaco/mermaid-tokenizer';
+import { setupMermaidLanguage } from './monaco/mermaid-tokenizer';
+import { setupRegexLanguage } from './monaco/regex-tokenizer';
 import { RenderMermaid } from './extensions/mermaidExtension';
 
 declare const monaco: typeof Monaco;
@@ -111,7 +112,8 @@ export class Editor extends EventEmittingClass {
         markdownGFM(this);
 
         waitForMonacoInstall().then(() => {
-            initEditor(window['monaco']);
+            setupMermaidLanguage(window['monaco']);
+            setupRegexLanguage(window['monaco']);
         })
 
         Promise.all([
