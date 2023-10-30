@@ -1,4 +1,7 @@
 import * as MonacoEditor from 'monaco-editor';
+import { setupMermaidLanguage } from './mermaid-tokenizer';
+import { setupRegexLanguage } from './regex-tokenizer';
+import { setupLogLanguage } from './log-tokenizer';
 
 let isMonacoInstalled = false;
 const installationLocation = '/lib/monaco/vs';
@@ -36,6 +39,10 @@ export function waitForMonacoInstall() {
 
             if (window['monaco'] != undefined) {
                 window.clearInterval(i);
+
+                setupMermaidLanguage(window['monaco']);
+                setupRegexLanguage(window['monaco']);
+                setupLogLanguage(window['monaco']);
 
                 res(true);
             }
