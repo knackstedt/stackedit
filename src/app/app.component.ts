@@ -1,43 +1,94 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, ViewChild } from '@angular/core';
 import { StackEditorComponent } from './editor/editor.component';
+import { NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+import { MenuComponent } from './menu/menu.component';
+import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { KeyboardService, MenuDirective, MenuItem, VscodeComponent } from '@dotglitch/ngx-common';
+import { Page } from './types/page';
+import { PagesService } from './services/pages.service';
+import { debounceTime, map } from 'rxjs';
+import { FilesService } from './services/files.service';
 
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+const $debounce = Symbol("debounce");
 
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss'],
     standalone: true,
-    imports: [StackEditorComponent]
+    imports: [
+        NgIf,
+        NgForOf,
+        NgSwitch,
+        NgSwitchCase,
+        NgSwitchDefault,
+        StackEditorComponent,
+        VscodeComponent,
+        MenuComponent,
+        MatTabsModule,
+        MatIconModule,
+        MatTooltipModule,
+        MenuDirective
+    ]
 })
 export class AppComponent {
-    markdownText = `
-# StackEdit
+    @ViewChild(MenuComponent) menu: MenuComponent;
 
-[![Build Status](https://img.shields.io/travis/benweet/stackedit.svg?style=flat)](https://travis-ci.org/benweet/stackedit) [![NPM version](https://img.shields.io/npm/v/stackedit.svg?style=flat)](https://www.npmjs.org/package/stackedit)
+    currentTabIndex = 0;
+    tabs: Page[] = [];
 
-> Full-featured, <span style="color: #33b579">open-source <span style="color: #f4d679">Markdown</span> editor based </span> on PageDown, the <span style="color: #11b3a5">Markdown</span> library used by Stack Overflow and the other Stack <span style="color: #eaa100">Exchange</span> sites.
+    readonly tabCtxMenu: MenuItem<Page>[] = [
+        { label: "Close", action: p => this.tabs.splice(this.tabs.indexOf(p), 1) },
+        { label: "Close Others", action: p => this.tabs = this.tabs.splice(this.tabs.indexOf(p), 1) },
+        { label: "Close to the right", action: p => this.tabs.splice(this.tabs.indexOf(p)) },
+        { label: "Close to the left", action: p => this.tabs.splice(0, this.tabs.indexOf(p)) },
+        { label: "Close All", action: p => this.tabs = [] },
+        // "separator",
+        // { label: "Icon", action: p => this.tabs = [] },
+        // { label: "Color", action: p => this.tabs = [] },
+        // { label: "Category", action: p => this.tabs = [] },
+        "separator",
+        // { label: "Pin" },
+        { label: "Edit...", action: p => this.menu.onEntryEdit(p) }
+    ]
 
-\`\`\`mermaid
-flowchart LR
-    markdown[This ** is ** _Markdown_]
-    newLines["Line1
-    Line 2
-    Line 3"]
-    markdown --> newLines
-\`\`\`
-
-- [x] Finish my changes
-- [ ] Push my commits to GitHub
-- [ ] Open a pull request
-- [x] @mentions, #refs, [links](), **formatting**, and <del>tags</del> supported
-- [x] list syntax required (any unordered or ordered list supported)
-- [ ] this is a complete item
-- [ ] this is an incomplete item
-    `
     constructor(
+        private readonly iconRegistry: MatIconRegistry,
+        private readonly keyboard: KeyboardService,
+        private readonly files: FilesService,
+        private readonly pages: PagesService
     ) {
-        // this.onResize();
+        window['root'] = this;
+        keyboard.onKeyCommand({
+            key: "f5",
+        }).subscribe(k => {
+            window.location.reload()
+        })
+    }
+
+    async addTab(tab: Page) {
+        let index = this.tabs.indexOf(tab);
+        if (index == -1) {
+            const emitter = new EventEmitter();
+            emitter
+                .pipe(debounceTime(300)).subscribe(() => {
+                    this.pages.savePage(tab);
+                });
+
+            tab[$debounce] = emitter;
+
+            if (tab.content == undefined || tab.content == null) {
+                const text = await this.files.readFile(tab.path.replace(/\.json$/, '.md')) as any;
+                tab.content = text;
+            }
+
+            index = this.tabs.push(tab);
+        }
+        this.currentTabIndex = index;
     }
 
     // @HostListener("window:resize", ["$event"])
@@ -56,5 +107,15 @@ flowchart LR
             label: "image text",
             link: "https://img.shields.io/travis/benweet/stackedit.svg?style=flat"
         });
+    }
+
+    onTabUpdate(page: Page, value: string) {
+        if (page.autoName) {
+            page.name = page.content?.trim()?.split('\n')?.[0]?.slice(0, 20);
+            if (page.name.trim().length < 2)
+                page.name = "untitled";
+        }
+        page.content = value;
+        page[$debounce].next()
     }
 }

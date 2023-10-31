@@ -19,3 +19,28 @@ ngx-lazy-loader {
     contain: content;
     overflow: hidden;
 }
+
+.tab {
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    width: 100%;
+    padding: 0 12px;
+}
+
+:host ::ng-deep {
+    --mdc-tab-indicator-active-indicator-height: 1px;
+
+    .mat-mdc-tab-labels .mdc-tab {
+        width: 240px;
+        padding: 0;
+    }
+    .mdc-tab__content,
+    .mdc-tab__text-label {
+        width: 100%;
+    }
+
+    .mdc-tab-indicator__content--underline {
+        align-self: flex-start;
+    }
+}

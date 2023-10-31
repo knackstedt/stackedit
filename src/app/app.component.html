@@ -1,5 +1,46 @@
-<!-- <app-menu [isMobile]="isMobile"></app-menu> -->
+<app-menu></app-menu>
 
-<ngx-stackedit [value]="markdownText"
-    (onImageUpload)="onImageUpload($event)"
-></ngx-stackedit>
+<mat-tab-group
+    style="flex: 1"
+    [(selectedIndex)]="currentTabIndex"
+>
+    <mat-tab *ngFor="let tab of tabs">
+        <ng-template mat-tab-label>
+            <div class="tab"
+                [ngx-contextmenu]="tabCtxMenu"
+                [ngx-menu-context]="tab"
+            >
+                <mat-icon [fontIcon]="tab.icon || 'edit_document'"></mat-icon>
+                <span style="flex: 1">
+                    <span>{{tab.name?.slice(0, 20)}}</span>
+                    <!-- <span>M|U|R</span> -->
+                </span>
+                <mat-icon (click)="tabs.splice(tabs.indexOf(tab), 1)">close</mat-icon>
+            </div>
+        </ng-template>
+
+        <ng-container [ngSwitch]="tab.kind">
+
+            <app-vscode
+                *ngSwitchCase="'code'"
+                [code]="tab.content"
+                (codeChange)="onTabUpdate(tab, $event)"
+            />
+
+            <div
+                *ngSwitchCase="'canvas'"
+            >
+                <h1>Canvas note!</h1>
+            </div>
+
+            <ngx-stackedit
+                *ngSwitchDefault
+                [mode]="tab.readonly ? 'view' : 'edit'"
+                [showPreview]="'off'"
+                [(value)]="tab.content"
+                (valueChange)="onTabUpdate(tab, $event)"
+                (onImageUpload)="onImageUpload($event)"
+            />
+        </ng-container>
+    </mat-tab>
+</mat-tab-group>
