@@ -1,0 +1,45 @@
+    .tag-container {
+        display: flex;
+        flex-direction: column;
+        padding: 12px;
+        gap: 2px;
+
+        .scroll {
+            max-height: 312px;
+            overflow-y: auto;
+
+            gap: 2px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tag {
+            color: var(--text-color);
+            background-color: var(--background-color);
+            user-select: none;
+            position: relative;
+            flex: 0 0 32px;
+            padding-left: 14px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 100ms ease-in-out;
+
+            &::before {
+                content: "";
+                top: 0;
+                bottom: 0;
+                left: 0;
+                width: 6px;
+                position: absolute;
+                background-color: var(--color);
+                border-radius: 3px;
+                border-top-right-radius: 0;
+                border-bottom-right-radius: 0;
+            }
+
+            &:hover {
+                background-color: var(--background-hover-color);
+            }
+        }
+    }

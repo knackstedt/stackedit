@@ -1,0 +1,142 @@
+
+:host {
+    display: block;
+    height: 100%;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    height: 100%;
+    transition: width 200ms ease;
+    background: #25282a;
+    box-shadow: 0 0 8px #00000094;
+    overflow: hidden;
+    padding: 8px;
+    font-size: 12px;
+
+    --item-hover-color: #434343;
+
+    &.collapsed {
+        width: 56px;
+
+        .shortcut,
+        .item .label {
+            opacity: 0;
+            width: 0px;
+        }
+    }
+
+    &.mobile:not(.collapsed) {
+        width: 300px;
+    }
+    &:not(.collapsed) .item:hover{
+        background-color: var(var(--item-hover-color));
+    }
+
+    &.collapsed .item {
+        .icon {
+            &:hover {
+                background-color: var(var(--item-hover-color));
+            }
+        }
+    }
+
+    .item {
+        height: 40px;
+        display: flex;
+        width: 100%;
+        overflow: hidden;
+        align-items: center;
+        border-radius: 8px;
+        user-select: none;
+        cursor: pointer;
+
+        &.selected {
+            background-color: #4b4b4b;
+        }
+        //
+        &.ngx-app-menu-open {
+            background-color: #555;
+            width: calc(100% + 8px);
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+
+            img {
+                width: 24px;
+            }
+        }
+        .label {
+            transition: all 200ms ease;
+            overflow: hidden;
+            white-space: pre;
+            width: 146px;
+        }
+        .shortcut {
+            font-family: 'DT Flow Mono';
+        }
+
+        .mat-mdc-slide-toggle {
+            float: right;
+            .mdc-switch .mdc-switch__track {
+                border: 1px solid #393939;
+            }
+        }
+    }
+
+    hr {
+        width: 90%;
+        border: 1px solid #434343;
+        border-bottom: 0;
+    }
+    .rooticon {
+        background-size: 20px;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+}
+
+::ng-deep .light app-menu .menu {
+    background: #e4e5ec;
+    --item-hover-color: #e0e0e0;
+    --ngx-ctx-menu-text-color: #121212;
+
+    .item.selected {
+        background-color: #d8d8d8 !important;
+    }
+    .item.ngx-app-menu-open {
+        background-color: #d0d0d0 !important;
+    }
+}
+
+::ng-deep .ngx-app-menu.nav-menu,
+::ng-deep .ngx-ctx-menu.nav-menu {
+    border-radius: 6px;
+
+    tr {
+        font-size: 12px !important;
+    }
+    .external-link {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+    }
+    a {
+        color: var(--text-color);
+    }
+}
+
+a {
+    color: var(--text-color);
+    text-decoration: none;
+}

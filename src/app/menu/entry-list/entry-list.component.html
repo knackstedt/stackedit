@@ -1,0 +1,53 @@
+
+<mat-accordion
+    displayMode="flat"
+    [multi]="true"
+    class="menu-accordion list"
+    cdkDropList
+    cdkDropListConnectedTo="entryList"
+    (cdkDropListDropped)="drop($event)"
+>
+    <mat-expansion-panel
+        *ngFor="let page of items; let i = index"
+        cdkDrag
+        [class.isleaf]="!page['children'] || page['children'].length == 0"
+        [disabled]="!page['children'] || page['children'].length == 0"
+        [(expanded)]="page['expanded']"
+        style="cursor: default;"
+    >
+        <div class="placeholder" *cdkDragPlaceholder></div>
+        <mat-expansion-panel-header cdkDragHandle [style.color]="'var(--text-color)'">
+            <div
+                class="label"
+                [ngx-contextmenu]="ctxMenu"
+                [ngx-menu-context]="page"
+                (click)="openPage(page)"
+            >
+                <div>
+                    <mat-icon *ngIf="page.icon" [fontIcon]="page.icon" [style.color]="page.color" style="margin-right: 10px"/>
+                    <span>{{page.name.slice(0, 20)}}</span>
+                </div>
+            </div>
+        </mat-expansion-panel-header>
+
+        <app-entry-list
+            *ngIf="page['children'] && depth < 5"
+            [item]="page"
+            [items]="page['children']"
+            [ctxMenu]="ctxMenu"
+            [depth]="depth + 1"
+        />
+
+    </mat-expansion-panel>
+</mat-accordion>
+
+<div class="add-line">
+    <span (click)="create('markdown')">
+        <mat-icon>add</mat-icon>
+        Markdown
+    </span>
+    <span (click)="create('code')">
+        <mat-icon>add</mat-icon>
+        Code
+    </span>
+</div>

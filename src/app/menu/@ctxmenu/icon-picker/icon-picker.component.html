@@ -1,0 +1,21 @@
+<div style="display: flex;">
+    <mat-form-field style="margin: 12px 24px 12px 24px; width: -webkit-fill-available;">
+        <mat-label>Type here to search...</mat-label>
+        <input
+            matInput
+            type="text"
+            [(ngModel)]="query"
+            (keydown)="filterResults()"
+        />
+    </mat-form-field>
+    <mat-icon (click)="clearIcon()">clear</mat-icon>
+</div>
+
+<div class="icon-container">
+    <button mat-icon-button *ngFor="let icon of searchIcons" (click)="setIcon(icon)">
+        <mat-icon [fontIcon]="icon" [style.color]="icon == page?.icon ? '#fff' : ''"></mat-icon>
+    </button>
+</div>
+
+
+

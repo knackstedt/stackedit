@@ -1,0 +1,55 @@
+<div style="display: flex; flex-direction: column;">
+    <div>
+        <h5>Appearance</h5>
+        <mat-form-field>
+            <mat-label>name</mat-label>
+            <input matInput [(ngModel)]="page.name" type="text">
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>type</mat-label>
+            <mat-select>
+                <mat-option
+                    *ngFor="let kind of PageKinds"
+                    [value]="kind.id"
+                >
+                    {{kind.label}}
+                </mat-option>
+            </mat-select>
+            <input matInput [(ngModel)]="page.name" type="text">
+        </mat-form-field>
+
+        <a href="https://fonts.google.com/icons?icon.set=Material+Icons&selected=Material+Icons+Outlined:settings:&icon.style=Outlined"></a>
+        <mat-form-field>
+            <mat-label>Icon</mat-label>
+            <input matInput type="text" [(ngModel)]="page.icon">
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>Color</mat-label>
+            <input matNativeControl type="color" [(ngModel)]="page.color">
+        </mat-form-field>
+    </div>
+
+    <div>
+        <h5>Configuration</h5>
+
+        <div>
+            <div style="display: flex; justify-content: space-between">
+                <mat-slide-toggle
+                    [checked]="page.readonly"
+                    (change)="page.readonly=$event.checked"
+                >
+                    Read Only
+                </mat-slide-toggle>
+            </div>
+        </div>
+    </div>
+
+    <div style="flex: 1"></div>
+
+    <div style="display: flex; gap: 10px; align-self: end">
+        <button mat-flat-button color="primary" (click)="save()">Save</button>
+        <button mat-flat-button color="primary" (click)="dialog.close()">Cancel</button>
+    </div>
+</div>

@@ -1,0 +1,135 @@
+:host {
+    // border: 1px solid #444;
+    display: block;
+    height: 100%;
+
+    &:hover {
+        &>.add-line {
+            opacity: 1;
+        }
+    }
+}
+
+.box {
+    display: flex;
+    flex-direction: column;
+    cursor: move;
+    font-size: 14px;
+}
+
+.cdk-drag-preview {
+    border-radius: 4px;
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+        0 8px 10px 1px rgba(0, 0, 0, 0.14),
+        0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.cdk-drag-animating {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.box:last-child {
+    border: none;
+}
+
+.list.cdk-drop-list-dragging .box:not(.cdk-drag-placeholder) {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.placeholder {
+    background: var(--panel-background-color);
+    border: dotted 3px #999;
+    height: 22px;
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+app-entry-list {
+    margin-left: 18px;
+    border-radius: 6px;
+    box-shadow: 0 3px 1px -2px #0003, 0 2px 2px #00000024, 0 1px 5px #0000001f;
+}
+
+.isleaf ::ng-deep {
+    .mat-expansion-indicator {
+        display: none;
+    }
+    .mat-content {
+        margin-left: 0;
+    }
+}
+
+::ng-deep .menu-accordion {
+    --mat-expansion-header-collapsed-state-height: 26px;
+    --mat-expansion-header-text-size: 13px;
+
+    .mat-expansion-panel {
+        box-shadow: none !important;
+        // background-color: #0000;
+        .mat-content {
+            flex-direction: column;
+            margin-left: 24px;
+        }
+    }
+
+    .mat-expansion-indicator {
+        position: absolute;
+        left: 17px;
+    }
+
+    .mat-expansion-panel-header {
+        padding: 0 24px 0 12px;
+    }
+
+    .mat-expansion-panel-header.mat-expanded {
+        height: 26px;
+    }
+
+    .mat-expansion-panel-body {
+        padding: 0;
+    }
+
+    .mat-content.mat-content-hide-toggle {
+        margin: 0;
+    }
+
+    .add-line {
+        height: 24px;
+        position: relative;
+        cursor: default;
+        opacity: 0;
+        transition: opacity 200ms ease;
+
+        &:hover {
+            background-color: var(--hover-background-color);
+        }
+
+        &::before,
+        &::after {
+            content: "";
+            position: absolute;
+            height: 1px;
+            background-color: red;
+            top: calc(50% - 1px);
+        }
+
+        &::before {
+            left: 0;
+        }
+
+        &::after {
+            right: 0;
+        }
+    }
+
+    .label {
+        display: flex;
+        align-items: center;
+
+        mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+            margin-right: 0px !important;
+        }
+    }
+}

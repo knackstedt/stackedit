@@ -1,0 +1,12 @@
+<div class="tag-container">
+    <!-- <div><mat-icon>search</mat-icon>Search for a tag</div> -->
+    <button *ngIf="hasTag" mat-flat-button (click)="1"><mat-icon>close</mat-icon>Clear</button>
+
+    <div class="scroll">
+        <div *ngFor="let tag of []" (click)="1"
+            class="tag tag-{{tag.class}}">
+            <!-- checkbox -->
+            {{tag.label}}
+        </div>
+    </div>
+</div>

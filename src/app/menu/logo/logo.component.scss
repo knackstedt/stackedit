@@ -1,0 +1,26 @@
+:host {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+app-symbol {
+    height: 100%;
+    aspect-ratio: 1;
+}
+
+app-text {
+    height: 100%;
+}
+
+app-widetext {
+    height: 100%;
+    transition: all 250ms ease;
+}
+
+
+.collapse {
+    width: 0;
+    opacity: 0;
+    overflow: hidden;
+}
