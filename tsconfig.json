@@ -3,7 +3,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./",
-    "sourceRoot": "./src",
+    "sourceRoot": "./src/",
     "outDir": "./dist/",
     "forceConsistentCasingInFileNames": true,
     "strict": false,
