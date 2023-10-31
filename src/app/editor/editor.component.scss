@@ -151,6 +151,11 @@
         height: 100%;
         left: 0;
 
+        > div {
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
         &.linenumbers {
             padding: 10px 24px 38px 64px;
             .lf {
@@ -220,11 +225,6 @@
             }
         }
 
-
-        &>div:nth-last-of-type(2) {
-            padding-bottom: 38px;
-        }
-
         .hide {
             display: none
         }
@@ -244,6 +244,7 @@
 
         .editor-inner {
             cursor: text;
+            min-height: 100%;
         }
 
         .code-block {
@@ -283,18 +284,21 @@
                     right: 44px;
                 }
             }
-            // .monaco-editor {
-            //     border-radius: 6px;
-            //     .overflow-guard .margin,
-            //     .margin-view-overlays {
-            //         border-bottom-left-radius: 6px;
-            //         border-top-left-radius: 6px;
-            //     }
-            //     .decorationsOverviewRuler {
-            //         border-bottom-right-radius: 6px;
-            //         border-top-right-radius: 6px;
-            //     }
-            // }
+
+            .monaco-editor {
+                border-radius: 6px;
+                .overflow-guard .margin,
+                .margin-view-overlays {
+                    border-bottom-left-radius: 6px;
+                    border-top-left-radius: 6px;
+                }
+                .monaco-scrollable-element.editor-scrollable,
+                .view-lines.monaco-mouse-cursor-text,
+                .decorationsOverviewRuler {
+                    border-bottom-right-radius: 6px;
+                    border-top-right-radius: 6px;
+                }
+            }
         }
     }
 
