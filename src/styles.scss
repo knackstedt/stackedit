@@ -1,11 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 @import "material.scss";
-@import "@fontsource/material-symbols-outlined";
-@import "@fontsource/fira-sans/100";
-@import "@fontsource/fira-sans/200";
-@import "@fontsource/fira-sans/300";
+@import "@fontsource/material-icons-outlined";
 @import "@fontsource/fira-sans/400";
-@import "@fontsource/fira-sans/500";
 @import "@fontsource/fira-sans/600";
 @import "@fontsource/fira-mono";
 
@@ -24,7 +20,7 @@ html, body {
 }
 
 mat-icon.material-icons {
-    font-family: "Material Symbols Outlined";
+    font-family: "Material Icons Outlined";
     font-size: 24px;
     font-weight: 400;
     font-style: normal;
