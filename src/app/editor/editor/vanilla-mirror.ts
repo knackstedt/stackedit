@@ -46,9 +46,12 @@ export class VanillaMirror extends EventEmittingClass {
     constructor(
         public ngEditor: StackEditorComponent,
         private editorElt: HTMLElement,
-        private lastTextContent: string
+        private lastTextContent: string = " "
     ) {
         super();
+
+        if (!lastTextContent.endsWith("\n"))
+            lastTextContent += "\n";
 
         window['editor'] = this;
 
@@ -109,6 +112,7 @@ export class VanillaMirror extends EventEmittingClass {
         this.selectionMgr.updateCursorCoordinates();
     }).bind(this)
 
+    // TODO: may need to debounce this -- has been seen to cause CPU locking
     onSelectionChange: () => void = (() => {
         this.selectionMgr.saveSelectionState();
         this.selectionMgr.updateCursorCoordinates(true);
@@ -203,7 +207,7 @@ export class VanillaMirror extends EventEmittingClass {
             // This doesn't have children, so we can simply read the textContent
             if (el.nodeType != 1 || el.childNodes.length == 0) {
                 const cl = el.textContent.length;
-                if (i + cl > index) {
+                if (index == 0 || i + cl > index) {
                     const offset = Math.max(index - i, 0);
                     return {
                         node: el,
