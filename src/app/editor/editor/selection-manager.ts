@@ -32,10 +32,10 @@ export class SelectionMgr extends EventEmittingClass {
     }
 
     createRange(start: number | { node, offset; }, end: number | { node, offset; }) {
-        const range = document.createRange();
-        const startContainer = typeof start === 'number'
+        let startContainer = typeof start === 'number'
             ? this.editor.getNodeAndOffsetAtIndex(start < 0 ? 0 : start)
             : start;
+        startContainer = startContainer ?? this.editor.getNodeAndOffsetAtIndex(0)
 
         let endContainer = startContainer;
         if (start !== end) {
@@ -44,6 +44,7 @@ export class SelectionMgr extends EventEmittingClass {
                 : end;
         }
 
+        const range = document.createRange();
         range.setStart(startContainer.node, startContainer.offset);
         range.setEnd(
             endContainer?.node ?? startContainer.node,

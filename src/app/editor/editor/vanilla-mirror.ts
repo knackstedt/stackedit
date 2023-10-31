@@ -50,10 +50,10 @@ export class VanillaMirror extends EventEmittingClass {
     ) {
         super();
 
-        if (typeof lastTextContent != 'string')
-            lastTextContent = '';
-        if (!lastTextContent.endsWith("\n"))
-            lastTextContent += "\n";
+        if (typeof this.lastTextContent != 'string')
+            this.lastTextContent = '';
+        if (!this.lastTextContent.endsWith("\n"))
+            this.lastTextContent += "\n";
 
         window['editor'] = this;
 
