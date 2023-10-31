@@ -5,7 +5,7 @@
         "beforeDevCommand": "npm run dev:tauri",
         "devPath": "http://localhost:8081",
         "distDir": "../dist/stackedit",
-        "withGlobalTauri": false
+        "withGlobalTauri": true
     },
     "package": {
         "productName": "stackedit",
@@ -17,7 +17,8 @@
             "fs": {
                 "all": true,
                 "scope": [
-                    "$DATA/dev.dotglitch.stackedit/*"
+                    "$APPDATA/**/*",
+                    "$USER/**/*"
                 ]
             },
             "clipboard": {

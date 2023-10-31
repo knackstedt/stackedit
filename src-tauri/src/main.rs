@@ -5,6 +5,7 @@ mod config;
 
 fn main() {
   tauri::Builder::default()
+  .plugin(tauri_plugin_window_state::Builder::default().build())
   .invoke_handler(tauri::generate_handler![
     config::load_config,
     config::save_config,
