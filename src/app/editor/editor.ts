@@ -428,7 +428,8 @@ export class Editor extends EventEmittingClass {
                     monacoContainer.style.height = codeBlock.offsetHeight + (0) + "px";
                     monacoContainer.style.width = codeBlock.offsetWidth + "px";
                     monacoContainer.style.top = codeBlock.offsetTop + 'px';
-                    monacoContainer.style.left = codeBlock.offsetLeft + 'px';
+                    monacoContainer.style.left = (codeBlock.offsetLeft - this.overlay1.offsetLeft) + 'px';
+                    // monacoContainer.style.left = '12px';
                 }
                 editor['_resize']();
                 const rsObserver = new ResizeObserver(editor['_resize']);
@@ -475,44 +476,44 @@ export class Editor extends EventEmittingClass {
                     }),
                     editor.onDidChangeCursorPosition(e => {
                         lastCursPos = e.position;
+                    }),
+                    editor.onKeyDown(e => {
+                        if (e.altKey || e.shiftKey || e.ctrlKey)
+                            return;
+
+                        if (e.code != "ArrowUp" && e.code != "ArrowDown")
+                            return;
+
+                        lastCursPos = lastCursPos || editor.getSelection().getPosition();
+
+                        const gutter =  editor.getDomNode().querySelector('.margin-view-overlays') as HTMLDivElement;
+
+                        if (e.code == "ArrowUp" && lastCursPos.lineNumber <= 1) {
+                            e.preventDefault();
+                            const node = codeBlock.previousElementSibling.previousElementSibling;
+
+                            const { left, top } = node.getBoundingClientRect();
+                            this.clEditor.rebaseSelectionByPixel(left + gutter.offsetWidth, top);
+                            this.clEditor.focus();
+                            this.focus = "editorContentEditable";
+                            return;
+                        }
+
+                        const text = editor.getValue();
+                        const lines = text.match(/[\r\n]/g).length;
+                        if (e.code == "ArrowDown" && lastCursPos.lineNumber >= lines+1) {
+                            e.preventDefault();
+                            const node = codeBlock.nextElementSibling;
+
+                            const {left, top} = node.getBoundingClientRect();
+                            this.clEditor.rebaseSelectionByPixel(left + gutter.offsetWidth, top);
+                            this.clEditor.focus();
+                            this.focus = "editorContentEditable";
+                            return;
+                        }
                     })
                 ];
 
-                editor.onKeyDown(e => {
-                    if (e.altKey || e.shiftKey || e.ctrlKey)
-                        return;
-
-                    if (e.code != "ArrowUp" && e.code != "ArrowDown")
-                        return;
-
-                    lastCursPos = lastCursPos || editor.getSelection().getPosition();
-
-                    const gutter =  editor.getDomNode().querySelector('.margin-view-overlays') as HTMLDivElement;
-
-                    if (e.code == "ArrowUp" && lastCursPos.lineNumber <= 1) {
-                        e.preventDefault();
-                        const node = codeBlock.previousElementSibling.previousElementSibling;
-
-                        const { left, top } = node.getBoundingClientRect();
-                        this.clEditor.rebaseSelectionByPixel(left + gutter.offsetWidth, top);
-                        this.clEditor.focus();
-                        this.focus = "editorContentEditable";
-                        return;
-                    }
-
-                    const text = editor.getValue();
-                    const lines = text.match(/[\r\n]/g).length;
-                    if (e.code == "ArrowDown" && lastCursPos.lineNumber >= lines+1) {
-                        e.preventDefault();
-                        const node = codeBlock.nextElementSibling;
-
-                        const {left, top} = node.getBoundingClientRect();
-                        this.clEditor.rebaseSelectionByPixel(left + gutter.offsetWidth, top);
-                        this.clEditor.focus();
-                        this.focus = "editorContentEditable";
-                        return;
-                    }
-                })
 
                 editor['_dispose'] = () => {
                     rsObserver.disconnect();
