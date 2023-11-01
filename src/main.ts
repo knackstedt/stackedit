@@ -1,8 +1,6 @@
 import 'zone.js';  // Included with Angular CLI.
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatButtonModule } from '@angular/material/button';
 import { withInterceptorsFromDi, provideHttpClient } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
@@ -11,6 +9,8 @@ import { isDevMode, importProvidersFrom } from '@angular/core';
 
 import { AppComponent } from './app/app.component';
 
+const isTauriEnvironment = !!window['__TAURI__'];
+
 bootstrapApplication(AppComponent, {
     providers: [
         importProvidersFrom(
@@ -18,7 +18,7 @@ bootstrapApplication(AppComponent, {
             BrowserModule,
             MatDialogModule,
             ServiceWorkerModule.register('ngsw-worker.js', {
-                enabled: !isDevMode(),
+                enabled: !isTauriEnvironment && !isDevMode(),
                 // Register the ServiceWorker as soon as the application is stable
                 // or after 30 seconds (whichever comes first).
                 registrationStrategy: 'registerWhenStable:30000'

@@ -1,13 +1,4 @@
-.DS_Store
 node_modules/
 dist/
-.history
-.idea
-npm-debug.log*
-.vscode
-stackedit_v4
-chrome-app/*.zip
-/test/unit/coverage/
-
-
+src-tauri/target
 .angular
