@@ -16,7 +16,7 @@
     "build:tauri": "ng build --project dotglitch",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build --debug"
+    "tauri:build": "tauri build"
   },
   "dependencies": {
     "@angular/animations": "^16.0.0",
