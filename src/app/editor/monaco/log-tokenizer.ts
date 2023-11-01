@@ -114,7 +114,8 @@ export function setupLogLanguage(monaco: typeof Monaco){
 
                 // Strings
                 [/"[^"]*"/, "string"],
-                [/(?<![\w])'[^']*'/, "string"],
+                // Regex not supported in webview
+                // [/(?<![\w])'[^']*'/, "string"],
 
                 // Match remote Urls
                 // Fully qualified with protocol
