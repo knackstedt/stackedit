@@ -34,5 +34,5 @@ npm i \
 npm run build
 
 git push
-git tag v$version
-git push origin v$version
+git tag "v$version"
+git push origin "v$version"
