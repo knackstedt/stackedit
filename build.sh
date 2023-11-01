@@ -33,5 +33,6 @@ npm i \
 
 npm run build
 
+git push
 git tag $version
 git push origin $version
