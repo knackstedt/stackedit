@@ -5,11 +5,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MenuItem, MenuDirective } from '@dotglitch/ngx-common';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MatExpansionModule } from '@angular/material/expansion';
-import { Page } from '../../types/page';
+import { Page } from '../../../types/page';
 import { MenuComponent } from '../menu.component';
 import { ulid } from 'ulidx';
-import { AppComponent } from '../../app.component';
-import { PagesService } from '../../services/pages.service';
+import { AppComponent } from '../../../app.component';
+import { PagesService } from '../../../services/pages.service';
 
 @Component({
     selector: 'app-entry-list',

@@ -1,0 +1,22 @@
+<h1>
+    Allow Telemetry?
+</h1>
+
+<h5>Types of telemetry data</h5>
+<p>
+    <b>Error Telemetry</b> - Error telemetry collects information about errors that do not crash the application but are
+    unexpected.
+
+    <b>Usage Data</b> - Usage data collects information about how features are used and perform in VS Code which helps us
+    prioritize future product improvements.
+</p>
+
+<p>
+    Selecting "no" will mean bugs can go unreported -- which may make developers
+    cry uncontrollably. You should click "yes" to prevent such a tragedy :)
+</p>
+
+<div class="buttons">
+    <button mat-flat-button color="primary" (click)="enable()">yes</button>
+    <button mat-flat-button color="warn" (click)="disable()">no</button>
+</div>

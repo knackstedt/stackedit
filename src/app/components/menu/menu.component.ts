@@ -4,13 +4,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { MenuItem, MenuDirective, ThemeService, DialogService } from '@dotglitch/ngx-common';
 import { LogoComponent } from './logo/logo.component';
-import { AppComponent } from '../app.component';
+import { AppComponent } from '../../app.component';
 import { EntryListComponent } from './entry-list/entry-list.component';
-import { Page } from '../types/page';
+import { Page } from '../../types/page';
 import { EditDialogComponent } from './edit-dialog/edit-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { sampleData } from './sampledata';
-import { FilesService } from '../services/files.service';
+import { FilesService } from '../../services/files.service';
 import { TagPickerComponent } from './@ctxmenu/tag-picker/tag-picker.component';
 import { IconPickerComponent } from './@ctxmenu/icon-picker/icon-picker.component';
 

@@ -8,8 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { LazyLoaderService } from '@dotglitch/ngx-common';
-import { Page, PageKinds } from '../../types/page';
+import { Page, PageKinds } from '../../../types/page';
 import { ulid } from 'ulidx';
 
 

@@ -1,0 +1,15 @@
+:host {
+    display: block;
+    width: 500px;
+    padding: 24px;
+}
+
+h1 {
+    margin-block-start: 0;
+}
+
+.buttons {
+    display: flex;
+    justify-content: end;
+    gap: 10px;
+}

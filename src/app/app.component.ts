@@ -8,10 +8,13 @@ import { KeyboardService, MenuDirective, MenuItem, VscodeComponent } from '@dotg
 import { debounceTime, map } from 'rxjs';
 
 import { StackEditorComponent } from './editor/editor.component';
-import { MenuComponent } from './menu/menu.component';
+import { MenuComponent } from './components/menu/menu.component';
 import { PagesService } from './services/pages.service';
 import { FilesService } from './services/files.service';
 import { Page } from './types/page';
+import { ConfigService } from './services/config.service';
+import { MatDialog } from '@angular/material/dialog';
+import { TelemetryDialogComponent } from './components/telemetry-dialog/telemetry-dialog.component';
 
 declare const dT_;
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -64,7 +67,9 @@ export class AppComponent {
         private readonly iconRegistry: MatIconRegistry,
         private readonly keyboard: KeyboardService,
         private readonly files: FilesService,
-        private readonly pages: PagesService
+        private readonly pages: PagesService,
+        private readonly config: ConfigService,
+        private readonly dialog: MatDialog
     ) {
         if (typeof dT_ != 'undefined' && dT_.initAngularNg) {
             dT_.initAngularNg(http, HttpHeaders);
@@ -75,6 +80,13 @@ export class AppComponent {
             key: "f5",
         }).subscribe(k => {
             window.location.reload()
+        });
+
+        config.subscribe(c => {
+            console.log("config", c)
+            if (c.telemetry == null) {
+                dialog.open(TelemetryDialogComponent);
+            }
         })
     }
 
