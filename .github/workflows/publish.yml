@@ -43,8 +43,8 @@ jobs:
         with:
           tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
           releaseName: 'StackEdit v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
-          releaseDraft: true
+          releaseBody: 'Automated release of latest StackEdit build.'
+          releaseDraft: false
           prerelease: false
       - name: Add Mac Universal Target
         if: matrix.platform == 'macos-latest'
@@ -58,6 +58,6 @@ jobs:
           tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version
           releaseName: 'StackEdit v__VERSION__'
           args: '--target universal-apple-darwin' # build universal app for mac, tauri is small any ways. 6MB -> 13MB. No difference
-          releaseBody: 'See the assets to download this version and install.'
-          releaseDraft: true
+          releaseBody: 'Automated release of latest StackEdit build.'
+          releaseDraft: false
           prerelease: false
