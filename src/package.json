@@ -1,7 +1,7 @@
 {
   "name": "ngx-stackedit",
   "private": false,
-  "version": "1.0.53",
+  "version": "1.0.54",
   "repository": {
     "url": "https://github.com/knackstedt/stackedit"
   },
