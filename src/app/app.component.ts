@@ -1,16 +1,19 @@
 import { Component, ElementRef, EventEmitter, ViewChild } from '@angular/core';
-import { StackEditorComponent } from './editor/editor.component';
 import { NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
-import { MenuComponent } from './menu/menu.component';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { KeyboardService, MenuDirective, MenuItem, VscodeComponent } from '@dotglitch/ngx-common';
-import { Page } from './types/page';
-import { PagesService } from './services/pages.service';
 import { debounceTime, map } from 'rxjs';
-import { FilesService } from './services/files.service';
 
+import { StackEditorComponent } from './editor/editor.component';
+import { MenuComponent } from './menu/menu.component';
+import { PagesService } from './services/pages.service';
+import { FilesService } from './services/files.service';
+import { Page } from './types/page';
+
+declare const dT_;
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 const $debounce = Symbol("debounce");
@@ -57,11 +60,16 @@ export class AppComponent {
     ]
 
     constructor(
+        private readonly http: HttpClient,
         private readonly iconRegistry: MatIconRegistry,
         private readonly keyboard: KeyboardService,
         private readonly files: FilesService,
         private readonly pages: PagesService
     ) {
+        if (typeof dT_ != 'undefined' && dT_.initAngularNg) {
+            dT_.initAngularNg(http, HttpHeaders);
+        }
+
         window['root'] = this;
         keyboard.onKeyCommand({
             key: "f5",
