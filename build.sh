@@ -8,6 +8,7 @@ git stash
 cd src
     npm version patch
     version=$(npm version --json | jq '.["ngx-stackedit"]' | tr -d '"')
+    npm run versionset
 cd ..
 
 git add src/package.json
