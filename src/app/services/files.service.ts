@@ -33,8 +33,18 @@ export class FilesService extends Subject<any> {
         ]);
     }
 
+    private async validateDir(path: string) {
+        if (!useTauri) return true;
+
+        if (path.endsWith(".json"))
+            path = path.split('/').slice(0, -1).join("/");
+
+        await createDir(path, { dir: BaseDirectory.AppData, recursive: true });
+        return true
+    }
+
     async saveFileMetadata(pageMetadata: Page) {
-        console.log(pageMetadata);
+        await this.validateDir(pageMetadata.path);
 
         const page = structuredClone(pageMetadata);
         page.content = undefined;
@@ -50,6 +60,8 @@ export class FilesService extends Subject<any> {
     }
 
     async saveFileContents(page: Page) {
+        await this.validateDir(page.path);
+
         // Do not set page contents to `undefined` or `null`.
         // This gets called when an update comes through before
         // a page loads it's contents
@@ -108,7 +120,7 @@ export class FilesService extends Subject<any> {
     }
 
     async listFiles(pathTarget: string) {
-        let rootPages: Page[] = [];
+        let pages: Page[] = [];
 
         if (pathTarget.trim().length < 3)
             pathTarget = "data";
@@ -126,15 +138,14 @@ export class FilesService extends Subject<any> {
 
             const processEntries = async (entries: FileEntry[], parent?) => {
                 for (const entry of entries) {
-
                     if (entry.name.endsWith(".md") || entry.name.endsWith(".mdx")) {
-                        const jsonFile = entry.name.replace(/\.mdx?$/, '.json');
+                        const jsonFile = entry.path.replace(/\.mdx?$/, '.json');
                         if (!entries.find(e => e.path == jsonFile)) {
                             // Markdown files that don't have corresponding json
                             // files. This scenario usually happens when
                             // opening a doc repo folder.
 
-                            rootPages.push({
+                            pages.push({
                                 path: entry.path,
                                 kind: "markdown-raw",
                                 name: entry.path.split('/').pop(),
@@ -145,23 +156,20 @@ export class FilesService extends Subject<any> {
                         }
                     }
 
+                    if (entry.children) {
+                        await processEntries(entry.children, entry);
+                    }
+
                     // skip any non json files
                     if (!entry.name.endsWith(".json"))
                         continue;
 
-                    const jsonText = await readTextFile(entry.path, { dir: BaseDirectory.AppData});
+                    const jsonText = await readTextFile(entry.path, { dir: BaseDirectory.AppData });
                     const page = JSON.parse(jsonText);
-
-                    if (!parent) {
-                        rootPages.push(page);
-                    }
-
-                    if (entry.children) {
-                        processEntries(entry.children, entry);
-                    }
+                    pages.push(page);
                 }
             };
-            processEntries(entries);
+            await processEntries(entries);
         }
         else {
             // console.log("Access db")
@@ -172,17 +180,16 @@ export class FilesService extends Subject<any> {
                 .filter(key => key.endsWith(".json"))
                 .filter(key => key.startsWith(slug));
 
-            rootPages = await Promise.all(jsonKeys.map(k => localforage.getItem(k))) as any;
-            rootPages.forEach(p => {
+            pages = await Promise.all(jsonKeys.map(k => localforage.getItem(k))) as any;
+            pages.forEach(p => {
                 if (!p.name || p.name.trim().length < 2) {
                     p.autoName = true;
                 }
             })
 
-            // return pages;
         }
 
-        rootPages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-        return rootPages;
+        pages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        return pages;
     }
 }

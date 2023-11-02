@@ -39,6 +39,7 @@ export class PagesService {
                 this.files.listFiles("data"),
                 this.files.listFiles("trash")
             ]);
+
             this.flatPages = pages;
             this.trash = trash;
             this.calculatePageTree();
@@ -68,16 +69,16 @@ export class PagesService {
             }
         });
 
-        this.pages = this.dirMap['data'];
+        const keys = Object.keys(this.dirMap).sort((a, b) => a.length - b.length)
+        this.pages = this.dirMap[keys[0]] || [];
 
-        // console.log({
-        //     dirm: this.dirMap,
-        //     pm: this.pageMap,
-        //     pages: this.pages,
-        //     pages2: pages
-        // });
-
-        this.addTab(this.pages[0]);
+        console.log({
+            dirm: this.dirMap,
+            pm: this.pageMap,
+            pages: this.pages,
+        });
+        if (this.pages.length > 0)
+            this.addTab(this.pages[0]);
     }
 
     async savePage(page: Page) {
@@ -112,7 +113,7 @@ export class PagesService {
         }
         else {
             let path;
-            if (parent) {
+            if (parent && parent.path?.length > 2) {
                 path = parent.path.split(".")?.slice(0, -1)?.join('.');
             }
 
