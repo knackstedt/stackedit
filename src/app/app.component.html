@@ -4,28 +4,28 @@
     style="flex: 1"
     [(selectedIndex)]="pages.selectedTabIndex"
 >
-    <mat-tab *ngFor="let tab of pages.tabs">
+    <mat-tab *ngFor="let page of pages.tabs">
         <ng-template mat-tab-label>
             <div class="tab"
                 [ngx-contextmenu]="tabCtxMenu"
-                [ngx-menu-context]="tab"
+                [ngx-menu-context]="page"
             >
-                <mat-icon [fontIcon]="tab.icon || 'edit_document'"></mat-icon>
+                <mat-icon [fontIcon]="page.icon || 'edit_document'"></mat-icon>
                 <span style="flex: 1">
-                    <span>{{tab.name?.slice(0, 20)}}</span>
+                    <span>{{page.name?.slice(0, 20)}}</span>
                     <!-- <span>M|U|R</span> -->
                 </span>
-                <mat-icon (click)="pages.tabs.splice(pages.tabs.indexOf(tab), 1)">close</mat-icon>
+                <mat-icon (click)="pages.tabs.splice(pages.tabs.indexOf(page), 1)">close</mat-icon>
             </div>
         </ng-template>
 
-        <ng-container [ngSwitch]="tab.kind">
+        <ng-container [ngSwitch]="page.kind">
 
             <app-vscode
                 *ngSwitchCase="'code'"
-                [code]="tab.content"
-                (codeChange)="pages.onTabUpdate(tab, $event)"
-                [language]="tab.options?.['language']"
+                [code]="page.content"
+                (codeChange)="pages.onPageContentChange(page, $event)"
+                [language]="page.options?.['language']"
             />
 
             <div
@@ -36,10 +36,10 @@
 
             <ngx-stackedit
                 *ngSwitchDefault
-                [mode]="tab.readonly ? 'view' : 'edit'"
+                [mode]="page.readonly ? 'view' : 'edit'"
                 [showPreview]="'off'"
-                [(value)]="tab.content"
-                (valueChange)="pages.onTabUpdate(tab, $event)"
+                [(value)]="page.content"
+                (valueChange)="pages.onPageContentChange(page, $event)"
                 (onImageUpload)="onImageUpload($event)"
             />
         </ng-container>

@@ -24,7 +24,7 @@ export type Page = {
      */
     kind: "markdown" | "markdown-raw" | "canvas" | "code";
     name?: string;
-    autoName?: boolean,
+    autoName?: boolean;
     content: string;
     order?: number;
     expanded?: boolean;
@@ -39,5 +39,6 @@ export type Page = {
     created: number;
     modified: number;
     deleted?: number;
+    children?: Page[];
 };
 

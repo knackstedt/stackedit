@@ -157,6 +157,16 @@ export class StackEditorComponent {
     @Input() tabSize = 4;
     @Input() tabChar: ' ' | '\t' = ' ';
 
+
+    /**
+     * ! WIP -- this feature is not supported
+     * Hide punctuation markings in the editor
+     *
+     * This requires improved editor table, mermaid,
+     * and code block rendering
+     */
+    @Input() hideWritingSymbols: boolean = false;
+
     /**
      * Initial value of the editor.
      * 2-way binding capable.

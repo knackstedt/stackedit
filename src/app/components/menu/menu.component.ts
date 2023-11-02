@@ -71,22 +71,25 @@ export class MenuComponent {
         }
     ]
 
-    readonly pageContextMenu: MenuItem[] = [
-        { label: "Open in new tab" },
+    readonly pageContextMenu: MenuItem<Page>[] = [
+        {
+            label: "Create Child (Markdown)",
+            action: (data) =>
+                this.pages.createPage({ kind: "markdown" }, data)
+        },
+        {
+            label: "Create Child (Code)",
+            action: (data) =>
+                this.pages.createPage({ kind: "code" }, data)
+        },
         "separator",
         {
             label: "Set Icon",
-            childTemplate: IconPickerComponent,
-            // action: (data) => {
-            //     console.log(data)
-            // }
+            childTemplate: IconPickerComponent
         },
         {
             label: "Set Tag",
-            childTemplate: TagPickerComponent,
-            // action: (data) => {
-            //     console.log(data)
-            // }
+            childTemplate: TagPickerComponent
         },
         // { label: "Set Color" },
         // { label: "Set Color" },

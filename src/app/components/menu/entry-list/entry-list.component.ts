@@ -60,6 +60,6 @@ export class EntryListComponent implements OnInit {
         this.pages.createPage({
             order: this.items.length,
             kind: kind as any
-        });
+        }, this.item as any);
     }
 }

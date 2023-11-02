@@ -5,6 +5,7 @@ import { ulid } from 'ulidx';
 import { debounceTime } from 'rxjs';
 
 const $debounce = Symbol("debounce");
+const basePath = `data/`;
 
 @Injectable({
     providedIn: 'root'
@@ -21,17 +22,62 @@ export class PagesService {
      * All currently registered pages on the nav menu
      */
     public pages: Page[] = [];
+    public flatPages: Page[] = [];
     public trash: Page[] = [];
+
+    // A map of page URLs to the page
+    private pageMap: { [key: string]: Page } = {};
+    // A map of dir URLs to pages
+    private dirMap: { [key: string]: Page[] } = {};
 
     constructor(
         private readonly files: FilesService
     ) {
 
         (async() => {
-            this.pages = await this.files.listFiles("data");
-            this.trash = await this.files.listFiles("trash");
-            this.addTab(this.pages[0]);
+            const [pages, trash] = await Promise.all([
+                this.files.listFiles("data"),
+                this.files.listFiles("trash")
+            ]);
+            this.flatPages = pages;
+            this.trash = trash;
+            this.calculatePageTree();
         })();
+    }
+
+    private calculatePageTree() {
+        this.dirMap = {};
+        this.pageMap = {};
+
+        this.flatPages.forEach(p => {
+            this.pageMap[
+                p.path.split('.').slice(0, -1).join('.')
+            ] = p;
+
+            const dir = p.path
+                .split('/').slice(0, -1).join('/');
+
+            this.dirMap[dir] = this.dirMap[dir] || [];
+            this.dirMap[dir].push(p);
+        });
+
+        Object.entries(this.dirMap).forEach(([k, v]) => {
+            const parent = this.pageMap[k];
+            if (parent) {
+                parent.children = v;
+            }
+        });
+
+        this.pages = this.dirMap['data'];
+
+        // console.log({
+        //     dirm: this.dirMap,
+        //     pm: this.pageMap,
+        //     pages: this.pages,
+        //     pages2: pages
+        // });
+
+        this.addTab(this.pages[0]);
     }
 
     async savePage(page: Page) {
@@ -52,29 +98,43 @@ export class PagesService {
 
         await this.files.saveFileMetadata(page);
         await this.files.saveFileContents(page);
+
+        this.pageMap[page.path] = page;
     }
 
-    async createPage(abstract: Partial<Page>) {
-        const isUpdate = !!abstract.path;
+    async createPage(abstract: Partial<Page>, parent?: Page) {
+        const isUpdate = !!abstract.path && !parent;
         // This is an update action
         if (isUpdate) {
+            abstract.modified = Date.now();
             await this.files.saveFileMetadata(abstract as any);
             return abstract;
         }
         else {
+            let path;
+            if (parent) {
+                path = parent.path.split(".")?.slice(0, -1)?.join('.');
+            }
+
             const page: Page = {
-                path: "data/temp_" + ulid() + '.json',
+                path: (path ? path + "/" : basePath) + ulid() + '.json',
                 content: '',
                 created: Date.now(),
                 kind: "markdown",
                 modified: Date.now(),
                 autoName: true,
+                options: {},
+                tags: [],
+                variables: {},
                 ...abstract
             };
             await this.savePage(page);
 
-            this.pages.push(page);
+            this.flatPages.push(page);
+            this.calculatePageTree();
+
             this.addTab(page);
+
             return page;
         }
     }
@@ -94,6 +154,8 @@ export class PagesService {
         }
         this.tabs.splice(this.tabs.indexOf(page), 1);
         this.pages.splice(this.pages.indexOf(page), 1);
+        this.flatPages.splice(this.flatPages.indexOf(page), 1);
+        this.pageMap[page.path] = undefined;
     }
 
     async addTab(tab: Page) {
@@ -118,7 +180,7 @@ export class PagesService {
         this.selectedTabIndex = index;
     }
 
-    onTabUpdate(page: Page, value: string) {
+    onPageContentChange(page: Page, value: string) {
         if (page.autoName) {
             page.name = page.content?.trim()?.split('\n')?.[0]?.slice(0, 20);
             if (page.name.trim().length < 2)
