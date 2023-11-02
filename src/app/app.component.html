@@ -2,9 +2,9 @@
 
 <mat-tab-group
     style="flex: 1"
-    [(selectedIndex)]="currentTabIndex"
+    [(selectedIndex)]="pages.selectedTabIndex"
 >
-    <mat-tab *ngFor="let tab of tabs">
+    <mat-tab *ngFor="let tab of pages.tabs">
         <ng-template mat-tab-label>
             <div class="tab"
                 [ngx-contextmenu]="tabCtxMenu"
@@ -15,7 +15,7 @@
                     <span>{{tab.name?.slice(0, 20)}}</span>
                     <!-- <span>M|U|R</span> -->
                 </span>
-                <mat-icon (click)="tabs.splice(tabs.indexOf(tab), 1)">close</mat-icon>
+                <mat-icon (click)="pages.tabs.splice(pages.tabs.indexOf(tab), 1)">close</mat-icon>
             </div>
         </ng-template>
 
@@ -24,7 +24,8 @@
             <app-vscode
                 *ngSwitchCase="'code'"
                 [code]="tab.content"
-                (codeChange)="onTabUpdate(tab, $event)"
+                (codeChange)="pages.onTabUpdate(tab, $event)"
+                [language]="tab.options?.['language']"
             />
 
             <div
@@ -38,7 +39,7 @@
                 [mode]="tab.readonly ? 'view' : 'edit'"
                 [showPreview]="'off'"
                 [(value)]="tab.content"
-                (valueChange)="onTabUpdate(tab, $event)"
+                (valueChange)="pages.onTabUpdate(tab, $event)"
                 (onImageUpload)="onImageUpload($event)"
             />
         </ng-container>

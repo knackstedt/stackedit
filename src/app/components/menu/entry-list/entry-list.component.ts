@@ -7,7 +7,6 @@ import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Page } from '../../../types/page';
 import { MenuComponent } from '../menu.component';
-import { ulid } from 'ulidx';
 import { AppComponent } from '../../../app.component';
 import { PagesService } from '../../../services/pages.service';
 
@@ -36,7 +35,7 @@ export class EntryListComponent implements OnInit {
     constructor(
         private readonly app: AppComponent,
         private readonly menu: MenuComponent,
-        private readonly pages: PagesService
+        public readonly pages: PagesService
     ) {
     }
 
@@ -57,17 +56,10 @@ export class EntryListComponent implements OnInit {
             await this.pages.savePage(this.items[i]);
     }
 
-    async create(kind: string) {
-        const page = await this.pages.createPage({
+    create(kind: string) {
+        this.pages.createPage({
             order: this.items.length,
             kind: kind as any
         });
-        this.app.addTab(page);
-        this.items.push(page);
-    }
-
-    openPage(page: Page) {
-        //
-        this.app.addTab(page);
     }
 }

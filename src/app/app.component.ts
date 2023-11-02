@@ -19,7 +19,6 @@ import { TelemetryDialogComponent } from './components/telemetry-dialog/telemetr
 declare const dT_;
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-const $debounce = Symbol("debounce");
 
 @Component({
     selector: 'app-root',
@@ -44,19 +43,16 @@ const $debounce = Symbol("debounce");
 export class AppComponent {
     @ViewChild(MenuComponent) menu: MenuComponent;
 
-    currentTabIndex = 0;
-    tabs: Page[] = [];
-
     readonly tabCtxMenu: MenuItem<Page>[] = [
-        { label: "Close", action: p => this.tabs.splice(this.tabs.indexOf(p), 1) },
-        { label: "Close Others", action: p => this.tabs = this.tabs.splice(this.tabs.indexOf(p), 1) },
-        { label: "Close to the right", action: p => this.tabs.splice(this.tabs.indexOf(p)) },
-        { label: "Close to the left", action: p => this.tabs.splice(0, this.tabs.indexOf(p)) },
-        { label: "Close All", action: p => this.tabs = [] },
+        { label: "Close", action: p => this.pages.tabs.splice(this.pages.tabs.indexOf(p), 1) },
+        { label: "Close Others", action: p => this.pages.tabs = this.pages.tabs.splice(this.pages.tabs.indexOf(p), 1) },
+        { label: "Close to the right", action: p => this.pages.tabs.splice(this.pages.tabs.indexOf(p)) },
+        { label: "Close to the left", action: p => this.pages.tabs.splice(0, this.pages.tabs.indexOf(p)) },
+        { label: "Close All", action: p => this.pages.tabs = [] },
         // "separator",
-        // { label: "Icon", action: p => this.tabs = [] },
-        // { label: "Color", action: p => this.tabs = [] },
-        // { label: "Category", action: p => this.tabs = [] },
+        // { label: "Icon", action: p => this.pages.tabs = [] },
+        // { label: "Color", action: p => this.pages.tabs = [] },
+        // { label: "Category", action: p => this.pages.tabs = [] },
         "separator",
         // { label: "Pin" },
         { label: "Edit...", action: p => this.menu.onEntryEdit(p) }
@@ -67,7 +63,7 @@ export class AppComponent {
         private readonly iconRegistry: MatIconRegistry,
         private readonly keyboard: KeyboardService,
         private readonly files: FilesService,
-        private readonly pages: PagesService,
+        public readonly pages: PagesService,
         private readonly config: ConfigService,
         private readonly dialog: MatDialog
     ) {
@@ -83,32 +79,10 @@ export class AppComponent {
         });
 
         config.subscribe(c => {
-            console.log("config", c)
             if (c.telemetry == null) {
                 dialog.open(TelemetryDialogComponent);
             }
         })
-    }
-
-    async addTab(tab: Page) {
-        let index = this.tabs.indexOf(tab);
-        if (index == -1) {
-            const emitter = new EventEmitter();
-            emitter
-                .pipe(debounceTime(300)).subscribe(() => {
-                    this.pages.savePage(tab);
-                });
-
-            tab[$debounce] = emitter;
-
-            if (tab.content == undefined || tab.content == null) {
-                const text = await this.files.readFile(tab.path.replace(/\.json$/, '.md')) as any;
-                tab.content = text;
-            }
-
-            index = this.tabs.push(tab);
-        }
-        this.currentTabIndex = index;
     }
 
     // @HostListener("window:resize", ["$event"])
@@ -129,13 +103,4 @@ export class AppComponent {
         });
     }
 
-    onTabUpdate(page: Page, value: string) {
-        if (page.autoName) {
-            page.name = page.content?.trim()?.split('\n')?.[0]?.slice(0, 20);
-            if (page.name.trim().length < 2)
-                page.name = "untitled";
-        }
-        page.content = value;
-        page[$debounce].next()
-    }
 }

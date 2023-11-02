@@ -10,6 +10,8 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Page, PageKinds } from '../../../types/page';
 import { ulid } from 'ulidx';
+import { installMonaco } from '../../../editor/monaco';
+import { PagesService } from '../../../services/pages.service';
 
 
 @Component({
@@ -34,23 +36,30 @@ export class EditDialogComponent implements OnInit {
     PageKinds = PageKinds;
     page: Page;
 
+    languages = [];
+
     constructor(
         public dialog: MatDialogRef<any>,
-        @Inject(MAT_DIALOG_DATA) public data: any
+        @Inject(MAT_DIALOG_DATA) public data: any,
+        private pages: PagesService
     ) {
         this.page = structuredClone(data) || {};
         this.page.path = this.page.path ?? "data/temp_" + ulid() + '.json'
         this.page.created = this.page.created ?? Date.now();
         this.page.kind = this.page.kind ?? "markdown";
-
+        this.page.options = this.page.options ?? {};
     }
 
-    ngOnInit() {
-
+    async ngOnInit() {
+        await installMonaco();
+        this.languages = window['monaco'].languages.getLanguages().map(l => l.id);
     }
 
     async save() {
-        this.page.modified = Date.now();
-        this.dialog.close(this.page);
+        // Apply changes
+        Object.keys(this.page).forEach(k => this.data[k] = this.page[k]);
+
+        this.pages.savePage(this.page);
+        this.dialog.close();
     }
 }

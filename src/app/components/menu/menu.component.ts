@@ -7,12 +7,16 @@ import { LogoComponent } from './logo/logo.component';
 import { AppComponent } from '../../app.component';
 import { EntryListComponent } from './entry-list/entry-list.component';
 import { Page } from '../../types/page';
-import { EditDialogComponent } from './edit-dialog/edit-dialog.component';
+import { EditDialogComponent } from '../@dialogs/edit-dialog/edit-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { sampleData } from './sampledata';
 import { FilesService } from '../../services/files.service';
-import { TagPickerComponent } from './@ctxmenu/tag-picker/tag-picker.component';
-import { IconPickerComponent } from './@ctxmenu/icon-picker/icon-picker.component';
+import { TagPickerComponent } from '../@ctxmenu/tag-picker/tag-picker.component';
+import { IconPickerComponent } from '../@ctxmenu/icon-picker/icon-picker.component';
+import { PagesService } from '../../services/pages.service';
+import { ConfigService } from '../../services/config.service';
+import { ConfirmDialogComponent } from '../@dialogs/confirm-dialog/confirm-dialog.component';
+import { UtilService } from '../../services/util.service';
 
 type Tag = {
     key: string,
@@ -36,14 +40,10 @@ type Tag = {
 })
 export class MenuComponent {
 
-    pages: Page[] = [];
-    trash: Page[] = [];
-
     public readonly matIconRx = /[\/\.]/i;
 
     @Input() isMobile = false;
 
-    collapsed = false;
     showAdvancedMenu = true;
 
     readonly profileLinks: MenuItem[] = [
@@ -77,16 +77,16 @@ export class MenuComponent {
         {
             label: "Set Icon",
             childTemplate: IconPickerComponent,
-            action: (data) => {
-                console.log(data)
-            }
+            // action: (data) => {
+            //     console.log(data)
+            // }
         },
         {
             label: "Set Tag",
             childTemplate: TagPickerComponent,
-            action: (data) => {
-                console.log(data)
-            }
+            // action: (data) => {
+            //     console.log(data)
+            // }
         },
         // { label: "Set Color" },
         // { label: "Set Color" },
@@ -100,36 +100,32 @@ export class MenuComponent {
         "separator",
         {
             label: "Delete",
-            action: page => {
-                // this.files.del
+            action: async page => {
+                await this.util.confirmAction("Confirm"
+                    , `Are you sure you want to delete ${page.name}?`);
+                this.pages.deletePage(page)
             }
         },
         { label: "Edit...", action: p => this.onEntryEdit(p) }
     ]
 
     constructor(
+        public readonly pages: PagesService,
         private readonly app: AppComponent,
         private readonly theme: ThemeService,
         private readonly dialog: MatDialog,
         private readonly files: FilesService,
+        public readonly config: ConfigService,
+        private readonly util: UtilService
     ) {
+
     }
 
     async ngOnInit() {
-        this.pages = await this.files.listFiles("data");
-        this.trash = await this.files.listFiles("trash");
-        this.app.addTab(this.pages[0]);
+
     }
 
     onEntryEdit(entry: Partial<Page>) {
-        const s = this.dialog.open(EditDialogComponent, { data: entry })
-            .afterClosed().subscribe(async (result) => {
-                s.unsubscribe();
-
-                if (result) {
-                    await this.files.saveFileMetadata(result);
-                    this.pages.push(result);
-                }
-            });
+        this.dialog.open(EditDialogComponent, { data: entry })
     }
 }

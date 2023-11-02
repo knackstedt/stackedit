@@ -1,6 +1,6 @@
 <!-- 200px expanded; 56px collapsed. 300px when expanded on mobile -->
-<div class="menu" [class.collapsed]="collapsed">
-    <app-logo style="width: calc(100% - 8px); height: 40px; gap: 0" [showText]="!collapsed"></app-logo>
+<div class="menu" [class.collapsed]="config.value.menuCollapsed">
+    <app-logo style="width: calc(100% - 8px); height: 40px; gap: 0" [showText]="!config.value.menuCollapsed"></app-logo>
 
     <!-- <div>
         <mat-icon>new_file</mat-icon>
@@ -12,9 +12,9 @@
     <hr/>
 
     <app-entry-list
-        [items]="pages"
+        [items]="pages.pages"
         [ctxMenu]="pageContextMenu"
-        [style.display]="collapsed ? 'none' : ''"
+        [style.display]="config.value.menuCollapsed ? 'none' : ''"
     />
 
     <span style="flex: 1"></span>
@@ -23,19 +23,19 @@
     <hr/>
 
     <div class="item"
-        [matTooltip]="collapsed ? 'Expand Dock' : null"
-        (click)="collapsed = !collapsed"
+        [matTooltip]="config.value.menuCollapsed ? 'Expand Dock' : null"
+        (click)="config.set('menuCollapsed', !config.value.menuCollapsed)"
     >
         <!-- Overlay search functionality -->
 
         <span class="icon">
-            <mat-icon [fontIcon]="collapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left'"></mat-icon>
+            <mat-icon [fontIcon]="config.value.menuCollapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left'"></mat-icon>
         </span>
         <span class="label">Collapse</span>
     </div>
 
     <div class="item"
-        [matTooltip]="collapsed ? 'Settings' : null"
+        [matTooltip]="config.value.menuCollapsed ? 'Settings' : null"
         [ngx-menu]="profileLinks"
         [ngx-menu-config]="{ position: 'right', alignment: 'end', customClass: ['nav-menu']}"
     >

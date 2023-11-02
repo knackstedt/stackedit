@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import type fs from '@tauri-apps/api/fs';
-import { BaseDirectory, FileEntry, writeTextFile } from '@tauri-apps/api/fs';
+import { BaseDirectory, FileEntry, removeFile, renameFile, writeTextFile } from '@tauri-apps/api/fs';
 import { Page } from '../types/page';
 import localforage from 'localforage';
 
@@ -72,6 +72,38 @@ export class FilesService extends Subject<any> {
         }
         else {
             return await localforage.getItem(path)
+        }
+    }
+
+    async deleteFile(page: Page) {
+        if (useTauri) {
+            return await removeFile(page.path, { dir: BaseDirectory.AppData });
+        }
+        else {
+            await localforage.removeItem(page.path);
+            await localforage.removeItem(page.path.replace(/\.json$/, '.md'));
+        }
+    }
+
+    async trashFile(page: Page) {
+        const srcPath = page.path;
+        const targetPath = page.path.replace(/^data\//, 'trash/');
+        const srcPathMd = srcPath.replace(/\.json$/, '.md');
+        const targetPathMd = targetPath.replace(/\.json$/, '.md');
+
+        if (useTauri) {
+            await renameFile(srcPath, targetPath, { dir: BaseDirectory.AppData });
+            await renameFile(srcPathMd, targetPathMd, { dir: BaseDirectory.AppData });
+        }
+        else {
+            const oldFile = await localforage.getItem(srcPath);
+            await localforage.setItem(targetPath, oldFile);
+
+            const oldFileMd = await localforage.getItem(srcPathMd);
+            await localforage.setItem(targetPathMd, oldFileMd);
+
+            await localforage.removeItem(srcPath);
+            await localforage.removeItem(srcPathMd);
         }
     }
 

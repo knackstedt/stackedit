@@ -21,7 +21,7 @@
                 class="label"
                 [ngx-contextmenu]="ctxMenu"
                 [ngx-menu-context]="page"
-                (click)="openPage(page)"
+                (click)="pages.addTab(page)"
             >
                 <div>
                     <mat-icon *ngIf="page.icon" [fontIcon]="page.icon" [style.color]="page.color" style="margin-right: 10px"/>

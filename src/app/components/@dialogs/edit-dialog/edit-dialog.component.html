@@ -1,14 +1,19 @@
 <div style="display: flex; flex-direction: column;">
     <div>
-        <h5>Appearance</h5>
         <mat-form-field>
-            <mat-label>name</mat-label>
-            <input matInput [(ngModel)]="page.name" type="text">
+            <mat-label>Name</mat-label>
+            <input
+                #_
+                matInput
+                [(ngModel)]="page.name"
+                type="text"
+                (keyup)="page.autoName = _.value.length < 2"
+            >
         </mat-form-field>
 
         <mat-form-field>
-            <mat-label>type</mat-label>
-            <mat-select>
+            <mat-label>Type</mat-label>
+            <mat-select [(value)]="page.kind">
                 <mat-option
                     *ngFor="let kind of PageKinds"
                     [value]="kind.id"
@@ -16,7 +21,19 @@
                     {{kind.label}}
                 </mat-option>
             </mat-select>
-            <input matInput [(ngModel)]="page.name" type="text">
+        </mat-form-field>
+
+
+        <mat-form-field *ngIf="page.kind == 'code'">
+            <mat-label>Language</mat-label>
+            <mat-select [(value)]="page.options['language']">
+                <mat-option
+                    *ngFor="let language of languages"
+                    [value]="language"
+                >
+                    {{language}}
+                </mat-option>
+            </mat-select>
         </mat-form-field>
 
         <a href="https://fonts.google.com/icons?icon.set=Material+Icons&selected=Material+Icons+Outlined:settings:&icon.style=Outlined"></a>

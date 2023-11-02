@@ -4,10 +4,10 @@ import { NgForOf, NgIf } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Page } from '../../../../types/page';
+import { Page } from '../../../types/page';
 import { FormsModule } from '@angular/forms';
 import icons from './mat-icons-outlined.json';
-import { PagesService } from '../../../../services/pages.service';
+import { PagesService } from '../../../services/pages.service';
 
 @Component({
     selector: 'app-icon-picker',

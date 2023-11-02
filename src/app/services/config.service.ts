@@ -16,11 +16,15 @@ const filePath = `app.json`;
 const prefix = `config-`;
 
 type Config = Partial<{
-    telemetry: boolean
+    telemetry: boolean,
+    menuCollapsed: boolean,
+    theme: string
 }>;
 
 const knownKeys = [
-    "telemetry"
+    "telemetry",
+    "menuCollapsed",
+    "theme"
 ]
 
 let dbPromise;
