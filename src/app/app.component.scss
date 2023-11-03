@@ -1,7 +1,7 @@
 :host {
     height: 100%;
     width: 100%;
-    display: flex;
+    // display: flex;
 }
 
 ngx-lazy-loader {
@@ -42,5 +42,9 @@ ngx-lazy-loader {
 
     .mdc-tab-indicator__content--underline {
         align-self: flex-start;
+    }
+
+    mat-tab-group {
+        overflow: hidden;
     }
 }

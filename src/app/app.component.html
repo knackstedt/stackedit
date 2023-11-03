@@ -1,47 +1,56 @@
-<app-menu></app-menu>
+<as-split direction="horizontal" [gutterSize]="2" [unit]="'pixel'">
+    <as-split-area
+        [size]="215"
+        [minSize]="215"
+        [maxSize]="400"
+    >
+        <app-menu></app-menu>
+    </as-split-area>
+    <as-split-area>
+        <mat-tab-group
+            style="flex: 1"
+            [(selectedIndex)]="pages.selectedTabIndex"
+        >
+            <mat-tab *ngFor="let page of pages.tabs">
+                <ng-template mat-tab-label>
+                    <div class="tab"
+                        [ngx-contextmenu]="tabCtxMenu"
+                        [ngx-menu-context]="page"
+                    >
+                        <mat-icon [fontIcon]="page.icon || 'edit_document'"></mat-icon>
+                        <span style="flex: 1">
+                            <span>{{page.name?.slice(0, 20)}}</span>
+                            <!-- <span>M|U|R</span> -->
+                        </span>
+                        <mat-icon (click)="pages.tabs.splice(pages.tabs.indexOf(page), 1)">close</mat-icon>
+                    </div>
+                </ng-template>
 
-<mat-tab-group
-    style="flex: 1"
-    [(selectedIndex)]="pages.selectedTabIndex"
->
-    <mat-tab *ngFor="let page of pages.tabs">
-        <ng-template mat-tab-label>
-            <div class="tab"
-                [ngx-contextmenu]="tabCtxMenu"
-                [ngx-menu-context]="page"
-            >
-                <mat-icon [fontIcon]="page.icon || 'edit_document'"></mat-icon>
-                <span style="flex: 1">
-                    <span>{{page.name?.slice(0, 20)}}</span>
-                    <!-- <span>M|U|R</span> -->
-                </span>
-                <mat-icon (click)="pages.tabs.splice(pages.tabs.indexOf(page), 1)">close</mat-icon>
-            </div>
-        </ng-template>
+                <ng-container [ngSwitch]="page.kind">
 
-        <ng-container [ngSwitch]="page.kind">
+                    <app-vscode
+                        *ngSwitchCase="'code'"
+                        [code]="page.content"
+                        (codeChange)="pages.onPageContentChange(page, $event)"
+                        [language]="page.options?.['language']"
+                    />
 
-            <app-vscode
-                *ngSwitchCase="'code'"
-                [code]="page.content"
-                (codeChange)="pages.onPageContentChange(page, $event)"
-                [language]="page.options?.['language']"
-            />
+                    <div
+                        *ngSwitchCase="'canvas'"
+                    >
+                        <h1>Canvas note!</h1>
+                    </div>
 
-            <div
-                *ngSwitchCase="'canvas'"
-            >
-                <h1>Canvas note!</h1>
-            </div>
-
-            <ngx-stackedit
-                *ngSwitchDefault
-                [mode]="page.readonly ? 'view' : 'edit'"
-                [showPreview]="'off'"
-                [(value)]="page.content"
-                (valueChange)="pages.onPageContentChange(page, $event)"
-                (onImageUpload)="onImageUpload($event)"
-            />
-        </ng-container>
-    </mat-tab>
-</mat-tab-group>
+                    <ngx-stackedit
+                        *ngSwitchDefault
+                        [mode]="page.readonly ? 'view' : 'edit'"
+                        [showPreview]="'off'"
+                        [(value)]="page.content"
+                        (valueChange)="pages.onPageContentChange(page, $event)"
+                        (onImageUpload)="onImageUpload($event)"
+                    />
+                </ng-container>
+            </mat-tab>
+        </mat-tab-group>
+    </as-split-area>
+</as-split>

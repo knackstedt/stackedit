@@ -15,6 +15,7 @@ import { Page } from './types/page';
 import { ConfigService } from './services/config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { TelemetryDialogComponent } from './components/telemetry-dialog/telemetry-dialog.component';
+import { AngularSplitModule } from 'angular-split';
 
 declare const dT_;
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -37,7 +38,8 @@ export const sleep = ms => new Promise(r => setTimeout(r, ms));
         MatTabsModule,
         MatIconModule,
         MatTooltipModule,
-        MenuDirective
+        MenuDirective,
+        AngularSplitModule
     ]
 })
 export class AppComponent {

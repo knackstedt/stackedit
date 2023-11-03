@@ -1,0 +1,46 @@
+@mixin print {
+    html {
+        overflow: auto;
+    }
+
+    body {
+        height: unset;
+        background-color: var(--background-color);
+    }
+
+    mat-tab-header,
+    app-toolbar,
+    app-menu {
+        display: none !important
+    }
+
+    .mat-mdc-tab-group {
+        height: unset;
+    }
+
+    body,
+    .mat-mdc-tab-body-wrapper,
+    mat-tab-body,
+    .mat-mdc-tab-body-content,
+    ngx-stackedit,
+    ngx-stackedit>.contents,
+    ngx-stackedit>.contents>.editor,
+    ngx-stackedit>.contents>.preview,
+    .f {
+        overflow: visible !important;
+        contain: unset !important;
+        height: unset;
+    }
+
+    .print-hidden {
+        display: none;
+    }
+}
+
+@media print {
+    @include print();
+}
+
+html.print {
+    @include print();
+}

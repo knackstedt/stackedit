@@ -1,0 +1,57 @@
+/* You can add global styles to this file, and also import other style files */
+@import "@fontsource/material-icons-outlined";
+@import "@fontsource/fira-sans/400";
+@import "@fontsource/fira-sans/600";
+@import "@fontsource/fira-mono";
+
+@import "material.scss";
+@import "print.scss";
+@import "scrollbar.scss";
+@import "splitter.scss";
+
+
+body { margin: 0 }
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    font-family: 'Fira Sans', Arial;
+    background-color: var(--background-color, #121212);
+    color: var(--text-color);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+a {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+
+// dark
+:root {
+    --text-color: #efefef;
+    --background-color: #121212;
+    --menu-guide-color: #313131;
+    --menu-text-color: #ccc;
+    --menu-background-color: #181818;
+    --menu-item-hover-color: #292c2d;
+    --splitter-hover-background-color: rgb(7, 250, 135);
+    --splitter-background-color: #555;
+    --splitter-transition: 200ms ease;
+}
+
+.light {
+    --text-color: #121212;
+    --background-color: #efefef;
+    --ngx-ctx-menu-text-color: #111;
+    --menu-guide-color: #bebebe;
+    --menu-text-color: #ccc;
+    --menu-background-color: #181818;
+    --menu-item-hover-color: #292c2d;
+    --splitter-hover-background-color: rgb(7, 250, 135);
+    --splitter-background-color: #999;
+}
+

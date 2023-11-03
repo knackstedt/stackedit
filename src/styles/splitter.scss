@@ -1,0 +1,8 @@
+.as-split-gutter {
+    background-color: var(--splitter-background-color)!important;
+    transition: background-color var(--splitter-transition);
+
+    &:hover {
+        background-color: var(--splitter-hover-background-color)!important;
+    }
+}

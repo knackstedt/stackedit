@@ -37,7 +37,7 @@
               }
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles/styles.scss"
             ],
             "serviceWorker": true,
             "ngswConfigPath": "ngsw-config.json"
