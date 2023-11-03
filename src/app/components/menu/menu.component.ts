@@ -1,5 +1,5 @@
 import { NgForOf, NgIf } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, TemplateRef, ViewChild } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { MenuItem, MenuDirective, ThemeService, DialogService } from '@dotglitch/ngx-common';
@@ -15,8 +15,8 @@ import { TagPickerComponent } from '../@ctxmenu/tag-picker/tag-picker.component'
 import { IconPickerComponent } from '../@ctxmenu/icon-picker/icon-picker.component';
 import { PagesService } from '../../services/pages.service';
 import { ConfigService } from '../../services/config.service';
-import { ConfirmDialogComponent } from '../@dialogs/confirm-dialog/confirm-dialog.component';
 import { UtilService } from '../../services/util.service';
+import { FolderRenameComponent } from '../@ctxmenu/folder-rename/folder-rename.component';
 
 type Tag = {
     key: string,
@@ -34,11 +34,14 @@ type Tag = {
         MatTooltipModule,
         MatIconModule,
         LogoComponent,
-        EntryListComponent
+        EntryListComponent,
+        FolderRenameComponent
     ],
     standalone: true
 })
 export class MenuComponent {
+    @ViewChild("renameTemplate", { read: TemplateRef }) renameTemplate: TemplateRef<any>;
+    @ViewChild("createTemplate", { read: TemplateRef }) createTemplate: TemplateRef<any>;
 
     public readonly matIconRx = /[\/\.]/i;
 
@@ -71,46 +74,7 @@ export class MenuComponent {
         }
     ]
 
-    readonly pageContextMenu: MenuItem<Page>[] = [
-        {
-            label: "Create Child (Markdown)",
-            action: (data) =>
-                this.pages.createPage({ kind: "markdown" }, data)
-        },
-        {
-            label: "Create Child (Code)",
-            action: (data) =>
-                this.pages.createPage({ kind: "code" }, data)
-        },
-        "separator",
-        {
-            label: "Set Icon",
-            childTemplate: IconPickerComponent
-        },
-        {
-            label: "Set Tag",
-            childTemplate: TagPickerComponent
-        },
-        // { label: "Set Color" },
-        // { label: "Set Color" },
-        // "separator",
-        // { label: "Rename" },
-        // { label: "Clone" },
-        // { label: "Move" },
-        // { label: "Bookmark" },
-        // "separator",
-        // { label: "Show in File Explorer" },
-        "separator",
-        {
-            label: "Delete",
-            action: async page => {
-                await this.util.confirmAction("Confirm"
-                    , `Are you sure you want to delete ${page.name}?`);
-                this.pages.deletePage(page)
-            }
-        },
-        { label: "Edit...", action: p => this.onEntryEdit(p) }
-    ]
+    pageContextMenu: MenuItem<Page>[] = [];
 
     constructor(
         public readonly pages: PagesService,
@@ -126,6 +90,56 @@ export class MenuComponent {
 
     async ngOnInit() {
 
+    }
+
+    async ngAfterViewInit() {
+        this.pageContextMenu = [
+            {
+                label: "Create Child (Markdown)",
+                action: (data) =>
+                    this.pages.createPage({ kind: "markdown" }, data)
+            },
+            {
+                label: "Create Child (Code)",
+                action: (data) =>
+                    this.pages.createPage({ kind: "code" }, data)
+            },
+            "separator",
+            {
+                label: "Set Icon",
+                childTemplate: IconPickerComponent
+            },
+            {
+                label: "Set Tag",
+                childTemplate: TagPickerComponent
+            },
+            // { label: "Set Color" },
+            // { label: "Set Color" },
+            // "separator",
+            // { label: "Rename" },
+            // { label: "Clone" },
+            // { label: "Move" },
+            // { label: "Bookmark" },
+            // "separator",
+            // { label: "Show in File Explorer" },
+            "separator",
+            {
+                label: "Delete",
+                action: async page => {
+                    await this.util.confirmAction("Confirm"
+                        , `Are you sure you want to delete ${page.name}?`);
+                    this.pages.deletePage(page);
+                }
+            },
+            {
+                label: "Rename",
+                childTemplate: this.renameTemplate,
+                action: async page => {
+                    this.pages.savePage(page);
+                }
+            },
+            { label: "Edit...", action: p => this.onEntryEdit(p) }
+        ]
     }
 
     onEntryEdit(entry: Partial<Page>) {

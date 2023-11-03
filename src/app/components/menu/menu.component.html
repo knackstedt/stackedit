@@ -47,3 +47,10 @@
         <span class="label">Settings</span>
     </div>
 </div>
+
+<ng-template #renameTemplate let-data let-dialog="dialog">
+    <app-folder-rename
+        [dialog]="dialog"
+        [data]="data"
+    />
+</ng-template>
