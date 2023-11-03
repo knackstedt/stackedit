@@ -41,7 +41,7 @@
     </mat-expansion-panel>
 </mat-accordion>
 
-<div class="add-line">
+<div class="add-line" *ngIf="depth == 0">
     <span (click)="create('markdown')">
         <mat-icon>add</mat-icon>
         Markdown

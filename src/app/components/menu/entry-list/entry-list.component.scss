@@ -46,7 +46,8 @@
 app-entry-list {
     margin-left: 18px;
     border-radius: 6px;
-    box-shadow: 0 3px 1px -2px #0003, 0 2px 2px #00000024, 0 1px 5px #0000001f;
+    // box-shadow: 0 3px 1px -2px #0003, 0 2px 2px #00000024, 0 1px 5px #0000001f;
+    border-left: 1px solid var(--menu-guide-color);
 }
 
 .isleaf ::ng-deep {
@@ -64,7 +65,7 @@ app-entry-list {
 
     .mat-expansion-panel {
         box-shadow: none !important;
-        // background-color: #0000;
+        background-color: #0000;
         .mat-content {
             flex-direction: column;
             margin-left: 24px;
@@ -78,6 +79,9 @@ app-entry-list {
 
     .mat-expansion-panel-header {
         padding: 0 24px 0 12px;
+        &:hover {
+            background-color: var(--menu-item-hover-color);
+        }
     }
 
     .mat-expansion-panel-header.mat-expanded {

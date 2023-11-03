@@ -7,16 +7,16 @@
 .menu {
     display: flex;
     flex-direction: column;
-    width: 200px;
+    width: 100%;
     height: 100%;
     transition: width 200ms ease;
-    background: #25282a;
+    background: var(--menu-background-color);
     box-shadow: 0 0 8px #00000094;
     overflow: hidden;
     padding: 8px;
     font-size: 12px;
+    color: var(--menu-text-color);
 
-    --item-hover-color: #434343;
 
     &.collapsed {
         width: 56px;
@@ -28,17 +28,14 @@
         }
     }
 
-    &.mobile:not(.collapsed) {
-        width: 300px;
-    }
     &:not(.collapsed) .item:hover{
-        background-color: var(var(--item-hover-color));
+        background-color: var(var(--menu-item-hover-color));
     }
 
     &.collapsed .item {
         .icon {
             &:hover {
-                background-color: var(var(--item-hover-color));
+                background-color: var(var(--menu-item-hover-color));
             }
         }
     }
