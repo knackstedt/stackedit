@@ -13,7 +13,7 @@
     "dev:tauri": "ng serve --port 8081",
     "versionset": "cd src && sed -i -e \"s/__VERSION__/$(npm version --json | jq \".[\\\"ngx-stackedit\\\"]\" | tr -d '\"')/g\" ./app/editor/editor.component.ts",
     "build": "ng build --project package",
-    "build:tauri": "ng build --project dotglitch",
+    "build:static": "ng build --project dotglitch",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build"

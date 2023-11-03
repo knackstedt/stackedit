@@ -5,7 +5,9 @@
 [![npm downloads](https://img.shields.io/npm/dt/ngx-stackedit.svg)](https://npmjs.org/ngx-stackedit)
 [![GitHub stars](https://img.shields.io/github/stars/knackstedt/stackedit.svg?label=GitHub%20Stars&style=flat)](https://github.com/knackstedt/stackedit)
 
-StackEdit Markdown Editor is a full-featured, open-source markdown editor designed to outshine all other embeddable markdown editors. With a range of powerful features and modern styling, it's your ultimate tool for creating beautiful markdown documents.
+StackEdit aspires to surpass all other markdown editors, becoming the most formidable and feature-rich markdown editor in the market. With a focus on power and versatility, we designed it to empower your markdown editing experience like never before
+
+> With the goal of burying all other markdown editors six feet under, we sometimes have to take risky measures. One of those measures is acting like we're better than the other markdown editors. Because we are.
 
 ## Features:
 
@@ -19,26 +21,11 @@ StackEdit Markdown Editor is a full-featured, open-source markdown editor design
 
 - **Scroll Syncing**: Experience a fluid writing and reading experience with scroll syncing, keeping your place in your document no matter where you are.
 
-## Installation
-
-To embed this markdown editor into your project, simply follow the installation instructions provided [here](#/quickstart).
-
-## Getting Started
-
-Detailed instructions on how to get started and make the most of StackEdit Markdown Editor can be found in our [documentation](https://github.com/yourrepository/docs).
-
-## Contributing
-
-We welcome contributions from the community to make StackEdit Markdown Editor even more amazing. Please read our [contribution guidelines](https://github.com/yourrepository/contributing) for more information on how to get involved.
-
-## License
-
-This project is licensed under mixed MIT and Apache 2.0 Licenses. See the [LICENSE](https://github.com/knackstedt/stackedit/blob/master/src/app/editor/LICENSE) file for details.
+![GitHub stars](./src/app/assets/preview.png)
 
 ---
 
-StackEdit Markdown Editor - Designed to make you forget about all other markdown editors.
-
+Demo:
 https://dotglitch.dev/#/StackEdit
 
 <!-- ### Ecosystem
@@ -106,7 +93,6 @@ sunt in culpa qui **officia deserunt mollit** anim id est laborum.
         });
         formData.append("data", JSON.stringify({
             path,
-            scope: this.asset.dto + '.' + this.asset.id,
             autoRename: true
         }));
 
@@ -128,41 +114,32 @@ sunt in culpa qui **officia deserunt mollit** anim id est laborum.
 ```bash
 npm install
 
-npm run dev # Start live-reload dev server on localhost:8080
+# Start dev server on localhost:8080
+npm run dev
+# OR: Start standalone app dev server
+npm run tauri:dev
 
 ```
 
 ### Building
 
 ```bash
-# production build in ./dist
+# npm package build in ./dist
 npm run build
+# Build a static site (uses indexedDB for storage)
+npm run build:static
+# or build the tauri app (requires rust Tauri setup)
+npm run tauri:build
 
 # build for production and view the bundle analyzer report
 npm run build:analyze
 
 ```
 
-## Roadmap:
- - [ ] Clicking on already selected text does nothing
- - [ ] Events need reworked
- - [ ] CL Editor needs to be rewritten into a TS Class
- - [ ] Grammars need to be reviewed
+<!-- ## Contributing
 
+We welcome contributions from the community to make StackEdit even more amazing. Please read our [contribution guidelines](https://github.com/) for more information on how to get involved. -->
 
-## Custom Markdown Syntax
+## License
 
-#### External (visible) syntax
- > This syntax is visible in the editor panel. It can be edited as raw text.
- - simple styling in `span` tags
-    - <span style="color: #ff00ff">Pretty colors</span>
-#### Internal (hidden) syntax
- > This syntax is abstracted in the editor. It is non-editable and is used
-for the rich-preview of content in the editor panel
- - Injected rich text (HTML) content
-    - \`\`\`<injected>{{html content}}</injected>\`\`\`
- - Image upload spinner
-    - \`\`\`image-spinner\`\`\`
-
-# Disclaimers
-> This is a massive rewrite of [StackEdit](https://github.com/benweet/stackedit).
+This project is licensed under mixed MIT and Apache 2.0 Licenses. See the [LICENSE](https://github.com/knackstedt/stackedit/blob/master/src/app/editor/LICENSE) file for details.

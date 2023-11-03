@@ -1,7 +1,7 @@
 {
     "$schema": "../node_modules/@tauri-apps/cli/schema.json",
     "build": {
-        "beforeBuildCommand": "npm run build:tauri",
+        "beforeBuildCommand": "npm run build:static",
         "beforeDevCommand": "npm run dev:tauri",
         "devPath": "http://localhost:8081",
         "distDir": "../dist/stackedit",
