@@ -32,7 +32,7 @@
                         *ngSwitchCase="'code'"
                         [code]="page.content"
                         (codeChange)="pages.onPageContentChange(page, $event)"
-                        [language]="page.options?.['language']"
+                        [language]="page.options?.['language'] || 'auto'"
                     />
 
                     <div
