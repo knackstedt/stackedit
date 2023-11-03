@@ -103,7 +103,7 @@ export class PagesService {
         this.pageMap[page.path] = page;
     }
 
-    async createPage(abstract: Partial<Page>, parent?: Page) {
+    async createPage(abstract: Partial<Page>, parent?: Page, openTab = true) {
         const isUpdate = !!abstract.path && !parent;
         // This is an update action
         if (isUpdate) {
@@ -134,7 +134,8 @@ export class PagesService {
             this.flatPages.push(page);
             this.calculatePageTree();
 
-            this.addTab(page);
+            if (openTab)
+                this.addTab(page);
 
             return page;
         }
@@ -143,6 +144,8 @@ export class PagesService {
     /**
      * Moves a page to `trash` or deletes it
      * deletes it only if `destroy` is set
+     *
+     * TODO: fix deleting things that are nested
      */
     async deletePage(page: Page, destroy = false) {
         if (destroy) {
@@ -153,9 +156,19 @@ export class PagesService {
             await this.files.trashFile(page);
             this.trash.push(page);
         }
-        this.tabs.splice(this.tabs.indexOf(page), 1);
-        this.pages.splice(this.pages.indexOf(page), 1);
-        this.flatPages.splice(this.flatPages.indexOf(page), 1);
+        const tabIndex = this.tabs.indexOf(page),
+              pageIndex = this.pages.indexOf(page),
+              flatIndex = this.flatPages.indexOf(page);
+
+        tabIndex != -1 && this.tabs.splice(tabIndex, 1);
+        pageIndex != -1 && this.pages.splice(pageIndex, 1);
+        flatIndex != -1 && this.flatPages.splice(flatIndex, 1);
+
+        Object.entries(this.dirMap).forEach(([key, entries]) => {
+            const i = entries.indexOf(page);
+            i != -1 && entries.splice(i, 1);
+        })
+
         this.pageMap[page.path] = undefined;
     }
 
