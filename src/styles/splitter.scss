@@ -1,8 +1,25 @@
 .as-split-gutter {
     background-color: var(--splitter-background-color)!important;
     transition: background-color var(--splitter-transition);
+    position: relative;
 
     &:hover {
         background-color: var(--splitter-hover-background-color)!important;
+    }
+
+    &::before,
+    &::after {
+        content: "";
+        width: 4px;
+        position: absolute;
+        top: 0;
+        height: 100%;
+        z-index: 2;
+    }
+    &::before {
+        right: 100%;
+    }
+    &::after {
+        left: 100%;
     }
 }
