@@ -23,10 +23,8 @@
                 [ngx-menu-context]="page"
                 (click)="pages.addTab(page)"
             >
-                <div>
-                    <mat-icon *ngIf="page.icon" [fontIcon]="page.icon" [style.color]="page.color" style="margin-right: 10px"/>
-                    <span>{{page.name.slice(0, 20)}}</span>
-                </div>
+                <mat-icon *ngIf="page.icon" [fontIcon]="page.icon" [style.color]="page.color" style="margin-right: 10px"/>
+                <span>{{page.name.slice(0, 20)}}</span>
             </div>
         </mat-expansion-panel-header>
 
