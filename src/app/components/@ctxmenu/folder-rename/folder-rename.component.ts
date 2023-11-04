@@ -5,6 +5,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Page } from '../../../types/page';
+import { PagesService } from '../../../services/pages.service';
 
 @Component({
     selector: 'app-folder-rename',
@@ -29,6 +30,7 @@ export class FolderRenameComponent implements OnInit {
     hasSaved = false;
 
     constructor(
+        private readonly pages: PagesService
     ) { }
 
     ngOnInit() {
@@ -44,7 +46,7 @@ export class FolderRenameComponent implements OnInit {
     }
 
     ngOnDestroy() {
-        if (this.data)
+        if (this.data && !this.hasSaved)
             this.data.name = this.originalName;
     }
 
@@ -53,5 +55,6 @@ export class FolderRenameComponent implements OnInit {
         if (this.data?.name?.length > 2)
             this.data.autoName = false;
         this.dialog.close(this.data);
+        this.pages.savePage(this.data);
     }
 }
