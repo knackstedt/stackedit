@@ -1,0 +1,47 @@
+<as-split direction="horizontal" [gutterSize]="2" [unit]="'pixel'">
+    <as-split-area
+        [size]="215"
+        [minSize]="215"
+        [maxSize]="400"
+    >
+        <div>
+            <mat-form-field>
+                <mat-label>Method</mat-label>
+                <mat-select>
+                    <mat-option>GET</mat-option>
+                </mat-select>
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>URL</mat-label>
+                <input #matInput type="text">
+            </mat-form-field>
+
+            <button mat-flat-button>Send</button>
+        </div>
+        <div>
+            <mat-tab-group>
+                <mat-tab label="Params"></mat-tab>
+                <mat-tab label="Headers"></mat-tab>
+                <mat-tab label="Body"></mat-tab>
+                <mat-tab label="Settings"></mat-tab>
+                <mat-tab label="Before Run"></mat-tab>
+                <mat-tab label="After Run"></mat-tab>
+            </mat-tab-group>
+        </div>
+    </as-split-area>
+    <as-split-area>
+        <div>
+            <span>Status: {{0}}</span>
+            <span>Size: {{0}}</span>
+            <span>Time: {{0}}</span>
+        </div>
+        <div>
+            <mat-tab-group>
+                <mat-tab label="Response"></mat-tab>
+                <mat-tab label="Headers"></mat-tab>
+                <mat-tab label="Cookies"></mat-tab>
+                <mat-tab label="Results"></mat-tab>
+            </mat-tab-group>
+        </div>
+    </as-split-area>
+</as-split>

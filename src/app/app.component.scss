@@ -44,6 +44,10 @@ ngx-lazy-loader {
         align-self: flex-start;
     }
 
+    mat-tab-header {
+        user-select: none;
+    }
+
     mat-tab-group {
         overflow: hidden;
     }

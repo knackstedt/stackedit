@@ -41,10 +41,20 @@
                         <h1>Canvas note!</h1>
                     </div>
 
+                    <div
+                        *ngSwitchCase="'fetch'"
+                    >
+                        <app-fetch-page
+                            [page]="page"
+                        />
+                    </div>
+
                     <ngx-stackedit
                         *ngSwitchDefault
                         [mode]="page.readonly ? 'view' : 'edit'"
                         [showPreview]="'off'"
+                        [showCodeRunButton]="true"
+                        codeRunner="piston"
                         [(value)]="page.content"
                         (valueChange)="pages.onPageContentChange(page, $event)"
                         (onImageUpload)="onImageUpload($event)"

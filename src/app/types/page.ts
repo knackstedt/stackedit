@@ -5,8 +5,9 @@ type Tag = {
 
 export const PageKinds = [
     { id: "markdown", label: "Markdown" },
-    { id: "canvas", label: "Canvas -- WIP" },
-    { id: "code", label: "Code" }
+    // { id: "canvas", label: "Canvas -- WIP" },
+    { id: "code", label: "Code" },
+    { id: "fetch", label: "Fetch" }
 ]
 /**
  * All properties will trigger filesystem reflect updates.
@@ -21,8 +22,13 @@ export type Page = {
      *      - Exclusive to Tauri mode
      * canvas => WIP
      * code => any text file
+     * fetch => postman-like interface
      */
-    kind: "markdown" | "markdown-raw" | "canvas" | "code";
+    kind: "markdown" |
+          "markdown-raw" |
+          "canvas" |
+          "code" |
+          "fetch";
     name?: string;
     autoName?: boolean;
     content: string;

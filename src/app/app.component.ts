@@ -16,6 +16,8 @@ import { ConfigService } from './services/config.service';
 import { MatDialog } from '@angular/material/dialog';
 import { TelemetryDialogComponent } from './components/telemetry-dialog/telemetry-dialog.component';
 import { AngularSplitModule } from 'angular-split';
+import { FetchPageComponent } from './components/fetch-page/fetch-page.component';
+import { Fetch, FetchOptions } from './services/fetch.service';
 
 declare const dT_;
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -34,6 +36,7 @@ export const sleep = ms => new Promise(r => setTimeout(r, ms));
         NgSwitchDefault,
         StackEditorComponent,
         VscodeComponent,
+        FetchPageComponent,
         MenuComponent,
         MatTabsModule,
         MatIconModule,
@@ -67,8 +70,10 @@ export class AppComponent {
         private readonly files: FilesService,
         public readonly pages: PagesService,
         private readonly config: ConfigService,
-        private readonly dialog: MatDialog
+        private readonly dialog: MatDialog,
+        private readonly fetch: Fetch
     ) {
+        window['_fetch'] = this.fetch;
         if (typeof dT_ != 'undefined' && dT_.initAngularNg) {
             dT_.initAngularNg(http, HttpHeaders);
         }
