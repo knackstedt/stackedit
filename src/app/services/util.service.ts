@@ -52,11 +52,9 @@ export class UtilService {
     }
 
     async getPistonRuntimes() {
-        console.log("what the actual hell")
         this.pistonRuntimes = this.pistonRuntimes?.length
             ? this.pistonRuntimes
             : await this.fetch.get<PistonLanguage[]>("https://emkc.org/api/v2/piston/runtimes");
-        console.log("promise me ", this.pistonRuntimes)
         return this.pistonRuntimes;
     }
 
