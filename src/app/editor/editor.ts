@@ -335,27 +335,60 @@ export class Editor extends EventEmittingClass {
             section.elt.querySelectorAll('.code-block').forEach((cb: HTMLElement) => {
                 const codeBlock = cb;
                 section.elt.classList.add("monaco-injected");
-                const ulid = section.elt.getAttribute("ulid");
-
-                let language = codeBlock.parentElement.querySelector('.code-language').textContent || 'auto';
+                const id = section.elt.getAttribute("ulid");
+                const langEl = codeBlock.parentElement.querySelector('.code-language');
+                const targetLang = langEl.textContent?.toLowerCase() || 'auto';
                 // Map aliases to known monaco languages
-                language = MonacoAliasMap[language] || language;
+                const language = MonacoAliasMap[targetLang] || targetLang;
 
                 const monacoContainer = document.createElement('div');
                 monacoContainer.setAttribute("ulid", section.elt.getAttribute("ulid"));
                 monacoContainer.classList.add("monaco-container");
 
-                // console.log("lang", language)
+                let languages: string[] = [];
 
-                if (this.ngEditor.showCodeRunButton && invokableLanguages.includes(language)) {
+                switch (this.ngEditor.codeRunner) {
+                    case "custom": languages = this.ngEditor.customCodeLanguages; break;
+                    case "eval": languages = ['javascript', 'js']; break;
+                    case "piston": languages = this.ngEditor.utils.pistonRuntimes
+                        .map(l => [l.language, ...l.aliases]).flat(); break;
+                }
+
+                console.log(this.ngEditor);
+                console.log(languages, language, this.ngEditor.codeRunner)
+                if (this.ngEditor.showCodeRunButton && languages.includes(targetLang)) {
                     const runButton = document.createElement('mat-icon');
                     runButton.classList.add("material-icons");
                     runButton.classList.add("run-button");
                     runButton.innerHTML = "play_arrow";
                     runButton.onclick = async () => {
-                        let res = eval(codeBlock.textContent);
-                        if (typeof res == "function")
-                            res = await res();
+                        switch (this.ngEditor.codeRunner) {
+                            case "custom": {
+                                this.ngEditor.onCustomCodeExecute.next({
+                                    content: codeBlock.textContent,
+                                    language: targetLang
+                                })
+                                break;
+                            }
+                            case "eval": {
+                                // TODO: run in worker thread to secure it, if even a little bit.
+                                let res = eval(codeBlock.textContent);
+                                if (typeof res == "function")
+                                    res = await res();
+                                break;
+                            }
+                            case "piston": {
+                                let runtimes = await this.ngEditor.utils.getPistonRuntimes();
+                                const lang = runtimes.find(r =>
+                                    r.language == language || r.aliases.includes(language)
+                                );
+                                this.ngEditor.utils.runPistonScript(lang, [{
+                                    content: codeBlock.textContent,
+                                    encoding: "utf-8",
+                                    name: ulid()
+                                }]);
+                            }
+                        }
 
                         // ... Do something with the result
                     }
@@ -455,7 +488,7 @@ export class Editor extends EventEmittingClass {
                         this.clEditor.watcher.noWatch(() => {
                             codeBlock.textContent = cleanedText;
 
-                            const previewSection = this.previewElt.querySelector(`.cl-preview-section[ulid="${ulid}"]`);
+                            const previewSection = this.previewElt.querySelector(`.cl-preview-section[ulid="${id}"]`);
                             const prismContainer = previewSection?.querySelector(".prism");
                             if (!previewSection) return;
 

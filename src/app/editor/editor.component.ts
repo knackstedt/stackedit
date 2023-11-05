@@ -11,6 +11,7 @@ import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { Editor } from './editor';
 import { installMonaco, waitForMonacoInstall } from './monaco';
 import { Subscription } from 'rxjs';
+import { UtilService } from '../services/util.service';
 
 type StackEditConfig = Partial<{
     /**
@@ -138,6 +139,20 @@ export class StackEditorComponent {
      */
     @Input() showCodeRunButton: boolean = false;
     /**
+     * Control the execution runtime for code blocks.
+     * > only valid for `showCodeRunButton` = true.
+     * - If set to `eval`, only javascript code blocks will have a run button
+     * - If set to `piston`, a HTTP request will be made to check the
+     *     available runtimes
+     *  - If set to `custom`, you need to define the runnable languages in
+     *     `customCodeLanguages` and hook onto `onCustomCodeExecute`.
+     */
+    @Input() codeRunner: "piston" | "eval" | "custom" = null;
+    /**
+     * If `codeRunner` is set to true
+     */
+    @Input() customCodeLanguages: string[] = [];
+    /**
      * Controls whether a "copy" button is shown for applicable
      * code blocks in the editor view.
      */
@@ -188,6 +203,11 @@ export class StackEditorComponent {
      */
     @Output() onImageUpload = new EventEmitter<any>();
 
+    /**
+     *
+     */
+    @Output() onCustomCodeExecute = new EventEmitter<{ content: string, language: string }>();
+
     editorSvc: Editor;
     public options: StackEditConfig = {};
 
@@ -199,6 +219,7 @@ export class StackEditorComponent {
     constructor(
         private readonly viewContainer: ViewContainerRef,
         private readonly themeService: ThemeService,
+        public readonly utils: UtilService,
         @Optional() @Inject(NGX_STACKEDIT_CONFIG) private config: StackEditConfig = {}
     ) {
         this.options = {
@@ -217,7 +238,12 @@ export class StackEditorComponent {
 
     async ngAfterViewInit() {
         installMonaco();
+
+        if (this.codeRunner == "piston")
+            await this.utils.getPistonRuntimes();
+
         await waitForMonacoInstall();
+
         this.$el.setAttribute("version", "__version__");
 
         const editorElt = this.$el.querySelector('.editor') as HTMLElement;
