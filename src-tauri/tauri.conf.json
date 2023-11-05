@@ -1,8 +1,8 @@
 {
     "$schema": "../node_modules/@tauri-apps/cli/schema.json",
     "build": {
-        "beforeBuildCommand": "npm run build:static",
-        "beforeDevCommand": "npm run dev:tauri",
+        "beforeBuildCommand": "npm run build:app",
+        "beforeDevCommand": "npm run dev:http",
         "devPath": "http://localhost:8081",
         "distDir": "../dist/stackedit",
         "withGlobalTauri": true
@@ -31,6 +31,20 @@
                 "setAlwaysOnTop": true,
                 "setTitle": true,
                 "show": true
+            },
+            "http": {
+                "all": true,
+                "request": true,
+                "scope": [
+                    "https://**/*",
+                    "http://**/*"
+                ]
+            },
+            "shell": {
+                "all": true,
+                "execute": true,
+                "sidecar": true,
+                "open": true
             }
         },
         "bundle": {
