@@ -354,8 +354,6 @@ export class Editor extends EventEmittingClass {
                         .map(l => [l.language, ...l.aliases]).flat(); break;
                 }
 
-                console.log(this.ngEditor);
-                console.log(languages, language, this.ngEditor.codeRunner)
                 if (this.ngEditor.showCodeRunButton && languages.includes(targetLang)) {
                     const runButton = document.createElement('mat-icon');
                     runButton.classList.add("material-icons");
