@@ -23,18 +23,50 @@
             </mat-select>
         </mat-form-field>
 
+        <ng-container *ngIf="page.kind == 'code'">
+            <mat-form-field>
+                <mat-label>Language</mat-label>
+                <mat-select [(value)]="page.options['language']">
+                    <mat-option
+                        *ngFor="let language of languages"
+                        [value]="language"
+                    >
+                        {{language}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
 
-        <mat-form-field *ngIf="page.kind == 'code'">
-            <mat-label>Language</mat-label>
-            <mat-select [(value)]="page.options['language']">
-                <mat-option
-                    *ngFor="let language of languages"
-                    [value]="language"
-                >
-                    {{language}}
-                </mat-option>
-            </mat-select>
-        </mat-form-field>
+            <mat-checkbox
+                [checked]="page.options['minimap'] == null ? true : page.options['minimap']"
+                (change)="page.options['minimap']=$event.checked"
+            >
+                Minimap
+            </mat-checkbox>
+
+            <mat-checkbox
+                [checked]="page.options['folding'] == null ? true : page.options['folding']"
+                (change)="page.options['folding']=$event.checked"
+            >
+                Folding
+            </mat-checkbox>
+
+            <mat-checkbox
+                [checked]="page.options['colorDecorators'] == null ? true : page.options['colorDecorators']"
+                (change)="page.options['colorDecorators']=$event.checked"
+            >
+                Color Decorators
+            </mat-checkbox>
+
+            <mat-form-field>
+                <mat-label>Font Size</mat-label>
+                <input matInput type="number" [(ngModel)]="page.options['fontSize']" [value]="16">
+            </mat-form-field>
+
+            <mat-form-field>
+                <mat-label>Tab Size</mat-label>
+                <input matInput type="number" [(ngModel)]="page.options['tabSize']" [value]="2">
+            </mat-form-field>
+        </ng-container>
 
         <a href="https://fonts.google.com/icons?icon.set=Material+Icons&selected=Material+Icons+Outlined:settings:&icon.style=Outlined"></a>
         <mat-form-field>

@@ -12,6 +12,7 @@ import { Page, PageKinds } from '../../../types/page';
 import { ulid } from 'ulidx';
 import { installMonaco } from '../../../editor/monaco';
 import { PagesService } from '../../../services/pages.service';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 
 
 @Component({
@@ -27,6 +28,7 @@ import { PagesService } from '../../../services/pages.service';
         MatButtonModule,
         MatSlideToggleModule,
         MatTooltipModule,
+        MatCheckboxModule,
         FormsModule,
     ],
     standalone: true

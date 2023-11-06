@@ -1,7 +1,8 @@
 :host {
     display: block;
     width: 500px;
-    max-height: 700px;
+    height: 700px;
+    max-height: 90vh;
     overflow-y: auto;
     padding: 24px;
 }
