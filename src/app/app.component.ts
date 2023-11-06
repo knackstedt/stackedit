@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, ViewChild } from '@angular/core';
 import { NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
@@ -18,6 +18,9 @@ import { TelemetryDialogComponent } from './components/telemetry-dialog/telemetr
 import { AngularSplitModule } from 'angular-split';
 import { FetchPageComponent } from './components/fetch-page/fetch-page.component';
 import { Fetch, FetchOptions } from './services/fetch.service';
+import { UtilService } from './services/util.service';
+import { MatButtonModule } from '@angular/material/button';
+import { ulid } from 'ulidx';
 
 declare const dT_;
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -41,6 +44,7 @@ export const sleep = ms => new Promise(r => setTimeout(r, ms));
         MatTabsModule,
         MatIconModule,
         MatTooltipModule,
+        MatButtonModule,
         MenuDirective,
         AngularSplitModule
     ]
@@ -71,8 +75,14 @@ export class AppComponent {
         public readonly pages: PagesService,
         private readonly config: ConfigService,
         private readonly dialog: MatDialog,
-        private readonly fetch: Fetch
+        private readonly fetch: Fetch,
+        public readonly utils: UtilService,
+        private readonly changeDetector: ChangeDetectorRef
     ) {
+        utils.getPistonRuntimes().then(r => {
+            this.changeDetector.detectChanges();
+        });
+
         window['_fetch'] = this.fetch;
         if (typeof dT_ != 'undefined' && dT_.initAngularNg) {
             dT_.initAngularNg(http, HttpHeaders);
@@ -89,7 +99,8 @@ export class AppComponent {
             if (c.telemetry == null) {
                 dialog.open(TelemetryDialogComponent);
             }
-        })
+        });
+        config.init();
     }
 
     // @HostListener("window:resize", ["$event"])
@@ -110,4 +121,29 @@ export class AppComponent {
         });
     }
 
+
+    public checkLangIsExecutable(page: Page) {
+        if (this.utils.pistonRuntimes.length == 0) {
+            return false;
+        }
+
+        const runtimes = this.utils.pistonRuntimes;
+        const lang = runtimes.find(r =>
+            r.language == page.options['language'] || r.aliases.includes(page.options['language'])
+        );
+
+        return !!lang;
+    }
+
+    public async executeScript(page: Page) {
+        const runtimes = await this.utils.getPistonRuntimes();
+        const lang = runtimes.find(r =>
+            r.language == page.options['language'] || r.aliases.includes(page.options['language'])
+        );
+        this.utils.runPistonScript(lang, [{
+            content: page.content,
+            encoding: "utf-8",
+            name: ulid()
+        }]);
+    }
 }
