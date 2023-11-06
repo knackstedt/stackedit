@@ -40,7 +40,7 @@ export type Page = {
     bookmarked?: boolean;
     canDelete?: boolean;
     variables?: { [key: string]: string; };
-    options?: { [key: string]: string; };
+    options?: { [key: string]: any; };
     tags?: Tag[];
     created: number;
     modified: number;
