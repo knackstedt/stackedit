@@ -4,6 +4,9 @@ import { Injectable } from '@angular/core';
 import { ConfirmDialogComponent } from '../components/@dialogs/confirm-dialog/confirm-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { Fetch } from './fetch.service';
+import { StackEditorComponent } from '../editor/editor.component';
+import { Page } from '../types/page';
+import { ulid } from 'ulidx';
 
 type PistonLanguage = { language: string, version: string, aliases: string[]; }
 type PistonFile = { name: string, content: string, encoding: string };
@@ -51,10 +54,26 @@ export class UtilService {
         });
     }
 
+    async executeCode(page: Page) {
+        const runtimes = await this.getPistonRuntimes();
+        const lang = runtimes.find(r =>
+            r.language == page.options['language'] || r.aliases.includes(page.options['language'])
+        );
+
+        return this.runPistonScript(lang, [{
+            content: page.content,
+            encoding: "utf-8",
+            name: ulid()
+        }]);
+    }
+
+    private _gettingRuntimes;
     async getPistonRuntimes() {
         this.pistonRuntimes = this.pistonRuntimes?.length
             ? this.pistonRuntimes
-            : await this.fetch.get<PistonLanguage[]>("https://emkc.org/api/v2/piston/runtimes");
+            : this._gettingRuntimes
+            ? this._gettingRuntimes
+            : await (this._gettingRuntimes = this.fetch.get<PistonLanguage[]>("https://emkc.org/api/v2/piston/runtimes"));
         return this.pistonRuntimes;
     }
 
