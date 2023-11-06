@@ -45,6 +45,9 @@ export class ConfigService extends Subject<Config> {
             localforage.INDEXEDDB
         ]);
 
+    }
+
+    init() {
         dbPromise.then(async () => {
             for (let i = 0; i < knownKeys.length; i++) {
                 const k = knownKeys[i];
