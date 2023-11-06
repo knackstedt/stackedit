@@ -1,5 +1,5 @@
 import { NgForOf, NgIf } from '@angular/common';
-import { Component, Input, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, TemplateRef, ViewChild } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { MenuItem, MenuDirective, ThemeService, DialogService } from '@dotglitch/ngx-common';
@@ -83,7 +83,8 @@ export class MenuComponent {
         private readonly dialog: MatDialog,
         private readonly files: FilesService,
         public readonly config: ConfigService,
-        private readonly util: UtilService
+        private readonly util: UtilService,
+        private readonly changeDetector: ChangeDetectorRef
     ) {
 
     }
@@ -139,7 +140,8 @@ export class MenuComponent {
                 }
             },
             { label: "Edit...", action: p => this.onEntryEdit(p) }
-        ]
+        ];
+        this.changeDetector.detectChanges()
     }
 
     onEntryEdit(entry: Partial<Page>) {
