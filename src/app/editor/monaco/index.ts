@@ -7,7 +7,7 @@ let isMonacoInstalled = false;
 const installationLocation = '/lib/monaco/vs';
 
 export function installMonaco() {
-    if (isMonacoInstalled) return;
+    if (isMonacoInstalled || window['monaco']) return;
 
     // Monaco has a UMD loader that requires this
     // Merge with any pre-existing global require objects.
