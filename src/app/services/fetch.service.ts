@@ -110,6 +110,7 @@ export class Fetch {
                             if (error.status == 504 && isDevMode())
                                 alert("It looks like you can't reach your development backend anymore");
 
+                            reject(error);
                             throw error;
                         },
                         count: retryCount
