@@ -69,12 +69,14 @@ export class UtilService {
 
     private _gettingRuntimes;
     async getPistonRuntimes() {
-        this.pistonRuntimes = this.pistonRuntimes?.length
-            ? this.pistonRuntimes
-            : this._gettingRuntimes
-            ? this._gettingRuntimes
-            : await (this._gettingRuntimes = this.fetch.get<PistonLanguage[]>("https://emkc.org/api/v2/piston/runtimes"));
-        return this.pistonRuntimes;
+        if (this.pistonRuntimes?.length > 0)
+            return this.pistonRuntimes;
+
+        if (this._gettingRuntimes)
+            return await this._gettingRuntimes;
+
+        return this._gettingRuntimes =
+            this.fetch.get<PistonLanguage[]>("https://emkc.org/api/v2/piston/runtimes");
     }
 
     async runPistonScript(lang: PistonLanguage, files: PistonFile[]): Promise<PistonExecResult> {
