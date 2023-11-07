@@ -1,47 +1,166 @@
-<as-split direction="horizontal" [gutterSize]="2" [unit]="'pixel'">
-    <as-split-area
-        [size]="215"
-        [minSize]="215"
-        [maxSize]="400"
-    >
-        <div>
-            <mat-form-field>
-                <mat-label>Method</mat-label>
-                <mat-select>
-                    <mat-option>GET</mat-option>
+<as-split
+    direction="horizontal"
+    [gutterSize]="2"
+    [unit]="'percent'"
+>
+    <as-split-area size="50">
+        <div style="display: flex; padding: 6px 24px">
+            <mat-form-field style="width: 120px">
+                <mat-select
+                    [(value)]="page.options['method']"
+                    (valueChange)="pages.savePage(page)"
+                >
+                    <mat-option *ngFor="let method of methods" [value]="method">{{method}}</mat-option>
                 </mat-select>
             </mat-form-field>
-            <mat-form-field>
-                <mat-label>URL</mat-label>
-                <input #matInput type="text">
+
+            <mat-form-field
+                style="flex: 1"
+                [class.invalid]="!urlIsValid"
+            >
+                <input matInput type="text"
+                    [(ngModel)]="page.options['url']"
+                    (change)="pages.savePage(page)"
+                    (keyup)="checkUrl(); $event.key == 'Enter' && submitRequest()"
+                >
             </mat-form-field>
 
-            <button mat-flat-button>Send</button>
+            <button
+                mat-flat-button
+                (click)="submitRequest()"
+                class="run-button"
+            >
+                <span
+                    [style.width]="requestIsPending ? '16px' : '0px'"
+                    style="display: inline-block; overflow: hidden; transition: width 200ms ease"
+                >
+                    <mat-progress-spinner mode="indeterminate" [diameter]="16" />
+                </span>
+                Send
+            </button>
         </div>
-        <div>
-            <mat-tab-group>
-                <mat-tab label="Params"></mat-tab>
-                <mat-tab label="Headers"></mat-tab>
-                <mat-tab label="Body"></mat-tab>
-                <mat-tab label="Settings"></mat-tab>
-                <mat-tab label="Before Run"></mat-tab>
-                <mat-tab label="After Run"></mat-tab>
+        <div style="height: 100%;">
+            <mat-tab-group style="flex: 1 1 100%">
+                <mat-tab label="Params">
+                    <div class="tab-container">
+                        <div *ngFor="let par of page.options['params']" class="row">
+                            <mat-form-field style="flex: 1; width: 50%">
+                                <mat-label>parameter</mat-label>
+                                <input
+                                    matInput
+                                    type="text"
+                                    [(ngModel)]="par.key"
+                                    (ngModelChange)="pages.savePage(page)"
+                                >
+                            </mat-form-field>
+                            <mat-form-field style="flex: 1; width: 50%">
+                                <mat-label>value</mat-label>
+                                <input
+                                    matInput
+                                    type="text"
+                                    [(ngModel)]="par.value"
+                                    (ngModelChange)="pages.savePage(page)"
+                                >
+                            </mat-form-field>
+                        </div>
+                        <button mat-flat-button (click)="page.options['params'].push({key: '', value: ''})">
+                            <mat-icon>add</mat-icon>
+                            add
+                        </button>
+                    </div>
+                </mat-tab>
+                <mat-tab label="Headers">
+                    <div class="tab-container">
+                        <div *ngFor="let header of page.options['headers']" class="row">
+                            <mat-form-field style="flex: 1; width: 50%">
+                                <mat-label>header</mat-label>
+                                <input
+                                    matInput
+                                    type="text"
+                                    [(ngModel)]="header.key"
+                                    (ngModelChange)="pages.savePage(page)"
+                                >
+                            </mat-form-field>
+                            <mat-form-field style="flex: 1; width: 50%">
+                                <mat-label>value</mat-label>
+                                <input
+                                    matInput
+                                    type="text"
+                                    [(ngModel)]="header.value"
+                                    (ngModelChange)="pages.savePage(page)"
+                                >
+                            </mat-form-field>
+                        </div>
+                        <button mat-flat-button (click)="page.options['headers'].push({key: '', value: ''})">
+                            <mat-icon>add</mat-icon>
+                            add
+                        </button>
+                    </div>
+                </mat-tab>
+                <mat-tab label="Body">
+                    <app-vscode
+                        [(code)]="page.content"
+                        (codeChange)="pages.savePage(page)"
+                    />
+                </mat-tab>
+                <mat-tab label="Settings">
+                    <div class="tab-container"></div>
+                </mat-tab>
+                <mat-tab label="Before Run">
+                    <app-vscode
+                        [(code)]="page.options['beforeRun']"
+                        (codeChange)="pages.savePage(page)"
+                        language="javascript"
+                    />
+                </mat-tab>
+                <mat-tab label="After Run">
+                    <app-vscode
+                        [(code)]="page.options['afterRun']"
+                        (codeChange)="pages.savePage(page)"
+                        language="javascript"
+                    />
+                </mat-tab>
             </mat-tab-group>
         </div>
     </as-split-area>
-    <as-split-area>
-        <div>
-            <span>Status: {{0}}</span>
-            <span>Size: {{0}}</span>
-            <span>Time: {{0}}</span>
-        </div>
-        <div>
-            <mat-tab-group>
-                <mat-tab label="Response"></mat-tab>
-                <mat-tab label="Headers"></mat-tab>
-                <mat-tab label="Cookies"></mat-tab>
-                <mat-tab label="Results"></mat-tab>
-            </mat-tab-group>
-        </div>
+    <as-split-area size="50">
+        <h4 style="margin: 0; padding: 12px 24px">
+            <span>Status: <span>{{resultStatus}}</span></span>
+            <span>Size: <span>{{resultSize}}</span></span>
+            <span>Time: <span>{{resultTime}}</span></span>
+        </h4>
+        <mat-tab-group>
+            <mat-tab label="Response">
+                <app-vscode
+                    [code]="resultBody"
+                    [language]="resultLanguage"
+                />
+            </mat-tab>
+            <mat-tab label="Headers">
+                <div class="tab-container">
+                    <div *ngIf="!resultHeaders || resultHeaders.length == 0">No headers to show.</div>
+                    <div *ngFor="let header of resultHeaders" class="row">
+                        <mat-form-field style="flex: 1; width: 50%">
+                            <input matInput
+                                type="text"
+                                [value]="header[0]"
+                                readonly="true"
+                            >
+                        </mat-form-field>
+                        <mat-form-field style="flex: 1; width: 50%">
+                            <input matInput
+                                type="text"
+                                [value]="header[1]"
+                                readonly="true"
+                            >
+                        </mat-form-field>
+                    </div>
+                </div>
+            </mat-tab>
+            <!-- <mat-tab label="Cookies"></mat-tab> -->
+            <mat-tab label="Results">
+                <div class="tab-container"></div>
+            </mat-tab>
+        </mat-tab-group>
     </as-split-area>
 </as-split>

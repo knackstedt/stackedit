@@ -4,6 +4,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "sourceRoot": "./src/",
+    "rootDir": "./src/",
     "outDir": "./dist/",
     "forceConsistentCasingInFileNames": true,
     "strict": false,
@@ -39,5 +40,9 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "exclude": [
+    "src-tauri/*"
+  ]
+
 }

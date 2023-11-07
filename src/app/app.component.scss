@@ -31,17 +31,9 @@ ngx-lazy-loader {
 :host ::ng-deep {
     --mdc-tab-indicator-active-indicator-height: 1px;
 
-    .mat-mdc-tab-labels .mdc-tab {
-        width: 240px;
-        padding: 0;
-    }
     .mdc-tab__content,
     .mdc-tab__text-label {
         width: 100%;
-    }
-
-    .mdc-tab-indicator__content--underline {
-        align-self: flex-start;
     }
 
     mat-tab-header {
@@ -50,6 +42,18 @@ ngx-lazy-loader {
 
     mat-tab-group {
         overflow: hidden;
+    }
+}
+
+mat-tab-group ::ng-deep {
+    > mat-tab-header {
+        .mat-mdc-tab-labels .mdc-tab {
+            width: 240px;
+            padding: 0;
+        }
+        .mdc-tab-indicator__content--underline {
+            align-self: flex-start;
+        }
     }
 }
 

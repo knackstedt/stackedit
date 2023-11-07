@@ -56,7 +56,7 @@ export class Fetch {
     }
 
     // Internally, handle the observable as a promise.
-    private async request<T>(method: string, url: string, options: FetchOptions = {}, returnDetails = false): Promise<T> {
+    async request<T>(method: string, url: string, options: FetchOptions = {}, returnDetails = false): Promise<T> {
         options.reportProgress = true;
 
         // Allow support for different response types.
