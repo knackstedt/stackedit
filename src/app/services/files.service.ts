@@ -104,6 +104,7 @@ export class FilesService extends Subject<any> {
         const targetPathMd = targetPath.replace(/\.json$/, '.md');
 
         if (useTauri) {
+            createDir(targetPath.split('/').slice(0, -1).join("/"), { dir: BaseDirectory.AppData });
             await renameFile(srcPath, targetPath, { dir: BaseDirectory.AppData });
             await renameFile(srcPathMd, targetPathMd, { dir: BaseDirectory.AppData });
         }
