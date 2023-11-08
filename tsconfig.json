@@ -4,7 +4,6 @@
   "compilerOptions": {
     "baseUrl": "./",
     "sourceRoot": "./src/",
-    "rootDir": "./src/",
     "outDir": "./dist/",
     "forceConsistentCasingInFileNames": true,
     "strict": false,
