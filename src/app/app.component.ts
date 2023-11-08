@@ -4,7 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { KeyboardService, MenuDirective, MenuItem, VscodeComponent } from '@dotglitch/ngx-common';
+import { KeyboardService, MenuDirective, MenuItem, ThemeService, VscodeComponent } from '@dotglitch/ngx-common';
 import { debounceTime, map } from 'rxjs';
 
 import { StackEditorComponent } from './editor/editor.component';
@@ -21,6 +21,7 @@ import { Fetch, FetchOptions } from './services/fetch.service';
 import { UtilService } from './services/util.service';
 import { MatButtonModule } from '@angular/material/button';
 import { ulid } from 'ulidx';
+import { DiagramComponent } from './components/diagram/diagram.component';
 
 declare const dT_;
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -40,6 +41,7 @@ export const sleep = ms => new Promise(r => setTimeout(r, ms));
         StackEditorComponent,
         VscodeComponent,
         FetchPageComponent,
+        DiagramComponent,
         MenuComponent,
         MatTabsModule,
         MatIconModule,
@@ -77,7 +79,8 @@ export class AppComponent {
         private readonly dialog: MatDialog,
         private readonly fetch: Fetch,
         public readonly utils: UtilService,
-        private readonly changeDetector: ChangeDetectorRef
+        private readonly changeDetector: ChangeDetectorRef,
+        private readonly theme: ThemeService
     ) {
         utils.getPistonRuntimes().then(r => {
             this.changeDetector.detectChanges();
@@ -99,6 +102,7 @@ export class AppComponent {
             if (c.telemetry == null) {
                 dialog.open(TelemetryDialogComponent);
             }
+            theme.setTheme(c.theme || "dark" as any);
         });
         config.init();
     }

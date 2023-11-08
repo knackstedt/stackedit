@@ -5,7 +5,7 @@ type Tag = {
 
 export const PageKinds = [
     { id: "markdown", label: "Markdown" },
-    // { id: "canvas", label: "Canvas -- WIP" },
+    { id: "canvas", label: "Diagram" },
     { id: "code", label: "Code" },
     { id: "fetch", label: "Fetch" }
 ]
