@@ -6,7 +6,7 @@ version=$(git rev-parse HEAD)
 
 # Run the build
 npm i
-npm run build
+npm run build:app
 docker build . -t harbor.dotglitch.dev/library/md-dotglitch:$version
 
 # Once built, push the new build number
