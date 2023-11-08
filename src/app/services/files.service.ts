@@ -54,7 +54,6 @@ export class FilesService extends Subject<any> {
             await writeTextFile(page.path, jsonText, { dir: BaseDirectory.AppData });
         }
         else {
-            console.log(page)
             await localforage.setItem(page.path, page)
         }
     }
@@ -173,7 +172,6 @@ export class FilesService extends Subject<any> {
             await processEntries(entries);
         }
         else {
-            // console.log("Access db")
             await dbPromise;
             const slug = pathTarget.replace(/[^a-z0-9_\-]/g, '');
             const keys = await localforage.keys();
