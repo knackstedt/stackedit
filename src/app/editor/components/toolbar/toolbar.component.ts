@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { KeyboardService, MenuDirective, MenuItem, TooltipDirective } from '@dotglitch/ngx-common';
+import { KeyboardService, MenuDirective, MenuItem, ThemeService, TooltipDirective } from '@dotglitch/ngx-common';
 
 import mermaidLayouts from './mermaid-layouts';
 import { NgForOf, NgIf } from '@angular/common';
@@ -167,7 +167,8 @@ export class ToolbarComponent {
     constructor(
         private readonly keyboard: KeyboardService,
         public readonly stackEditor: StackEditorComponent,
-        private readonly dialog: MatDialog
+        private readonly dialog: MatDialog,
+        public readonly theme: ThemeService
     ) { }
 
     bindEditorEvents() {
