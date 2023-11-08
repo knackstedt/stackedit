@@ -1,0 +1,87 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: md.dotglitch.dev-ingress
+spec:
+  entryPoints:
+   - web
+  routes:
+    - match: Host(`dev-md.dotglitch.dev`)
+      kind: Rule
+      services:
+      - name: md-dotglitch-webserver
+        port: 80
+
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: dotglitch.dev-secure-ingress
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - kind: Rule
+      match: Host(`dev-md.dotglitch.dev`)
+      services:
+        - name: md-dotglitch-webserver
+          port: 80
+  tls:
+    secretName: dev-md.dotglitch.dev-tls
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: md-dotglitch-webserver
+spec:
+  selector:
+    app: md-dotglitch-webserver
+  ports:
+  - protocol: "TCP"
+    port: 80
+    targetPort: 80
+  type: ClusterIP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: md-dotglitch-webserver
+spec:
+  selector:
+    matchLabels:
+      app: md-dotglitch-webserver
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: md-dotglitch-webserver
+    spec:
+      containers:
+      - name: dotglitch
+        image: harbor.dotglitch.dev/library/md-dotglitch:latest
+        ports:
+        - containerPort: 80
+      imagePullSecrets:
+      - name: harbor-key
+
+---
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: dev-md.dotglitch.dev
+spec:
+  commonName: dev-md.dotglitch.dev
+  dnsNames:
+    - dev-md.dotglitch.dev
+  issuerRef:
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  secretName: dev-md.dotglitch.dev-tls
+
+
