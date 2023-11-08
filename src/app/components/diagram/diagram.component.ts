@@ -85,7 +85,6 @@ export class DiagramComponent implements OnInit {
 
     private saveState() {
         this.page.content = JSON.stringify(this.dataChangeEmitter.value);
-        console.log(this.page.content)
 
         return this.pages.savePage(this.page);
     }
