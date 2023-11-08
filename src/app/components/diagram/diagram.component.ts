@@ -55,7 +55,8 @@ export class DiagramComponent implements OnInit {
             this.contentData = {
                 scrollToContent: true,
                 elements: data.elements,
-                libraryItems: libItems
+                libraryItems: libItems,
+                files: data.files
             };
             this.appState = {
                 frameRendering: {
@@ -78,12 +79,14 @@ export class DiagramComponent implements OnInit {
         this.dataChangeEmitter.next({
             elements,
             appState,
-            files
+            files: {...files}
         });
     }
 
     private saveState() {
         this.page.content = JSON.stringify(this.dataChangeEmitter.value);
+        console.log(this.page.content)
+
         return this.pages.savePage(this.page);
     }
 }
