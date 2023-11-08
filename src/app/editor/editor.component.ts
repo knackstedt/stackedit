@@ -11,7 +11,6 @@ import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { Editor } from './editor';
 import { installMonaco, waitForMonacoInstall } from './monaco';
 import { Subscription } from 'rxjs';
-import { UtilService } from '../services/util.service';
 
 type StackEditConfig = Partial<{
     /**
@@ -219,7 +218,6 @@ export class StackEditorComponent {
     constructor(
         private readonly viewContainer: ViewContainerRef,
         private readonly themeService: ThemeService,
-        public readonly utils: UtilService,
         @Optional() @Inject(NGX_STACKEDIT_CONFIG) private config: StackEditConfig = {}
     ) {
         this.options = {
@@ -239,8 +237,9 @@ export class StackEditorComponent {
     async ngAfterViewInit() {
         installMonaco();
 
+        // This is only active in tauri mode.
         if (this.codeRunner == "piston") {
-            await this.utils.getPistonRuntimes()
+            await window['root']?.utils.getPistonRuntimes()
                 .catch(e => null)
         }
 

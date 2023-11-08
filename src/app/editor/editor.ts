@@ -109,9 +109,6 @@ export class Editor extends EventEmittingClass {
         // Enable standard markdown rendering support
         markdownGFM(this);
 
-        waitForMonacoInstall().then(() => {
-        })
-
         Promise.all([
             (!ngEditor.options.disableEmoji)
                 ? import('./extensions/emojiExtension').then((ext) => ext.default(this))
@@ -350,7 +347,7 @@ export class Editor extends EventEmittingClass {
                 switch (this.ngEditor.codeRunner) {
                     case "custom": languages = this.ngEditor.customCodeLanguages; break;
                     case "eval": languages = ['javascript', 'js']; break;
-                    case "piston": languages = this.ngEditor.utils.pistonRuntimes
+                    case "piston": languages = window['root']?.utils.pistonRuntimes
                         .map(l => [l.language, ...l.aliases]).flat(); break;
                 }
 
@@ -376,12 +373,12 @@ export class Editor extends EventEmittingClass {
                                 break;
                             }
                             case "piston": {
-                                const runtimes = await this.ngEditor.utils.getPistonRuntimes()
+                                const runtimes = await window['root']?.utils.getPistonRuntimes()
                                     .catch(e => []);
                                 const lang = runtimes.find(r =>
                                     r.language == language || r.aliases.includes(language)
                                 );
-                                this.ngEditor.utils.runPistonScript(lang, [{
+                                window['root']?.utils.runPistonScript(lang, [{
                                     content: codeBlock.textContent,
                                     encoding: "utf-8",
                                     name: ulid()
