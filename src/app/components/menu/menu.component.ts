@@ -63,12 +63,12 @@ export class MenuComponent {
                 {
                     // label: "Light",
                     labelTemplate: () => `${this.theme.value == "light" ? '⏺' : '\u00A0\u00A0\u00A0'} Light`,
-                    action: () => this.theme.setTheme("light")
+                    action: () => this.config.set('theme', "light")
                 },
                 {
                     // label: "Dark",
                     labelTemplate: () => `${this.theme.value == "dark" ? '⏺' : '\u00A0\u00A0\u00A0\u00A0'} Dark`,
-                    action: () => this.theme.setTheme("dark")
+                    action: () => this.config.set('theme', "dark")
                 }
             ]
         }
@@ -141,7 +141,7 @@ export class MenuComponent {
             },
             { label: "Edit...", action: p => this.onEntryEdit(p) }
         ];
-        this.changeDetector.detectChanges()
+        this.changeDetector.detectChanges();
     }
 
     onEntryEdit(entry: Partial<Page>) {
