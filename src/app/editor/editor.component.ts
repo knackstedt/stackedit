@@ -239,8 +239,10 @@ export class StackEditorComponent {
     async ngAfterViewInit() {
         installMonaco();
 
-        if (this.codeRunner == "piston")
-            await this.utils.getPistonRuntimes();
+        if (this.codeRunner == "piston") {
+            await this.utils.getPistonRuntimes()
+                .catch(e => null)
+        }
 
         await waitForMonacoInstall();
 

@@ -376,7 +376,8 @@ export class Editor extends EventEmittingClass {
                                 break;
                             }
                             case "piston": {
-                                let runtimes = await this.ngEditor.utils.getPistonRuntimes();
+                                const runtimes = await this.ngEditor.utils.getPistonRuntimes()
+                                    .catch(e => []);
                                 const lang = runtimes.find(r =>
                                     r.language == language || r.aliases.includes(language)
                                 );
