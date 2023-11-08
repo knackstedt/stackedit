@@ -88,11 +88,13 @@ export class FetchPageComponent implements OnInit {
         const url = this.page.options['url'];
 
         this.page.options['headers'].forEach(({key, value}) => {
-            headers[key] = value;
+            if (key.trim().length > 0)
+                headers[key] = value;
         });
 
         this.page.options['params'].forEach(({key, value}) => {
-            params[key] = value;
+            if (key.trim().length > 0)
+                params[key] = value;
         });
 
         const compiledUrl = url + (url.includes('?') ? '&' : '?')
