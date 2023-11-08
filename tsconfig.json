@@ -21,6 +21,7 @@
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "importHelpers": true,
+    "jsx": "react",
     "target": "es2022",
     "module": "es2020",
     "lib": [
