@@ -21,7 +21,10 @@ StackEdit aspires to surpass all other markdown editors, becoming the most formi
 
 - **Scroll Syncing**: Experience a fluid writing and reading experience with scroll syncing, keeping your place in your document no matter where you are.
 
-![GitHub stars](./src/app/assets/preview.png)
+![Markdown Preview](./src/app/assets/preview.png)
+![Diagram View](./src/app/assets/diagram.png)
+![Fetch View](./src/app/assets/fetch.png)
+![Code View](./src/app/assets/code.png)
 
 ---
 
