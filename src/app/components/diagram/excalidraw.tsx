@@ -13,12 +13,12 @@ export const WrappableComponent: FunctionComponent<any> = ({ props }) => {
                 <WelcomeScreen.Hints.HelpHint />
 
                 <WelcomeScreen.Center>
-                    <div>
-                        Fuckin logo dude.
-                    </div>
                     <WelcomeScreen.Center.Heading>
-                        Welcome Screen Heading!
+                        Create a Diagram with Excalidraw!
                     </WelcomeScreen.Center.Heading>
+                    <h3>
+                        Changes will be automatically saved.
+                    </h3>
                     <WelcomeScreen.Center.Menu>
                         <WelcomeScreen.Center.MenuItemLink href="https://github.com/excalidraw/excalidraw">
                             Excalidraw GitHub
