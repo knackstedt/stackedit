@@ -72,7 +72,7 @@ export class PagesService {
         });
     }
 
-    private calculatePageTree() {
+    public calculatePageTree() {
         this.dirMap = {};
         this.pageMap = {};
 

@@ -114,12 +114,13 @@ export class AppComponent {
                 ]).then(async (files) => {
                     for (let {page} of files) {
                         await this.pages.addTab(page as any);
+                        this.pages.flatPages.push(page as any);
                         this.pages.savePage(page as any);
-                        this.pages.selectedTabIndex = 0;
                     };
-
-                    config.set("hasInstalledDefaultPages", true);
+                    this.pages.calculatePageTree();
+                    this.pages.selectedTabIndex = 0;
                 })
+                config.set("hasInstalledDefaultPages", true);
             }
             theme.setTheme(c.theme || "dark" as any);
         });
