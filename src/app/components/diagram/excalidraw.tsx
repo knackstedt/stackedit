@@ -2,12 +2,8 @@ import { Excalidraw, WelcomeScreen, restoreAppState } from '@excalidraw/excalidr
 import * as React from 'react';
 import { FunctionComponent } from 'react';
 
-/**
- * ReactFlowProvider fixes some internal context
- * issues with ReactFlow
- */
 export const WrappableComponent: FunctionComponent<any> = ({ props }) => {
-    const instance = (
+    return (
         <Excalidraw
             { ...props as any }
         >
@@ -33,12 +29,4 @@ export const WrappableComponent: FunctionComponent<any> = ({ props }) => {
             </WelcomeScreen>
         </Excalidraw>
     );
-
-    // setInterval(() => {
-    //     updateScene({ appState: { 0, 0 } }),
-    // })
-
-    // restoreAppState(props.appState, null);
-
-    return instance;
 };
