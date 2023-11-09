@@ -99,7 +99,10 @@ export class AppComponent {
 
         config.subscribe(c => {
             if (c.telemetry == null) {
-                dialog.open(TelemetryDialogComponent);
+                if (!window['__SHOW_TELEMETRY_DIALOG']) {
+                    dialog.open(TelemetryDialogComponent, { disableClose: true });
+                    window['__SHOW_TELEMETRY_DIALOG'] = true;
+                }
             }
 
             if (c.hasInstalledDefaultPages == null) {
