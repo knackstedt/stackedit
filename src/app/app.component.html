@@ -6,7 +6,7 @@
 >
     <as-split-area
         #menuSplit
-        [size]="config.value.menuCollapsed ? 56 : config.value.menuSize"
+        [size]="config.value.menuCollapsed ? 56 : config.value.menuSize ?? 215"
         [minSize]="config.value.menuCollapsed ? 56 : 215"
         [maxSize]="config.value.menuCollapsed ? 56 : 400"
     >
