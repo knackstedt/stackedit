@@ -1,8 +1,14 @@
-<as-split direction="horizontal" [gutterSize]="2" [unit]="'pixel'">
+<as-split
+    direction="horizontal"
+    [gutterSize]="2"
+    [unit]="'pixel'"
+    (dragEnd)="config.set('menuSize', menuSplit.clientWidth)"
+>
     <as-split-area
-        [size]="215"
-        [minSize]="215"
-        [maxSize]="400"
+        #menuSplit
+        [size]="config.value.menuCollapsed ? 56 : config.value.menuSize"
+        [minSize]="config.value.menuCollapsed ? 56 : 215"
+        [maxSize]="config.value.menuCollapsed ? 56 : 400"
     >
         <app-menu></app-menu>
     </as-split-area>

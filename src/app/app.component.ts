@@ -1,11 +1,14 @@
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
 import { NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { KeyboardService, MenuDirective, MenuItem, ThemeService, VscodeComponent } from '@dotglitch/ngx-common';
-import { debounceTime, map } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { AngularSplitModule } from 'angular-split';
+import { ulid } from 'ulidx';
 
 import { StackEditorComponent } from './editor/editor.component';
 import { MenuComponent } from './components/menu/menu.component';
@@ -13,14 +16,10 @@ import { PagesService } from './services/pages.service';
 import { FilesService } from './services/files.service';
 import { Page } from './types/page';
 import { ConfigService } from './services/config.service';
-import { MatDialog } from '@angular/material/dialog';
 import { TelemetryDialogComponent } from './components/telemetry-dialog/telemetry-dialog.component';
-import { AngularSplitModule } from 'angular-split';
 import { FetchPageComponent } from './components/fetch-page/fetch-page.component';
-import { Fetch, FetchOptions } from './services/fetch.service';
+import { Fetch } from './services/fetch.service';
 import { UtilService } from './services/util.service';
-import { MatButtonModule } from '@angular/material/button';
-import { ulid } from 'ulidx';
 import { DiagramComponent } from './components/diagram/diagram.component';
 
 declare const dT_;
@@ -67,18 +66,18 @@ export class AppComponent {
         "separator",
         // { label: "Pin" },
         { label: "Edit...", action: p => this.menu.onEntryEdit(p) }
-    ]
+    ];
 
     constructor(
+        public readonly pages: PagesService,
+        public readonly config: ConfigService,
+        public readonly utils: UtilService,
         private readonly http: HttpClient,
         private readonly iconRegistry: MatIconRegistry,
         private readonly keyboard: KeyboardService,
         private readonly files: FilesService,
-        public readonly pages: PagesService,
-        private readonly config: ConfigService,
         private readonly dialog: MatDialog,
         private readonly fetch: Fetch,
-        public readonly utils: UtilService,
         private readonly changeDetector: ChangeDetectorRef,
         private readonly theme: ThemeService
     ) {
@@ -119,7 +118,6 @@ export class AppComponent {
                     config.set("hasInstalledDefaultPages", true);
                 })
             }
-
             theme.setTheme(c.theme || "dark" as any);
         });
         config.init();
