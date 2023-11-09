@@ -3,6 +3,7 @@ import { FilesService } from './files.service';
 import { Page } from '../types/page';
 import { ulid } from 'ulidx';
 import { debounceTime } from 'rxjs';
+import { ConfigService } from './config.service';
 
 const $debounce = Symbol("debounce");
 const basePath = `data/`;
@@ -12,7 +13,14 @@ const basePath = `data/`;
 })
 export class PagesService {
 
-    public selectedTabIndex = 0;
+    private _selectedTabIndex = 0;
+    public get selectedTabIndex() { return this._selectedTabIndex };
+    public set selectedTabIndex(value) {
+        // Don't allow the selected tab index to go out of bounds
+        this._selectedTabIndex = Math.min(Math.max(value, 0), this.tabs.length);
+
+        this.saveTabsState();
+    };
 
     /**
      * List of all tabs in the current view
@@ -31,19 +39,37 @@ export class PagesService {
     private dirMap: { [key: string]: Page[] } = {};
 
     constructor(
-        private readonly files: FilesService
+        private readonly files: FilesService,
+        private readonly config: ConfigService
     ) {
 
         (async() => {
-            const [pages, trash] = await Promise.all([
+            const [
+                pages,
+                trash,
+                { tabs, selectedTabIndex }
+            ] = await Promise.all([
                 this.files.listFiles("data"),
-                this.files.listFiles("trash")
+                this.files.listFiles("trash"),
+                this.config.get("tabsState")
+                    .then(r => r || { tabs: [], selectedTabIndex: 0 })
             ]);
 
             this.flatPages = pages;
             this.trash = trash;
+
+            this.tabs = this.pages.filter(p => tabs.find(t => t.path == p.path));
+            this.selectedTabIndex = selectedTabIndex;
+
             this.calculatePageTree();
         })();
+    }
+
+    private saveTabsState() {
+        this.config.set("tabsState", {
+            selectedTabIndex: this.selectedTabIndex,
+            tabs: this.tabs.map(t => t.path)
+        });
     }
 
     private calculatePageTree() {
@@ -72,12 +98,15 @@ export class PagesService {
         const keys = Object.keys(this.dirMap).sort((a, b) => a.length - b.length)
         this.pages = this.dirMap[keys[0]] || [];
 
-        console.log({
-            dirm: this.dirMap,
-            pm: this.pageMap,
-            pages: this.pages,
-        });
-        if (this.pages.length > 0)
+        // console.log({
+        //     dirm: this.dirMap,
+        //     pm: this.pageMap,
+        //     pages: this.pages,
+        // });
+
+        // If there would otherwise be no tabs selected, preselect the
+        // first item in the list.
+        if (this.pages.length > 0 && this.tabs.length == 0)
             this.addTab(this.pages[0]);
     }
 
