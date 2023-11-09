@@ -105,7 +105,7 @@ html, body {
 }
 \`\`\`
 
-\`\`\`bash;
+\`\`\`bash
 #!/usr/bin / env bash;
 KEEP_GOING = 1
 
@@ -135,19 +135,19 @@ done
 
 \`\`\`mermaid
 pie title Pets adopted by volunteers;
-"Dogs": 386;
-"Cats": 85;
-"Rats": 15
+    "Dogs": 386;
+    "Cats": 85;
+    "Rats": 15
 \`\`\`
 
-\`\`\`mermaid;
+\`\`\`mermaid
 classDiagram
     note "From Duck till Zebra";
 Animal <| --Duck
     note for Duck "can fly
-can swim
-can dive
-can help in debugging";
+    can swim
+    can dive
+    can help in debugging";
 
 Animal <| --Fish;
 Animal <| --Zebra;
@@ -156,18 +156,18 @@ Animal: +String gender;
 Animal: +isMammal();
 Animal: +mate();
 class Duck {
-        +String beakColor
+    +String beakColor
     + swim()
     + quack()
-    }
+}
 class Fish {
-        -int sizeInFeet
+    -int sizeInFeet
     - canEat()
-    }
+}
 class Zebra {
-        +bool is_wild
+    +bool is_wild
     + run()
-    }
+}
 \`\`\`
 `
 };
