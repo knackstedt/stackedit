@@ -103,7 +103,7 @@
                         (codeChange)="pages.savePage(page)"
                     />
                 </mat-tab>
-                <mat-tab label="Settings">
+                <!-- <mat-tab label="Settings">
                     <div class="tab-container"></div>
                 </mat-tab>
                 <mat-tab label="Before Run">
@@ -119,15 +119,15 @@
                         (codeChange)="pages.savePage(page)"
                         language="javascript"
                     />
-                </mat-tab>
+                </mat-tab> -->
             </mat-tab-group>
         </div>
     </as-split-area>
     <as-split-area size="50">
         <h4 style="margin: 0; padding: 12px 24px">
-            <span>Status: <span>{{resultStatus}}</span></span>
-            <span>Size: <span>{{resultSize}}</span></span>
-            <span>Time: <span>{{resultTime}}</span></span>
+            <span>Status: <span>{{resultStatus}} </span></span>
+            <span>Size: <span>{{resultSize}} </span></span>
+            <span>Time: <span>{{resultTime}} </span></span>
         </h4>
         <mat-tab-group>
             <mat-tab label="Response">
@@ -158,9 +158,9 @@
                 </div>
             </mat-tab>
             <!-- <mat-tab label="Cookies"></mat-tab> -->
-            <mat-tab label="Results">
+            <!-- <mat-tab label="Results">
                 <div class="tab-container"></div>
-            </mat-tab>
+            </mat-tab> -->
         </mat-tab-group>
     </as-split-area>
 </as-split>

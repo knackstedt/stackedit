@@ -119,8 +119,6 @@ export class FetchPageComponent implements OnInit {
         );
         this.requestIsPending = false;
 
-        console.log(result);
-
         this.resolveContentType(result['headers']?.["content-type"]);
 
         this.resultStatus = result['status'];
