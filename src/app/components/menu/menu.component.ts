@@ -101,28 +101,25 @@ export class MenuComponent {
                     this.pages.createPage({ kind: "markdown" }, data)
             },
             {
+                label: "Create Child (Diagram)",
+                action: (data) =>
+                    this.pages.createPage({ kind: "canvas" }, data)
+            },
+            {
                 label: "Create Child (Code)",
                 action: (data) =>
                     this.pages.createPage({ kind: "code" }, data)
+            },
+            {
+                label: "Create Child (Fetch)",
+                action: (data) =>
+                    this.pages.createPage({ kind: "fetch" }, data)
             },
             "separator",
             {
                 label: "Set Icon",
                 childTemplate: IconPickerComponent
             },
-            {
-                label: "Set Tag",
-                childTemplate: TagPickerComponent
-            },
-            // { label: "Set Color" },
-            // { label: "Set Color" },
-            // "separator",
-            // { label: "Rename" },
-            // { label: "Clone" },
-            // { label: "Move" },
-            // { label: "Bookmark" },
-            // "separator",
-            // { label: "Show in File Explorer" },
             "separator",
             {
                 label: "Delete",
