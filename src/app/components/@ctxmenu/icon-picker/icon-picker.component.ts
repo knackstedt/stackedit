@@ -36,7 +36,6 @@ export class IconPickerComponent {
         @Inject(MAT_DIALOG_DATA) public readonly data,
         private readonly pages: PagesService
     ) {
-        console.log(data);
         this.page = data.data;
         this.dialog = data.dialog;
     }
