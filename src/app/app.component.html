@@ -22,12 +22,13 @@
                     <div class="tab"
                         [ngx-contextmenu]="tabCtxMenu"
                         [ngx-menu-context]="page"
+                        (pointerdown)="$event.which == 2 && closeTab(page)"
                     >
                         <mat-icon [fontIcon]="page.icon || 'edit_document'"></mat-icon>
                         <span style="flex: 1">
                             <span>{{page.name?.slice(0, 20)}}</span>
                         </span>
-                        <mat-icon (click)="pages.tabs.splice(pages.tabs.indexOf(page), 1)">close</mat-icon>
+                        <mat-icon (click)="closeTab(page)">close</mat-icon>
                     </div>
                 </ng-template>
             </mat-tab>

@@ -170,4 +170,9 @@ export class AppComponent {
             name: ulid()
         }]);
     }
+
+    closeTab(page: Page) {
+        const index = this.pages.tabs.indexOf(page);
+        this.pages.tabs.splice(index, 1);
+    }
 }

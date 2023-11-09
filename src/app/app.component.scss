@@ -52,8 +52,17 @@ mat-tab-group ::ng-deep {
             width: 240px;
             padding: 0;
         }
+
         .mdc-tab-indicator__content--underline {
             align-self: flex-start;
+        }
+
+        .mat-mdc-tab {
+            letter-spacing: unset
+        }
+
+        .mdc-tab__text-label {
+            height: 100%;
         }
     }
     .mat-mdc-tab-body-wrapper {
