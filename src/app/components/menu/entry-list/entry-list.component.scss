@@ -2,19 +2,6 @@
     // border: 1px solid #444;
     display: block;
     height: 100%;
-
-    &:hover {
-        &>.add-line {
-            opacity: 1;
-        }
-    }
-}
-
-.box {
-    display: flex;
-    flex-direction: column;
-    cursor: move;
-    font-size: 14px;
 }
 
 .cdk-drag-preview {
@@ -45,7 +32,6 @@
 
 app-entry-list {
     margin-left: 18px;
-    border-radius: 6px;
     // box-shadow: 0 3px 1px -2px #0003, 0 2px 2px #00000024, 0 1px 5px #0000001f;
     border-left: 1px solid var(--menu-guide-color);
 }
@@ -78,9 +64,12 @@ app-entry-list {
     }
 
     .mat-expansion-panel-header {
-        padding: 0 24px 0 12px;
+        padding: 0 0 0 12px;
+        transition: background-color 100ms ease;
+        border-radius: 5px;
+
         &:hover {
-            background-color: var(--menu-item-hover-color);
+            background-color: var(--menu-item-hover-color) !important;
         }
     }
 
@@ -94,42 +83,19 @@ app-entry-list {
 
     .mat-content.mat-content-hide-toggle {
         margin: 0;
-    }
-
-    .add-line {
-        height: 24px;
-        position: relative;
-        cursor: default;
-        opacity: 0;
-        transition: opacity 200ms ease;
-
-        &:hover {
-            background-color: var(--hover-background-color);
-        }
-
-        &::before,
-        &::after {
-            content: "";
-            position: absolute;
-            height: 1px;
-            background-color: red;
-            top: calc(50% - 1px);
-        }
-
-        &::before {
-            left: 0;
-        }
-
-        &::after {
-            right: 0;
-        }
+        height: 100%;
+        width: 100%;
+        place-content: center;
     }
 
     .label {
+        display: flex;
         align-items: center;
         white-space: pre;
         text-overflow: ellipsis;
         overflow: hidden;
+        width: 100%;
+        height: 100%;
 
         mat-icon {
             position: relative;
@@ -137,8 +103,34 @@ app-entry-list {
 
             width: 18px;
             height: 18px;
-            margin-right: 0px !important;
+            margin-right: 4px;
             font-size: 18px;
         }
     }
+}
+
+.add-line {
+    position: relative;
+    cursor: default;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
+
+    span {
+        border-radius: 5px;
+        transition: background-color 100ms ease;
+        padding: 2px 6px;
+    }
+
+    span:hover {
+        background-color: var(--menu-item-hover-color);
+    }
+}
+
+hr {
+    width: 90%;
+    border: 1px solid #434343;
+    border-bottom: 0;
 }
