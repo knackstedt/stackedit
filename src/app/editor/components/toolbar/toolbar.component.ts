@@ -103,19 +103,19 @@ export class ToolbarComponent {
     }
 
     blockQuoteText() {
-        this.wrapSelection("> ", '', 2, true);
+        this.wrapSelection("> ", '', null, true);
     }
 
     insertOrderedList() {
-        this.wrapSelection(" 1. ", '', 4, true);
+        this.wrapSelection(" 1. ", '', null, true);
     }
 
     insertList() {
-        this.wrapSelection(" - ", '', 3, true);
+        this.wrapSelection(" - ", '', null, true);
     }
 
     insertCheckList() {
-        this.wrapSelection(" - [ ] ", '', 7, true);
+        this.wrapSelection(" - [ ] ", '', null, true);
     }
 
     insertInlineCode() {
