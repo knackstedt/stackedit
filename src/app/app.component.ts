@@ -102,6 +102,24 @@ export class AppComponent {
             if (c.telemetry == null) {
                 dialog.open(TelemetryDialogComponent);
             }
+
+            if (c.hasInstalledDefaultPages == null) {
+                Promise.all([
+                    import("./assets/sample-markdown"),
+                    import("./assets/sample-diagram"),
+                    import("./assets/sample-fetch"),
+                    import("./assets/sample-code")
+                ]).then(async (files) => {
+                    for (let {page} of files) {
+                        await this.pages.addTab(page as any);
+                        this.pages.savePage(page as any);
+                        this.pages.selectedTabIndex = 0;
+                    };
+
+                    config.set("hasInstalledDefaultPages", true);
+                })
+            }
+
             theme.setTheme(c.theme || "dark" as any);
         });
         config.init();

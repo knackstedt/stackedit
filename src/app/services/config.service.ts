@@ -18,13 +18,15 @@ const prefix = `config-`;
 type Config = Partial<{
     telemetry: boolean,
     menuCollapsed: boolean,
-    theme: string
+    theme: string,
+    hasInstalledDefaultPages: boolean
 }>;
 
 const knownKeys = [
     "telemetry",
     "menuCollapsed",
-    "theme"
+    "theme",
+    "hasInstalledDefaultPages"
 ]
 
 let dbPromise;
