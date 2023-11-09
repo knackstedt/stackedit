@@ -63,7 +63,6 @@ export class Fetch {
         // Generally we shouldn't need this to be anything other than JSON.
         options.responseType = options.responseType || "json";
         options.observe = "response";
-        options.withCredentials = true;
 
         if (fetch) {
             const res = await fetch<any>(url, {
