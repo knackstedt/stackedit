@@ -98,11 +98,17 @@ export class AppComponent {
         });
 
         config.subscribe(c => {
-            if (c.telemetry == null) {
+            if (c.telemetry == null && window['dtrum']) {
                 if (!window['__SHOW_TELEMETRY_DIALOG']) {
                     dialog.open(TelemetryDialogComponent, { disableClose: true });
                     window['__SHOW_TELEMETRY_DIALOG'] = true;
                 }
+            }
+            else {
+                if (c.telemetry)
+                    window['dtrum']?.enable();
+                else
+                    window['dtrum']?.disable();
             }
 
             if (c.hasInstalledDefaultPages == null) {
