@@ -239,7 +239,8 @@ export class StackEditorComponent {
     }
 
     ngOnChanges() {
-        this.themeService.setTheme(this.theme);
+        if (this.theme)
+            this.themeService.setTheme(this.theme);
     }
 
     async ngAfterViewInit() {
@@ -254,7 +255,7 @@ export class StackEditorComponent {
         await waitForMonacoInstall();
 
         // This is replaced during automation.
-        this.$el.setAttribute("version", "__version__");
+        this.$el.setAttribute("version", "__VERSION__");
 
         const editorElt = this.$el.querySelector('.editor') as HTMLElement;
         const previewElt = this.$el.querySelector('.preview__inner-2') as HTMLElement;
