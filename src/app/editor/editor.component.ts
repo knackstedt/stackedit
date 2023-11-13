@@ -109,6 +109,10 @@ export class StackEditorComponent {
     get $el() { return this.viewContainer.element.nativeElement as HTMLElement }
 
     /**
+     * Dictates the theme of the editor.
+     */
+    @Input() theme: "light" | "dark";
+    /**
      * What mode should the editor be in.
      * - Possible values are `edit` | `view` | `viewonly`
      * - Default `edit`
@@ -234,6 +238,10 @@ export class StackEditorComponent {
         ]
     }
 
+    ngOnChanges() {
+        this.themeService.setTheme(this.theme);
+    }
+
     async ngAfterViewInit() {
         installMonaco();
 
@@ -245,6 +253,7 @@ export class StackEditorComponent {
 
         await waitForMonacoInstall();
 
+        // This is replaced during automation.
         this.$el.setAttribute("version", "__version__");
 
         const editorElt = this.$el.querySelector('.editor') as HTMLElement;
