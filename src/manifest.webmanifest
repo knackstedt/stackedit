@@ -8,9 +8,17 @@
   "start_url": "./",
   "icons": [
     {
-      "src": "assets/channel.png",
+      "src": "/icons/icon.png",
       "type": "image/png",
       "purpose": "maskable any"
+    },
+    {
+        "src": "/icons/icon.ico",
+        "sizes": "72x72 96x96 128x128 256x256"
+    },
+    {
+        "src": "/icons/icon.svg",
+        "sizes": "any"
     }
   ]
 }
