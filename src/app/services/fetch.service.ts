@@ -67,7 +67,10 @@ export class Fetch {
         if (fetch) {
             const res = await fetch<any>(url, {
                 method: method.toUpperCase() as any,
-                body: options.body,
+                body: (method == "post" || method == "put") && options.body ? {
+                    type: "Json", // Form Json Text Bytes
+                    payload: options.body
+                } : null,
                 headers: options.headers,
                 responseType: ResponseType.Binary,
             });

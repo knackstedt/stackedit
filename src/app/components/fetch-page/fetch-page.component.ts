@@ -116,7 +116,11 @@ export class FetchPageComponent implements OnInit {
                 headers: headers
             },
             true
-        );
+        ).catch(err => {
+            console.error(err)
+            return err;
+        });
+
         this.requestIsPending = false;
 
         this.resolveContentType(result['headers']?.["content-type"]);
