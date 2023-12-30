@@ -9,6 +9,7 @@ import { Page } from '../../../types/page';
 import { MenuComponent } from '../menu.component';
 import { AppComponent } from '../../../app.component';
 import { PagesService } from '../../../services/pages.service';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-entry-list',
@@ -21,6 +22,7 @@ import { PagesService } from '../../../services/pages.service';
         MatIconModule,
         MatButtonModule,
         MatExpansionModule,
+        MatTooltipModule,
         MenuDirective
     ],
     standalone: true

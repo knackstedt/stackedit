@@ -21,7 +21,10 @@
                 class="label"
                 [ngx-contextmenu]="ctxMenu"
                 [ngx-menu-context]="page"
-                (click)="pages.addTab(page)"
+                [matTooltip]="page.name"
+                [matTooltipShowDelay]="750"
+                (click)="pages.addTab(page, true)"
+                (dblclick)="pages.addTab(page)"
             >
                 <mat-icon
                     *ngIf="page.icon"
