@@ -19,12 +19,12 @@
     box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
-ng-scrollbar {
+ng-scrollbar.ng-scrollbar {
     --scrollbar-padding: 0px;
     --scrollbar-size: 14px;
     --scrollbar-border-radius: 0;
     --scrollbar-thumb-color: #0000;
-    --scrollbar-thumb-transition: height ease-out .15s, width ease-out .15s, background-color ease 1200ms;
+    --scrollbar-thumb-transition: height ease 200ms, width ease 200ms, background-color ease 200ms;
 
     &:hover {
         --scrollbar-thumb-color: #444;
