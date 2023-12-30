@@ -61,7 +61,7 @@ But you can also embed links normally like [so](https://npmgraph.js.org/?q=ngx-s
 
 
 #### Code blocks
-\`\`\`ts;
+\`\`\`ts
 import 'zone.js';  // Included with Angular CLI.
 
 import { AppComponent } from './app/app.component';
@@ -99,62 +99,56 @@ html, body {
     height: 100 %;
     width: 100 %;
     overflow: hidden;
-    font - family: 'Fira Sans', Arial;
-    background - color: var(--background - color, #121212);
+    font-family: 'Fira Sans', Arial;
+    background-color: var(--background - color, #121212);
     color: var(--text - color);
 }
 \`\`\`
 
 \`\`\`bash
-#!/usr/bin / env bash;
-KEEP_GOING = 1
+#!/usr/bin/env bash;
+for file in ./*.yaml
+do
+    tmp="You shouldnt see this text"
+    tmp=$(perl -pe 's/\\$\{([_A-Z]+)\}/defined $ENV{$1} ? $ENV{$1} : "\\\${$1}"/eg' < $file > "$file.tmp")
+    tmp=$(cat $file.tmp)
 
-export SD_WEBUI_RESTART = tmp / restart;
-while [["$KEEP_GOING" - eq "1"]]; do
-    if [[! -z "\${ACCELERATE}"]] && [\${ ACCELERATE } = "True"] && [-x "$(command -v accelerate)"]; then
-        printf "\n%s\n" "\${delimiter}"
-        printf "Accelerating launch.py..."
-        printf "\n%s\n" "\${delimiter}";
-prepare_tcmalloc
-        accelerate launch--num_cpu_threads_per_process = 6 "\${LAUNCH_SCRIPT}" "$@"
-    else
-        printf "\n%s\n" "\${delimiter}"
-        printf "Launching launch.py..."
-        printf "\n%s\n" "\${delimiter}";
-prepare_tcmalloc;
-"\${python_cmd}" - u "\${LAUNCH_SCRIPT}" "$@";
-fi;
+    err=$(echo "$tmp" | grep -E '\\\${[^}]*}')
 
-if [[! -f tmp / restart]]; then;
-KEEP_GOING = 0;
-fi;
+    # If the variable hasn't been replaced, exit with an error
+    if [ \${#err} -ge 1 ]; then
+        >&2 echo "$tmp" | grep --color -E '\\\${[^}]*}'
+        exit 1;
+    fi
+
+    echo "$tmp" > $file
 done
 \`\`\`
 
 #### Mermaid Diagrams
 
 \`\`\`mermaid
-pie title Pets adopted by volunteers;
-    "Dogs": 386;
-    "Cats": 85;
+pie title Pets adopted by volunteers
+    "Dogs": 386
+    "Cats": 85
     "Rats": 15
 \`\`\`
 
 \`\`\`mermaid
 classDiagram
-    note "From Duck till Zebra";
-Animal <| --Duck
+    note "From Duck till Zebra"
+Animal <|--Duck
     note for Duck "can fly
     can swim
     can dive
-    can help in debugging";
+    can help in debugging"
 
-Animal <| --Fish;
-Animal <| --Zebra;
-Animal: +int age;
-Animal: +String gender;
-Animal: +isMammal();
-Animal: +mate();
+Animal <|--Fish
+Animal <|--Zebra
+Animal: +int age
+Animal: +String gender
+Animal: +isMammal()
+Animal: +mate()
 class Duck {
     +String beakColor
     + swim()
