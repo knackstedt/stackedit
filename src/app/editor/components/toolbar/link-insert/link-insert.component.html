@@ -12,13 +12,18 @@
 
 <div style="display: flex; justify-content: end;">
     <button mat-flat-button (click)="applyChanges()">
-        <mat-icon *ngIf="!isSaving">check</mat-icon>
-        <mat-progress-spinner
-            *ngIf="isSaving"
-            mode="indeterminate"
-            [diameter]="18"
-            style="display: inline"
-        />
+
+        @if (isSaving) {
+            <mat-progress-spinner
+                mode="indeterminate"
+                [diameter]="18"
+                style="display: inline"
+            />
+        }
+        @else {
+            <mat-icon>check</mat-icon>
+        }
+
         Ok
     </button>
     <button mat-flat-button (click)="dialogRef.close()">

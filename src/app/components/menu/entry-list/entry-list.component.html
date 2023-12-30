@@ -7,62 +7,67 @@
     cdkDropListConnectedTo="entryList"
     (cdkDropListDropped)="drop($event)"
 >
-    <mat-expansion-panel
-        *ngFor="let page of items; let i = index"
-        cdkDrag
-        [class.isleaf]="!page['children'] || page['children'].length == 0"
-        [disabled]="!page['children'] || page['children'].length == 0"
-        [(expanded)]="page['expanded']"
-        style="cursor: default;"
-    >
-        <div class="placeholder" *cdkDragPlaceholder></div>
-        <mat-expansion-panel-header cdkDragHandle [style.color]="'var(--text-color)'">
-            <div
-                class="label"
-                [ngx-contextmenu]="ctxMenu"
-                [ngx-menu-context]="page"
-                [matTooltip]="page.name"
-                [matTooltipShowDelay]="750"
-                (click)="pages.addTab(page, true)"
-                (dblclick)="pages.addTab(page)"
-            >
-                <mat-icon
-                    *ngIf="page.icon"
-                    [fontIcon]="page.icon"
-                    [style.color]="page.color"
+    @for (page of items; track page; let i = $index) {
+        <mat-expansion-panel
+            cdkDrag
+            [class.isleaf]="!page['children'] || page['children'].length == 0"
+            [disabled]="!page['children'] || page['children'].length == 0"
+            [(expanded)]="page['expanded']"
+            style="cursor: default;"
+        >
+            <div class="placeholder" *cdkDragPlaceholder></div>
+            <mat-expansion-panel-header cdkDragHandle [style.color]="'var(--text-color)'">
+                <div
+                    class="label"
+                    [ngx-contextmenu]="ctxMenu"
+                    [ngx-menu-context]="page"
+                    [matTooltip]="page.name"
+                    [matTooltipShowDelay]="750"
+                    (click)="pages.addTab(page)"
+                    (dblclick)="pages.addTab(page)"
+                >
+                    @if (page.icon) {
+                        <mat-icon
+
+                            [fontIcon]="page.icon"
+                            [style.color]="page.color"
+                        />
+                    }
+                    <span>{{page.name.slice(0, 20)}}</span>
+                </div>
+            </mat-expansion-panel-header>
+
+            @if (page['children'] && depth < 5) {
+                <app-entry-list
+                    [item]="page"
+                    [items]="page['children']"
+                    [ctxMenu]="ctxMenu"
+                    [depth]="depth + 1"
                 />
-                <span>{{page.name.slice(0, 20)}}</span>
-            </div>
-        </mat-expansion-panel-header>
-
-        <app-entry-list
-            *ngIf="page['children'] && depth < 5"
-            [item]="page"
-            [items]="page['children']"
-            [ctxMenu]="ctxMenu"
-            [depth]="depth + 1"
-        />
-
-    </mat-expansion-panel>
+            }
+        </mat-expansion-panel>
+    }
 </mat-accordion>
 
-<hr *ngIf="depth == 0"/>
+@if (depth == 0) {
+    <hr/>
 
-<div class="add-line" *ngIf="depth == 0">
-    <span (click)="create('markdown')">
-        <mat-icon>add</mat-icon>
-        Markdown
-    </span>
-    <span (click)="create('code')">
-        <mat-icon>add</mat-icon>
-        Code
-    </span>
-    <span (click)="create('canvas')">
-        <mat-icon>add</mat-icon>
-        Diagram
-    </span>
-    <span (click)="create('fetch')">
-        <mat-icon>add</mat-icon>
-        Fetch
-    </span>
-</div>
+    <div class="add-line">
+        <span (click)="create('markdown')">
+            <mat-icon>add</mat-icon>
+            Markdown
+        </span>
+        <span (click)="create('code')">
+            <mat-icon>add</mat-icon>
+            Code
+        </span>
+        <span (click)="create('canvas')">
+            <mat-icon>add</mat-icon>
+            Diagram
+        </span>
+        <span (click)="create('fetch')">
+            <mat-icon>add</mat-icon>
+            Fetch
+        </span>
+    </div>
+}

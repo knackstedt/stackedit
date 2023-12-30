@@ -5,15 +5,18 @@
         <input matInput type="text" [(ngModel)]="imageUrl">
 
         <input #file type="file" style="display: none;">
-        <button
-            mat-flat-button
-            *ngIf="data.stackEditor.allowImageUpload"
-            (click)="file.click(); onFileUpload(file.files)"
-            style="float: right"
-        >
-            <mat-icon>upload_file</mat-icon>
-            Or upload an Image
-        </button>
+
+        @if (data.stackEditor.allowImageUpload) {
+            <button
+                mat-flat-button
+
+                (click)="file.click(); onFileUpload(file.files)"
+                style="float: right"
+            >
+                <mat-icon>upload_file</mat-icon>
+                Or upload an Image
+            </button>
+        }
     </mat-form-field>
 </div>
 
@@ -26,13 +29,18 @@
 
 <div style="display: flex; justify-content: end;">
     <button mat-flat-button (click)="applyChanges()">
-        <mat-icon *ngIf="!isSaving">check</mat-icon>
-        <mat-progress-spinner
-            *ngIf="isSaving"
-            mode="indeterminate"
-            [diameter]="18"
-            style="display: inline"
-        />
+
+        @if (isSaving) {
+            <mat-progress-spinner
+                mode="indeterminate"
+                [diameter]="18"
+                style="display: inline"
+            />
+        }
+        @else {
+            <mat-icon>check</mat-icon>
+        }
+
         Ok
     </button>
     <button

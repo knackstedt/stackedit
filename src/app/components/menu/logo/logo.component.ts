@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+
 import { Component, Input, OnInit } from '@angular/core';
 import { SymbolComponent } from './symbol/symbol.component';
 import { TextComponent } from './text/text.component';
@@ -11,8 +11,7 @@ import { WidetextComponent } from './widetext/widetext.component';
     imports: [
         SymbolComponent,
         TextComponent,
-        WidetextComponent,
-        NgIf
+        WidetextComponent
     ],
     standalone: true
 })

@@ -1,4 +1,4 @@
-import { NgForOf, NgIf } from '@angular/common';
+
 import { Component, Input, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,8 +16,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     templateUrl: './entry-list.component.html',
     styleUrls: ['./entry-list.component.scss'],
     imports: [
-        NgForOf,
-        NgIf,
         DragDropModule,
         MatIconModule,
         MatButtonModule,

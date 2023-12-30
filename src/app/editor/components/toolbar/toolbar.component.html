@@ -7,45 +7,75 @@
         <path fill="var(--text-color)" d="M10.75 3L5.49 17L7.91 17L9.18 13.42L14.83 13.42L16.09 17L18.51 17L13.25 3L10.75 3z M11.94 5.6L12.06 5.6L14.09 11.39L9.91 11.39L11.94 5.6z" />
     </svg>
 </mat-icon>
+
 <ng-template #colorPopup let-dialog="dialog">
-    <div
-        *ngFor="let ctx of [{color: '#000'}]"
-        class="table-popup"
-    >
+    @for (ctx of [{color: '#000'}]; track ctx) {
         <div
-            [style.color]="ctx.color"
-            [style.background-color]=""
+            class="table-popup"
         >
-            {{ctx.color}}
-        </div>
-        <div class="grouped" style="display: flex; gap: 2px; flex-direction: column;">
-            <div class="table-row" *ngFor="let row of colorList">
-                <div
-                    *ngFor="let color of row"
-                    class="col-cell"
-                    style="width: 24px; height: 24px"
-                    [style.background-color]="color + 'ee'"
-                    [style.border-color]="color + ''"
-                    (click)="colorizeText(currentTextColor = color); dialog.close()"
-                    (pointerenter)="ctx.color = color"
-                ></div>
+            <div
+                [style.color]="ctx.color"
+                [style.background-color]=""
+            >
+                {{ctx.color}}
+            </div>
+            <div class="grouped" style="display: flex; gap: 2px; flex-direction: column;">
+                @for (row of colorList; track row) {
+                    <div class="table-row">
+                        @for (color of row; track color) {
+                            <div
+
+                                class="col-cell"
+                                style="width: 24px; height: 24px"
+                                [style.background-color]="color + 'ee'"
+                                [style.border-color]="color + ''"
+                                (click)="colorizeText(currentTextColor = color); dialog.close()"
+                                (pointerenter)="ctx.color = color"
+                            >
+                            </div>
+                        }
+                    </div>
+                }
             </div>
         </div>
-    </div>
-
+    }
 </ng-template>
 
 <!-- Bold -->
-<mat-icon (mousedown)="boldText(); $event.preventDefault()" [class.reflect]="cursorIsInBold" matTooltip="Bold">format_bold</mat-icon>
+<mat-icon
+    (mousedown)="boldText(); $event.preventDefault()"
+    [class.reflect]="cursorIsInBold"
+    matTooltip="Bold"
+>
+    format_bold
+</mat-icon>
 <!-- Italic -->
-<mat-icon (mousedown)="italicizeText(); $event.preventDefault()" [class.reflect]="cursorIsInItalic" matTooltip="Italic">format_italic</mat-icon>
+<mat-icon
+    (mousedown)="italicizeText(); $event.preventDefault()"
+    [class.reflect]="cursorIsInItalic"
+    matTooltip="Italic"
+>
+    format_italic
+</mat-icon>
 <!-- Strikethrough -->
-<mat-icon (mousedown)="strikethroughText(); $event.preventDefault()" [class.reflect]="cursorIsInStrikethrough" matTooltip="Strikethrough">format_strikethrough</mat-icon>
+<mat-icon
+    (mousedown)="strikethroughText(); $event.preventDefault()"
+    [class.reflect]="cursorIsInStrikethrough"
+    matTooltip="Strikethrough"
+>
+    format_strikethrough
+</mat-icon>
 <!-- Underscore -->
 <!-- <mat-icon>format_underlined</mat-icon> -->
 
 <!-- Quote -->
-<mat-icon (mousedown)="blockQuoteText(); $event.preventDefault()" [class.reflect]="cursorIsInBlockquote" matTooltip="Blockquote">format_quote</mat-icon>
+<mat-icon
+    (mousedown)="blockQuoteText(); $event.preventDefault()"
+    [class.reflect]="cursorIsInBlockquote"
+    matTooltip="Blockquote"
+>
+    format_quote
+</mat-icon>
 <!-- Link -->
 <mat-icon
     matTooltip="Insert a Link"
@@ -65,23 +95,29 @@
 <!-- Table -->
 <mat-icon [ngx-tooltip]="tablePopup" [ngx-tooltip-config]="{ triggers: ['click'], position: 'bottom' }" [class.reflect]="cursorIsInTable">table_chart</mat-icon>
 <ng-template #tablePopup let-data="data" let-dialog="dialog">
-    <div
-        *ngFor="let ctx of [{cols: 0, rows: 0}]"
-        class="table-popup"
-    >
-        <div>{{ctx.cols}}x{{ctx.rows}}</div>
-        <div class="grouped">
-            <div class="table-row" *ngFor="let row of [1,2,3,4,5,6]">
-                <div
-                    *ngFor="let col of [1,2,3,4,5,6]"
-                    class="col-cell"
-                    [class.selected]="ctx.cols >= col && ctx.rows >= row"
-                    (pointerenter)="ctx.cols = col; ctx.rows = row"
-                    (click)="insertTable(ctx.cols, ctx.rows); dialog.close()"
-                ></div>
+    @for (ctx of [{cols: 0, rows: 0}]; track ctx) {
+        <div
+
+            class="table-popup"
+        >
+            <div>{{ctx.cols}}x{{ctx.rows}}</div>
+            <div class="grouped">
+                @for (row of [1,2,3,4,5,6]; track row) {
+                    <div class="table-row">
+                        @for (col of [1,2,3,4,5,6]; track col) {
+                            <div
+
+                                class="col-cell"
+                                [class.selected]="ctx.cols >= col && ctx.rows >= row"
+                                (pointerenter)="ctx.cols = col; ctx.rows = row"
+                                (click)="insertTable(ctx.cols, ctx.rows); dialog.close()"
+                            ></div>
+                        }
+                    </div>
+                }
             </div>
         </div>
-    </div>
+    }
 </ng-template>
 
 <!-- Image -->
@@ -94,12 +130,34 @@
 
 
 <!-- Inline code -->
-<mat-icon (mousedown)="insertInlineCode(); $event.preventDefault()" [class.reflect]="cursorIsInInlineCode" matTooltip="Inline highlight">code</mat-icon>
+<mat-icon
+    (mousedown)="insertInlineCode(); $event.preventDefault()"
+    [class.reflect]="cursorIsInInlineCode"
+    matTooltip="Inline highlight"
+>
+    code
+</mat-icon>
 <!-- Code Block -->
-<mat-icon (mousedown)="insertCodeBlock(); $event.preventDefault()" [class.reflect]="cursorIsInCode" matTooltip="Code block">data_object</mat-icon>
+<mat-icon
+    (mousedown)="insertCodeBlock(); $event.preventDefault()"
+    [class.reflect]="cursorIsInCode"
+    matTooltip="Code block"
+>
+    data_object
+</mat-icon>
 
 <!-- Mermaid Diagrams... -->
-<mat-icon *ngIf="stackEditor.showMermaid" [ngx-menu]="diagramMenu" [ngx-menu-config]="{ customClass: ['mermaid-menu'] }" matTooltip="Diagrams">account_tree</mat-icon>
+@if (stackEditor.showMermaid) {
+    <mat-icon
+        [ngx-menu]="diagramMenu"
+        [ngx-menu-config]="{
+            customClass: ['mermaid-menu']
+        }"
+        matTooltip="Diagrams"
+    >
+        account_tree
+    </mat-icon>
+}
 
 <span style="flex: 1">
     <!-- {{stackEditor.editorSvc?.focus}}
@@ -108,31 +166,37 @@
     {{stackEditor.editorSvc?.clEditor?.selectionMgr?.selectionEnd}} -->
 </span>
 
-<mat-icon
-    *ngIf="stackEditor.showToc != 'off'"
-    (mousedown)="toggleTOC(); $event.preventDefault()"
-    matTooltip="Table of Contents"
->
-    toc
-</mat-icon>
-<svg
-    *ngIf="stackEditor.showPreview != 'off' && stackEditor.mode != 'viewonly'"
-    (mousedown)="toggleEditor(); $event.preventDefault()"
-    matTooltip="Toggle Editor"
-    xmlns="http://www.w3.org/2000/svg"
-    height="48"
-    width="48"
-    viewBox="0 -960 960 960"
-    [style.fill]="theme.value == 'light' ? '#111111' : '#eeeeee'"
-    style="padding: 12px;"
->
-    <path
-        d="m640-360 120-120-42-43-48 48v-125h-60v125l-48-48-42 43 120 120ZM140-160q-24 0-42-18t-18-42v-520q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm0-60h680v-520H140v520Zm0 0v-520 520Zm79-140h50v-190h53v127h50v-127h60v190h50v-200q0-14-13-27t-27-13H259q-14 0-27 13t-13 27v200Z" />
-</svg>
-<mat-icon
-    *ngIf="stackEditor.showPreview != 'off'"
-    (mousedown)="togglePreview(); $event.preventDefault()"
-    matTooltip="Toggle Preview"
->
-    preview
-</mat-icon>
+@if (stackEditor.showToc != 'off') {
+    <mat-icon
+
+        (mousedown)="toggleTOC(); $event.preventDefault()"
+        matTooltip="Table of Contents"
+    >
+        toc
+    </mat-icon>
+}
+
+@if (stackEditor.showPreview != 'off' && stackEditor.mode != 'viewonly') {
+    <svg
+        (mousedown)="toggleEditor(); $event.preventDefault()"
+        matTooltip="Toggle Editor"
+        xmlns="http://www.w3.org/2000/svg"
+        height="48"
+        width="48"
+        viewBox="0 -960 960 960"
+        [style.fill]="theme.value == 'light' ? '#111111' : '#eeeeee'"
+        style="padding: 12px;"
+    >
+        <path
+            d="m640-360 120-120-42-43-48 48v-125h-60v125l-48-48-42 43 120 120ZM140-160q-24 0-42-18t-18-42v-520q0-24 18-42t42-18h680q24 0 42 18t18 42v520q0 24-18 42t-42 18H140Zm0-60h680v-520H140v520Zm0 0v-520 520Zm79-140h50v-190h53v127h50v-127h60v190h50v-200q0-14-13-27t-27-13H259q-14 0-27 13t-13 27v200Z" />
+    </svg>
+}
+
+@if (stackEditor.showPreview != 'off') {
+    <mat-icon
+        (mousedown)="togglePreview(); $event.preventDefault()"
+        matTooltip="Toggle Preview"
+    >
+        preview
+    </mat-icon>
+}

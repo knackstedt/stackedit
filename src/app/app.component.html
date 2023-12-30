@@ -17,77 +17,85 @@
             style="flex: 1"
             [(selectedIndex)]="pages.selectedTabIndex"
         >
-            <mat-tab *ngFor="let page of pages.tabs">
-                <ng-template mat-tab-label>
-                    <div class="tab"
-                        [ngx-contextmenu]="tabCtxMenu"
-                        [ngx-menu-context]="page"
-                        (pointerdown)="$event.which == 2 && closeTab(page)"
-                    >
-                        <mat-icon [fontIcon]="page.icon || 'edit_document'"></mat-icon>
-                        <span style="flex: 1">
-                            <span>{{page.name?.slice(0, 20)}}</span>
-                        </span>
+            @for (page of pages.tabs; track page) {
+                <mat-tab>
+                    <ng-template mat-tab-label>
+                        <div class="tab"
+                            [ngx-contextmenu]="tabCtxMenu"
+                            [ngx-menu-context]="page"
+                            (pointerdown)="$event.which == 2 && closeTab(page)"
+                        >
+                            <mat-icon [fontIcon]="page.icon || 'edit_document'"></mat-icon>
+                            <span style="flex: 1">
+                                <span>{{page.name?.slice(0, 20)}}</span>
+                            </span>
 
-                        <mat-icon class="close-button" (click)="closeTab(page)">close</mat-icon>
-                    </div>
-                </ng-template>
-            </mat-tab>
+                            <mat-icon class="close-button" (click)="closeTab(page)">close</mat-icon>
+                        </div>
+                    </ng-template>
+                </mat-tab>
+            }
         </mat-tab-group>
-        <ng-container *ngFor="let page of pages.tabs; let i = index">
-            <div class="container" *ngIf="pages.selectedTabIndex == i" [ngSwitch]="page.kind">
-                <ng-container
-                    *ngSwitchCase="'code'"
-                >
-                    <ng-container
-                        *ngIf="utils.getPistonRuntimes.length > 0 && checkLangIsExecutable(page)"
-                    >
-                        <button mat-icon-button class="run-button">
-                            <mat-icon (click)="utils.executeCode(page)">play_arrow</mat-icon>
-                        </button>
-                    </ng-container>
-                    <app-vscode
-                        [code]="page.content"
-                        (codeChange)="pages.onPageContentChange(page, $event)"
-                        [language]="page.options?.['language'] || 'auto'"
-                        [minimap]="page.options?.['minimap']"
-                        [folding]="page.options?.['folding']"
-                        [fontSize]="page.options?.['fontSize']"
-                        [colorDecorators]="page.options?.['colorDecorators']"
-                        [tabSize]="page.options?.['tabSize']"
-                        [tabSize]="4"
-                    />
-                </ng-container>
+        @for (page of pages.tabs; track page; let i = $index) {
+            @if (pages.selectedTabIndex == i) {
+                <div class="container">
+                    @switch (page.kind) {
+                        @case ('code') {
+                            @if (utils.getPistonRuntimes.length > 0 && checkLangIsExecutable(page)) {
+                                <button mat-icon-button class="run-button">
+                                    <mat-icon (click)="utils.executeCode(page)">play_arrow</mat-icon>
+                                </button>
+                            }
 
-                <div
-                    *ngSwitchCase="'canvas'"
-                    style="height: 100%"
-                >
-                    <app-diagram
-                        [page]="page"
-                    />
+                            <app-vscode
+                                [code]="page.content"
+                                (codeChange)="pages.onPageContentChange(page, $event)"
+                                [language]="page.options?.['language'] || 'auto'"
+                                [minimap]="page.options?.['minimap']"
+                                [folding]="page.options?.['folding']"
+                                [fontSize]="page.options?.['fontSize']"
+                                [colorDecorators]="page.options?.['colorDecorators']"
+                                [tabSize]="page.options?.['tabSize']"
+                                [tabSize]="4"
+                            />
+                        }
+
+                        @case ('canvas') {
+                            <div
+                                style="height: 100%"
+                            >
+                                <app-diagram
+                                    [page]="page"
+                                />
+                            </div>
+                        }
+
+                        @case ('fetch') {
+                            <div
+
+                                style="height: 100%"
+                            >
+                                <app-fetch-page
+                                    [page]="page"
+                                />
+                            </div>
+                        }
+
+                        @default {
+                            <ngx-stackedit
+
+                                [mode]="page.readonly ? 'view' : 'edit'"
+                                [showPreview]="'off'"
+                                [showCodeRunButton]="true"
+                                codeRunner="piston"
+                                [(value)]="page.content"
+                                (valueChange)="pages.onPageContentChange(page, $event)"
+                                (onImageUpload)="onImageUpload($event)"
+                            />
+                        }
+                    }
                 </div>
-
-                <div
-                    *ngSwitchCase="'fetch'"
-                    style="height: 100%"
-                >
-                    <app-fetch-page
-                        [page]="page"
-                    />
-                </div>
-
-                <ngx-stackedit
-                    *ngSwitchDefault
-                    [mode]="page.readonly ? 'view' : 'edit'"
-                    [showPreview]="'off'"
-                    [showCodeRunButton]="true"
-                    codeRunner="piston"
-                    [(value)]="page.content"
-                    (valueChange)="pages.onPageContentChange(page, $event)"
-                    (onImageUpload)="onImageUpload($event)"
-                />
-            </div>
-        </ng-container>
+            }
+        }
     </as-split-area>
 </as-split>

@@ -4,7 +4,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { KeyboardService, MenuDirective, MenuItem, ThemeService, TooltipDirective } from '@dotglitch/ngx-common';
 
 import mermaidLayouts from './mermaid-layouts';
-import { NgForOf, NgIf } from '@angular/common';
+
 import { Subscription } from 'rxjs';
 import { MatButtonModule } from '@angular/material/button';
 import { StackEditorComponent } from '../../editor.component';
@@ -17,8 +17,6 @@ import { LinkInsertComponent } from './link-insert/link-insert.component';
     templateUrl: './toolbar.component.html',
     styleUrls: ['./toolbar.component.scss'],
     imports: [
-        NgIf,
-        NgForOf,
         MatIconModule,
         MatTooltipModule,
         MatButtonModule,

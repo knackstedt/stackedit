@@ -1,6 +1,6 @@
 import { Component, Inject, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { NgForOf, NgIf } from '@angular/common';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -14,8 +14,6 @@ import { PagesService } from '../../../services/pages.service';
     templateUrl: './icon-picker.component.html',
     styleUrls: ['./icon-picker.component.scss'],
     imports: [
-        NgIf,
-        NgForOf,
         MatIconModule,
         MatButtonModule,
         MatInputModule,

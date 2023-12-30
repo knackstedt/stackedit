@@ -1,4 +1,4 @@
-import { NgForOf, NgIf } from '@angular/common';
+
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,8 +20,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
     templateUrl: './edit-dialog.component.html',
     styleUrls: ['./edit-dialog.component.scss'],
     imports: [
-        NgIf,
-        NgForOf,
         MatInputModule,
         MatSelectModule,
         MatIconModule,
@@ -29,7 +27,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
         MatSlideToggleModule,
         MatTooltipModule,
         MatCheckboxModule,
-        FormsModule,
+        FormsModule
     ],
     standalone: true
 })

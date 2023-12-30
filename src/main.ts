@@ -6,7 +6,6 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { isDevMode, importProvidersFrom } from '@angular/core';
-
 import { AppComponent } from './app/app.component';
 
 const isTauriEnvironment = !!window['__TAURI__'];

@@ -1,4 +1,4 @@
-import { NgForOf, NgIf } from '@angular/common';
+
 import { ChangeDetectorRef, Component, Input, TemplateRef, ViewChild } from '@angular/core';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
@@ -28,8 +28,6 @@ type Tag = {
     templateUrl: './menu.component.html',
     styleUrls: ['./menu.component.scss'],
     imports: [
-        NgForOf,
-        NgIf,
         MenuDirective,
         MatTooltipModule,
         MatIconModule,

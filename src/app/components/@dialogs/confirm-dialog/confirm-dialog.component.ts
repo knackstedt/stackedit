@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -9,7 +9,6 @@ import { MatIconModule } from '@angular/material/icon';
     templateUrl: './confirm-dialog.component.html',
     styleUrls: ['./confirm-dialog.component.scss'],
     imports: [
-        NgIf,
         MatIconModule,
         MatButtonModule
     ],

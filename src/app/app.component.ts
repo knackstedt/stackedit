@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, ViewChild } from '@angular/core';
-import { NgForOf, NgIf, NgSwitch, NgSwitchCase, NgSwitchDefault } from '@angular/common';
+
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -32,23 +32,18 @@ export const sleep = ms => new Promise(r => setTimeout(r, ms));
     styleUrls: ['./app.component.scss'],
     standalone: true,
     imports: [
-        NgIf,
-        NgForOf,
-        NgSwitch,
-        NgSwitchCase,
-        NgSwitchDefault,
-        StackEditorComponent,
-        VscodeComponent,
-        FetchPageComponent,
-        DiagramComponent,
-        MenuComponent,
-        MatTabsModule,
-        MatIconModule,
-        MatTooltipModule,
-        MatButtonModule,
-        MenuDirective,
-        AngularSplitModule
-    ]
+    StackEditorComponent,
+    VscodeComponent,
+    FetchPageComponent,
+    DiagramComponent,
+    MenuComponent,
+    MatTabsModule,
+    MatIconModule,
+    MatTooltipModule,
+    MatButtonModule,
+    MenuDirective,
+    AngularSplitModule
+]
 })
 export class AppComponent {
     @ViewChild(MenuComponent) menu: MenuComponent;

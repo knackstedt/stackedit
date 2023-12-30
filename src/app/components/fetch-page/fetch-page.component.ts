@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { VscodeComponent } from '@dotglitch/ngx-common';
 import { Page } from '../../types/page';
-import { CommonModule } from '@angular/common';
+
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -19,7 +19,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     templateUrl: './fetch-page.component.html',
     styleUrls: ['./fetch-page.component.scss'],
     imports: [
-        CommonModule,
         FormsModule,
         MatSelectModule,
         MatInputModule,

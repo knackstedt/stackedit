@@ -1,7 +1,6 @@
 import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
 import { WrappableComponent } from './excalidraw';
-import { ForwardRef } from '@excalidraw/excalidraw/types/utility-types';
-import { AppState, BinaryFiles, ExcalidrawAPIRefValue, ExcalidrawInitialDataState, Gesture, LibraryItems, PointerDownState, UIAppState } from '@excalidraw/excalidraw/types/types';
+import { AppState, BinaryFiles, ExcalidrawInitialDataState, Gesture, LibraryItems, PointerDownState, UIAppState } from '@excalidraw/excalidraw/types/types';
 import { ExcalidrawElement, ExcalidrawEmbeddableElement, NonDeleted, NonDeletedExcalidrawElement, Theme } from '@excalidraw/excalidraw/types/element/types';
 import { ClipboardData } from '@excalidraw/excalidraw/types/clipboard';
 import { Language } from '@excalidraw/excalidraw/types/i18n';
@@ -21,7 +20,6 @@ export class ExcalidrawComponent extends ReactMagicWrapperComponent {
 
     @Input() initialData?: ExcalidrawInitialDataState | null | Promise<ExcalidrawInitialDataState | null>;
     @Input() appState?: Object;
-    @Input() excalidrawRef?: ForwardRef<ExcalidrawAPIRefValue>;
     @Input() isCollaborating?: boolean;
     @Input() langCode?: Language["code"];
     @Input() viewModeEnabled?: boolean;

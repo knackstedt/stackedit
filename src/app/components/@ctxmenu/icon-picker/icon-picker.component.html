@@ -12,9 +12,14 @@
 </div>
 
 <div class="icon-container">
-    <button mat-icon-button *ngFor="let icon of searchIcons" (click)="setIcon(icon)">
-        <mat-icon [fontIcon]="icon" [style.color]="icon == page?.icon ? '#fff' : ''"></mat-icon>
-    </button>
+    @for (icon of searchIcons; track icon) {
+        <button mat-icon-button (click)="setIcon(icon)">
+            <mat-icon
+                [fontIcon]="icon"
+                [style.color]="icon == page?.icon ? '#fff' : ''"
+            />
+        </button>
+    }
 </div>
 
 

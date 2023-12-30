@@ -10,7 +10,9 @@
                     [(value)]="page.options['method']"
                     (valueChange)="pages.savePage(page)"
                 >
-                    <mat-option *ngFor="let method of methods" [value]="method">{{method}}</mat-option>
+                    @for (method of methods; track method) {
+                        <mat-option [value]="method">{{method}}</mat-option>
+                    }
                 </mat-select>
             </mat-form-field>
 
@@ -43,26 +45,28 @@
             <mat-tab-group style="flex: 1 1 100%">
                 <mat-tab label="Params">
                     <div class="tab-container">
-                        <div *ngFor="let par of page.options['params']" class="row">
-                            <mat-form-field style="flex: 1; width: 50%">
-                                <mat-label>parameter</mat-label>
-                                <input
-                                    matInput
-                                    type="text"
-                                    [(ngModel)]="par.key"
-                                    (ngModelChange)="pages.savePage(page)"
-                                >
-                            </mat-form-field>
-                            <mat-form-field style="flex: 1; width: 50%">
-                                <mat-label>value</mat-label>
-                                <input
-                                    matInput
-                                    type="text"
-                                    [(ngModel)]="par.value"
-                                    (ngModelChange)="pages.savePage(page)"
-                                >
-                            </mat-form-field>
-                        </div>
+                        @for (par of page.options['params']; track par) {
+                            <div class="row">
+                                <mat-form-field style="flex: 1; width: 50%">
+                                    <mat-label>parameter</mat-label>
+                                    <input
+                                        matInput
+                                        type="text"
+                                        [(ngModel)]="par.key"
+                                        (ngModelChange)="pages.savePage(page)"
+                                    >
+                                </mat-form-field>
+                                <mat-form-field style="flex: 1; width: 50%">
+                                    <mat-label>value</mat-label>
+                                    <input
+                                        matInput
+                                        type="text"
+                                        [(ngModel)]="par.value"
+                                        (ngModelChange)="pages.savePage(page)"
+                                    >
+                                </mat-form-field>
+                            </div>
+                        }
                         <button mat-flat-button (click)="page.options['params'].push({key: '', value: ''})">
                             <mat-icon>add</mat-icon>
                             add
@@ -71,26 +75,28 @@
                 </mat-tab>
                 <mat-tab label="Headers">
                     <div class="tab-container">
-                        <div *ngFor="let header of page.options['headers']" class="row">
-                            <mat-form-field style="flex: 1; width: 50%">
-                                <mat-label>header</mat-label>
-                                <input
-                                    matInput
-                                    type="text"
-                                    [(ngModel)]="header.key"
-                                    (ngModelChange)="pages.savePage(page)"
-                                >
-                            </mat-form-field>
-                            <mat-form-field style="flex: 1; width: 50%">
-                                <mat-label>value</mat-label>
-                                <input
-                                    matInput
-                                    type="text"
-                                    [(ngModel)]="header.value"
-                                    (ngModelChange)="pages.savePage(page)"
-                                >
-                            </mat-form-field>
-                        </div>
+                        @for (header of page.options['headers']; track header) {
+                            <div class="row">
+                                <mat-form-field style="flex: 1; width: 50%">
+                                    <mat-label>header</mat-label>
+                                    <input
+                                        matInput
+                                        type="text"
+                                        [(ngModel)]="header.key"
+                                        (ngModelChange)="pages.savePage(page)"
+                                    >
+                                </mat-form-field>
+                                <mat-form-field style="flex: 1; width: 50%">
+                                    <mat-label>value</mat-label>
+                                    <input
+                                        matInput
+                                        type="text"
+                                        [(ngModel)]="header.value"
+                                        (ngModelChange)="pages.savePage(page)"
+                                    >
+                                </mat-form-field>
+                            </div>
+                        }
                         <button mat-flat-button (click)="page.options['headers'].push({key: '', value: ''})">
                             <mat-icon>add</mat-icon>
                             add
@@ -138,23 +144,27 @@
             </mat-tab>
             <mat-tab label="Headers">
                 <div class="tab-container">
-                    <div *ngIf="!resultHeaders || resultHeaders.length == 0">No headers to show.</div>
-                    <div *ngFor="let header of resultHeaders" class="row">
-                        <mat-form-field style="flex: 1; width: 50%">
-                            <input matInput
-                                type="text"
-                                [value]="header[0]"
-                                readonly="true"
-                            >
-                        </mat-form-field>
-                        <mat-form-field style="flex: 1; width: 50%">
-                            <input matInput
-                                type="text"
-                                [value]="header[1]"
-                                readonly="true"
-                            >
-                        </mat-form-field>
-                    </div>
+                    @if (!resultHeaders || resultHeaders.length == 0) {
+                        <div>No headers to show.</div>
+                    }
+                    @for (header of resultHeaders; track header) {
+                        <div class="row">
+                            <mat-form-field style="flex: 1; width: 50%">
+                                <input matInput
+                                    type="text"
+                                    [value]="header[0]"
+                                    readonly="true"
+                                >
+                            </mat-form-field>
+                            <mat-form-field style="flex: 1; width: 50%">
+                                <input matInput
+                                    type="text"
+                                    [value]="header[1]"
+                                    readonly="true"
+                                >
+                            </mat-form-field>
+                        </div>
+                    }
                 </div>
             </mat-tab>
             <!-- <mat-tab label="Cookies"></mat-tab> -->

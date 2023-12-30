@@ -1,4 +1,4 @@
-import { NgIf } from '@angular/common';
+
 import { Component, Inject, OnInit } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -14,7 +14,6 @@ import { StackEditorComponent } from '../../../editor.component';
     templateUrl: './image-insert.component.html',
     styleUrls: ['./image-insert.component.scss'],
     imports: [
-        NgIf,
         MatIconModule,
         MatTooltipModule,
         MatInputModule,

@@ -14,25 +14,28 @@
         <mat-form-field>
             <mat-label>Type</mat-label>
             <mat-select [(value)]="page.kind">
-                <mat-option
-                    *ngFor="let kind of PageKinds"
-                    [value]="kind.id"
-                >
-                    {{kind.label}}
-                </mat-option>
+                @for (kind of PageKinds; track kind) {
+                    <mat-option
+                        [value]="kind.id"
+                    >
+                        {{kind.label}}
+                    </mat-option>
+                }
             </mat-select>
         </mat-form-field>
 
-        <ng-container *ngIf="page.kind == 'code'">
+        @if (page.kind == 'code') {
+
             <mat-form-field>
                 <mat-label>Language</mat-label>
                 <mat-select [(value)]="page.options['language']">
-                    <mat-option
-                        *ngFor="let language of languages"
-                        [value]="language"
-                    >
-                        {{language}}
-                    </mat-option>
+                    @for (language of languages; track language) {
+                        <mat-option
+                            [value]="language"
+                        >
+                            {{language}}
+                        </mat-option>
+                    }
                 </mat-select>
             </mat-form-field>
 
@@ -66,7 +69,8 @@
                 <mat-label>Tab Size</mat-label>
                 <input matInput type="number" [(ngModel)]="page.options['tabSize']" [value]="2">
             </mat-form-field>
-        </ng-container>
+
+        }
 
         <a href="https://fonts.google.com/icons?icon.set=Material+Icons&selected=Material+Icons+Outlined:settings:&icon.style=Outlined"></a>
         <mat-form-field>

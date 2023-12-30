@@ -1,7 +1,6 @@
 import { Component, Input } from '@angular/core';
-import { NgForOf, NgIf } from '@angular/common';
+
 import { MatIconModule } from '@angular/material/icon';
-import { MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 
 @Component({
@@ -9,8 +8,6 @@ import { MatButtonModule } from '@angular/material/button';
     templateUrl: './tag-picker.component.html',
     styleUrls: ['./tag-picker.component.scss'],
     imports: [
-        NgIf,
-        NgForOf,
         MatIconModule,
         MatButtonModule
     ],

@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Inject, InjectionToken, Input, Optional, Output, ViewChild, ViewContainerRef } from '@angular/core';
-import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
+import { NgClass, NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TooltipDirective, MenuDirective, ThemeService } from '@dotglitch/ngx-common';
@@ -89,16 +89,13 @@ export const NGX_STACKEDIT_CONFIG = new InjectionToken<StackEditConfig>('stacked
     templateUrl: './editor.component.html',
     styleUrls: ['./editor.component.scss'],
     imports: [
-        NgIf,
-        NgFor,
         NgClass,
         NgStyle,
         MatIconModule,
         MatTooltipModule,
         TooltipDirective,
         MenuDirective,
-        ToolbarComponent,
-        // StatusbarComponent
+        ToolbarComponent
     ],
     standalone: true
 })
