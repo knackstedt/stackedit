@@ -28,7 +28,7 @@
       "dom"
     ],
     "paths": {
-      "path": ["src/polyfills.ts"]
+      "path": ["src/empty.ts"]
     },
     "typeRoots": [
         "node_modules/@types",
