@@ -3,6 +3,9 @@ type Tag = {
     value: string;
 }
 
+/**
+ * List of known page kinds for edit dialog dropdown
+ */
 export const PageKinds = [
     { id: "markdown", label: "Markdown" },
     { id: "canvas", label: "Diagram" },
@@ -17,21 +20,19 @@ export type Page = {
     /**
      * markdown => normal Stackedit markdown file (with
      *      partner json file)
-     * markdown-raw => raw markdown file. No additional features
+     * raw => raw file. No additional features
      *      can be enabled on it.
-     *      - Exclusive to Tauri mode
      * canvas => WIP
      * code => any text file
      * fetch => postman-like interface
      */
     kind: "markdown" |
-          "markdown-raw" |
+          "raw" |
           "canvas" |
           "code" |
           "fetch";
     name?: string;
     autoName?: boolean;
-    content: string;
     order?: number;
     expanded?: boolean;
     icon?: string; // mat icon
@@ -45,6 +46,20 @@ export type Page = {
     created: number;
     modified: number;
     deleted?: number;
+
+
+    /**
+     * Computed properties:
+     * These shall not be saved to disk.
+     */
+    hasLoaded?: boolean;
+    content?: string;
     children?: Page[];
+    /**
+     * If the tab is being previewed (not completely added to tab list)
+     */
+    isPreviewTab?: true;
+    metadataEntry?: FileSystemFileHandle;
+    fileEntry?: FileSystemFileHandle;
 };
 
