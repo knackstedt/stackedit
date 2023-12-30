@@ -3,35 +3,50 @@
 <div
     class="contents"
 >
-    <div
-        class="editor markdown-highlighting"
-        [class.linenumbers]="showLineNumbers"
+    <ng-scrollbar
+        class="editor-container"
         [class.hidden]="mode != 'edit'"
         [class.expand]="showPreview == 'off' || !showPreview"
         [class.show-toc]="showToc && showToc != 'off'"
-        (click)="editorSvc.clEditor.focus()"
     >
-        <div class="editor-underlay"></div>
-        <div class="editor-inner"></div>
-        <div class="editor-overlay-1"></div>
-        <div class="editor-overlay-2"></div>
-    </div>
-    <div class="preview"
+        <div
+            class="editor markdown-highlighting"
+            style="width: 100%"
+            [class.linenumbers]="showLineNumbers"
+            (click)="editorSvc.clEditor.focus()"
+        >
+            <div class="editor-underlay"></div>
+            <div class="editor-inner"></div>
+            <div class="editor-overlay-1"></div>
+            <div class="editor-overlay-2"></div>
+        </div>
+    </ng-scrollbar>
+
+    <ng-scrollbar
+        class="preview-container"
         [class.hidden]="showPreview == 'off' || !showPreview"
         [class.expand]="mode != 'edit'"
         [class.show-toc]="showToc && showToc != 'off'"
     >
-        <div class="preview__inner-1">
-            <div class="preview__inner-2"></div>
+        <div
+            class="preview"
+            style="width: 100%"
+        >
+            <div class="preview__inner"></div>
         </div>
-    </div>
+    </ng-scrollbar>
+
     <!-- TODO: -->
-    <div
-        class="toc"
+    <ng-scrollbar
+        class="toc-container"
         [style.width]="(showToc == 'off' || !showToc)  ? '0px' : '240px'"
     >
-        <div class="toc__inner"></div>
-    </div>
+        <div
+            class="toc"
+        >
+            <div class="toc__inner"></div>
+        </div>
+    </ng-scrollbar>
 </div>
 
 <!-- <app-statusbar [style.flex]="'0 0 ' + (mode != 'viewonly' ? 22 : 0) + 'px'"></app-statusbar> -->

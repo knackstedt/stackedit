@@ -114,11 +114,14 @@
     position: relative;
 }
 
+ng-scrollbar {
+    width: 100%;
+}
 
 :host ::ng-deep {
     --line-height: 24px;
 
-    .editor, .preview {
+    .editor-container, .preview-container {
         // Take off 1 px to have a slight space between panels
         width: calc(50% - 1px);
         position: absolute;
@@ -136,8 +139,43 @@
         }
     }
 
+    .editor-container {
+        left: 0;
+
+        .hide {
+            display: none
+        }
+
+        &.hidden {
+            left: -50%
+        }
+    }
+
+    .preview-container {
+        right: 0;
+
+        &.hidden {
+            right: -50%
+        }
+
+        &.show-toc:not(.hidden) {
+            right: 240px;
+        }
+    }
+
+    .toc-container {
+        position: absolute;
+        transition: width 200ms ease;
+        right: 0;
+        width: 240px;
+
+        &.hidden {
+            right: -240px
+        }
+    }
+
     .editor {
-        overflow: auto;
+        // overflow: auto;
         // font-family: var(--stackedit-font-family);
         font-family: var(--stackedit-font-family-mono);
         background-color: var(--editor-background-color);
@@ -149,7 +187,6 @@
         word-break: break-word;
         word-wrap: break-word;
         height: 100%;
-        left: 0;
 
         > div {
             max-width: 960px;
@@ -225,14 +262,6 @@
             }
         }
 
-        .hide {
-            display: none
-        }
-
-        &.hidden {
-            left: -50%
-        }
-
         .editor-underlay,
         .editor-overlay-1,
         .editor-overlay-2 {
@@ -306,18 +335,6 @@
         background-color: var(--preview-background-color);
         line-height: 24px;
         height: 100%;
-        right: 0;
-        overflow: hidden;
-
-        .preview__inner-1 {
-            width: 100%;
-            height: 100%
-        }
-
-        .preview__inner-1 {
-            overflow: auto;
-            // scroll-behavior: smooth;
-        }
 
         .cl-preview-section {
             min-width: 100%;
@@ -347,23 +364,17 @@
             }
         }
 
-        &.hidden {
-            right: -50%
-        }
-
-        &.show-toc:not(.hidden) {
-            right: 240px
-        }
-    }
-
-    .toc {
-        position: absolute;
-        transition: width 200ms ease;
-        right: 0;
-        width: 240px;
-
-        &.hidden {
-            right: -240px
+        .focus-highlight {
+            position: relative;
+            overflow: visible;
+            &::before {
+                content: "";
+                border-radius: 3px;
+                position: absolute;
+                inset: 0 -12px;
+                background-color: var(--focus-highlight-background-color);
+                transition: background-color 400ms ease;
+            }
         }
     }
 
@@ -894,7 +905,7 @@
         position: relative;
         color: var(--text-header-color);
         cursor: pointer;
-        font-size: 9px;
+        font-size: 12px;
         padding: 10px 20px 40px;
         white-space: nowrap;
         user-select: none;
@@ -940,12 +951,12 @@
         }
     }
 
-    .preview__inner-2 {
+    .preview__inner {
         margin: 0;
         padding: 24px;
     }
 
-    .preview__inner-2>:first-child>:first-child {
+    .preview__inner>:first-child>:first-child {
         margin-top: 0
     }
 
@@ -1124,6 +1135,10 @@
         .token.indent-space {
             letter-spacing: .45em;
         }
+    }
+
+    .ng-scroll-content {
+        width: 100%;
     }
 }
 

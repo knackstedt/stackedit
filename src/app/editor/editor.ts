@@ -137,14 +137,14 @@ export class Editor extends EventEmittingClass {
                 );
             };
 
-            editorElt.addEventListener('scroll', evt => {
+            editorElt.parentElement.parentElement.addEventListener('scroll', evt => {
                 if (scrollMode == "editor" || lastScrollEvent + scrollDebounceTime < Date.now()) {
                     scrollMode = "editor";
                     lastScrollEvent = Date.now();
                     onScroll(evt);
                 }
             });
-            previewElt.parentNode.addEventListener('scroll', evt => {
+            previewElt.parentElement.parentElement.parentElement.addEventListener('scroll', evt => {
                 if (scrollMode == "preview" || lastScrollEvent + scrollDebounceTime < Date.now()) {
                     scrollMode = "preview";
                     lastScrollEvent = Date.now();
@@ -558,13 +558,13 @@ export class Editor extends EventEmittingClass {
     /**
      * Get an object describing the position of the scroll bar in the file.
      */
-    getScrollPosition(elt) {
+    getScrollPosition(elt: HTMLElement) {
 
         const dimensionKey = elt === this.editorElt
             ? 'editorDimension'
             : 'previewDimension';
 
-        const { scrollTop } = dimensionKey == "editorDimension" ? elt : elt.parentNode;
+        const { scrollTop } = dimensionKey == "editorDimension" ? elt.parentElement.parentElement : elt.parentElement.parentElement.parentElement;
 
         let result;
 
@@ -595,15 +595,18 @@ export class Editor extends EventEmittingClass {
         const sectionDesc: SectionDesc = this.previewCtxMeasured?.sectionDescList[scrollPosition?.sectionIdx];
         if (!sectionDesc) return;
 
+        const editorScroller = this.editorElt.parentElement.parentElement;
+        const previewScroller = this.previewElt.parentElement.parentElement.parentElement;
+
         const editorScrollTop = sectionDesc.editorDimension.topOffset +
             (sectionDesc.editorDimension.height * scrollPosition.posInSection);
 
-        this.editorElt.scrollTop = editorScrollTop;
+        editorScroller.scrollTo(0, editorScrollTop);
 
         const previewScrollTop = sectionDesc.previewDimension.topOffset +
             (sectionDesc.previewDimension.height * scrollPosition.posInSection);
 
-        this.previewElt.parentElement.scrollTop = previewScrollTop;
+        previewScroller.scrollTo(0, previewScrollTop);
     }
 
     /**
@@ -693,13 +696,15 @@ export class Editor extends EventEmittingClass {
      * Scroll the preview (or the editor if preview is hidden) to the specified anchor
      * @unused
      */
-    scrollToAnchor(anchor) {
+    scrollToAnchor(anchor: string) {
         let scrollTop = 0;
-        const scrollerElt = this.previewElt.parentNode as HTMLElement;
+        const scrollerElt = this.previewElt.parentElement.parentElement.parentElement as HTMLElement;
         const elt = document.getElementById(anchor);
-        if (elt) {
-            scrollTop = elt.offsetTop;
-        }
+
+        if (!elt) return;
+
+        scrollTop = Math.min(Math.max(elt.offsetTop, 0), );
+
         const maxScrollTop = scrollerElt.scrollHeight - scrollerElt.offsetHeight;
         if (scrollTop < 0) {
             scrollTop = 0;
@@ -737,8 +742,6 @@ export class Editor extends EventEmittingClass {
     async refreshPreview() {
         const sectionDescList: SectionDesc[] = [];
 
-        let sectionPreviewElt;
-        let sectionTocElt;
         let sectionIdx = 0;
         let sectionDescIdx = 0;
         let insertBeforePreviewElt = this.previewElt.firstChild;
@@ -784,10 +787,10 @@ export class Editor extends EventEmittingClass {
                     sectionDesc?.section?.monaco?.['_dispose']();
 
                     sectionDescIdx++;
-                    sectionPreviewElt = insertBeforePreviewElt;
+                    const sectionPreviewElt = insertBeforePreviewElt;
                     insertBeforePreviewElt = insertBeforePreviewElt.nextSibling;
                     this.previewElt.removeChild(sectionPreviewElt);
-                    sectionTocElt = insertBeforeTocElt;
+                    const sectionTocElt = insertBeforeTocElt;
                     insertBeforeTocElt = insertBeforeTocElt.nextSibling;
                     this.tocElt.removeChild(sectionTocElt);
                 }
@@ -796,7 +799,7 @@ export class Editor extends EventEmittingClass {
                     sectionIdx++;
 
                     // Create preview section element
-                    sectionPreviewElt = document.createElement('div');
+                    const sectionPreviewElt = document.createElement('div');
                     sectionPreviewElt.className = 'cl-preview-section';
                     sectionPreviewElt.innerHTML = html;
 
@@ -811,7 +814,7 @@ export class Editor extends EventEmittingClass {
                     this.sectionPreview(sectionPreviewElt, this.ngEditor.options.markdownIt, true);
 
                     // Make some anchors external links
-                    [...sectionPreviewElt.querySelectorAll('a')].forEach(el => {
+                    [...sectionPreviewElt.querySelectorAll('a') as any].forEach(el => {
                         const url = el.getAttribute('href');
 
                         // Make external links open in a new tab.
@@ -825,11 +828,27 @@ export class Editor extends EventEmittingClass {
                     ];
 
                     // Create TOC section element
-                    sectionTocElt = document.createElement('div');
+                    const sectionTocElt = document.createElement('div');
                     sectionTocElt.className = 'cl-toc-section';
                     const headingElt = sectionPreviewElt.querySelector('h1, h2, h3, h4, h5, h6');
+
+                    sectionTocElt.onclick = () => {
+
+                        sectionPreviewElt.scrollIntoView();
+                        sectionPreviewElt.classList.add('focus-highlight');
+                        sectionPreviewElt.style.setProperty('--focus-highlight-background-color', '#69f0ae88');
+
+                        setTimeout(() => {
+                            sectionPreviewElt.style.setProperty('--focus-highlight-background-color', '#0000');
+
+                            setTimeout(() => {
+                                sectionPreviewElt.classList.remove('focus-highlight');
+                            }, 600);
+                        }, 200);
+                    }
+
                     if (headingElt) {
-                        const clonedElt = headingElt.cloneNode(true);
+                        const clonedElt = headingElt.cloneNode(true) as HTMLElement;
                         clonedElt.removeAttribute('id');
                         sectionTocElt.appendChild(clonedElt);
                     }

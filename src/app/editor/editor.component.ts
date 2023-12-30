@@ -11,6 +11,8 @@ import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { Editor } from './editor';
 import { installMonaco, waitForMonacoInstall } from './monaco';
 import { Subscription } from 'rxjs';
+import { NgScrollbarModule } from 'ngx-scrollbar';
+import { AngularSplitModule } from 'angular-split';
 
 type StackEditConfig = Partial<{
     /**
@@ -95,7 +97,9 @@ export const NGX_STACKEDIT_CONFIG = new InjectionToken<StackEditConfig>('stacked
         MatTooltipModule,
         TooltipDirective,
         MenuDirective,
-        ToolbarComponent
+        ToolbarComponent,
+        NgScrollbarModule,
+        AngularSplitModule
     ],
     standalone: true
 })
@@ -255,7 +259,7 @@ export class StackEditorComponent {
         this.$el.setAttribute("version", "__VERSION__");
 
         const editorElt = this.$el.querySelector('.editor') as HTMLElement;
-        const previewElt = this.$el.querySelector('.preview__inner-2') as HTMLElement;
+        const previewElt = this.$el.querySelector('.preview__inner') as HTMLElement;
         const tocElt = this.$el.querySelector('.toc__inner') as HTMLElement;
         this.editorSvc = new Editor(this, editorElt, previewElt, tocElt);
         this.toolbar.bindEditorEvents();
