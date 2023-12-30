@@ -114,7 +114,7 @@ export class PagesService {
 
         // Raw markdown files are always saved
         // without metadata.
-        if (page.kind == "markdown-raw") {
+        if (page.kind == "raw") {
             await this.files.saveFileContents(page);
             return;
         }

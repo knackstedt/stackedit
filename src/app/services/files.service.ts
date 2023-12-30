@@ -147,7 +147,7 @@ export class FilesService extends Subject<any> {
 
                             pages.push({
                                 path: entry.path,
-                                kind: "markdown-raw",
+                                kind: "raw",
                                 name: entry.path.split('/').pop(),
                                 modified: 0,
                                 created: 0,
