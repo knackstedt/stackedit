@@ -34,6 +34,12 @@
         crossorigin="anonymous"></script>
     <script>
         window.EXCALIDRAW_ASSET_PATH="/lib/excalidraw/";
+        // Polyfill process so shitty react libraries can actually startup >.>
+        window.process = {
+            env: {
+                NODE_ENV: "development"// : "production"
+            }
+        }
     </script>
 </head>
 <body class="dark">
