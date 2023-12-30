@@ -87,10 +87,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "dotglitch:build:production"
+              "buildTarget": "dotglitch:build:production"
             },
             "development": {
-              "browserTarget": "dotglitch:build:development"
+              "buildTarget": "dotglitch:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -98,7 +98,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "dotglitch:build"
+            "buildTarget": "dotglitch:build"
           }
         }
       }
