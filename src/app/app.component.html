@@ -16,6 +16,7 @@
         <mat-tab-group
             style="flex: 1"
             [(selectedIndex)]="pages.selectedTabIndex"
+            (selectedIndexChange)="pages.loadCurrentPageContent()"
         >
             @for (page of pages.tabs; track page) {
                 <mat-tab>
@@ -24,6 +25,7 @@
                             [ngx-contextmenu]="tabCtxMenu"
                             [ngx-menu-context]="page"
                             (pointerdown)="$event.which == 2 && closeTab(page)"
+                            [style.font-style]="page.isPreviewTab ? 'italic' : ''"
                         >
                             <mat-icon [fontIcon]="page.icon || 'edit_document'"></mat-icon>
                             <span style="flex: 1">

@@ -69,7 +69,7 @@ app-entry-list {
         border-radius: 5px;
 
         &:hover {
-            background-color: var(--menu-item-hover-color) !important;
+            background-color: var(--menu-item-hover-background-color) !important;
         }
     }
 
@@ -125,7 +125,7 @@ app-entry-list {
     }
 
     span:hover {
-        background-color: var(--menu-item-hover-color);
+        background-color: var(--menu-item-hover-background-color);
     }
 }
 

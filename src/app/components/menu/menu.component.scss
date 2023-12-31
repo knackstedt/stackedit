@@ -28,13 +28,13 @@
     }
 
     &:not(.collapsed) .item:hover{
-        background-color: var(var(--menu-item-hover-color));
+        background-color: var(--menu-item-hover-background-color);
     }
 
     &.collapsed .item {
         .icon {
             &:hover {
-                background-color: var(var(--menu-item-hover-color));
+                background-color: var(--menu-item-hover-background-color);
             }
         }
     }

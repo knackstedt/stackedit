@@ -7,6 +7,7 @@ import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { isDevMode, importProvidersFrom } from '@angular/core';
 import { AppComponent } from './app/app.component';
+import { LazyLoaderModule } from '@dotglitch/ngx-common';
 
 const isTauriEnvironment = !!window['__TAURI__'];
 
@@ -16,6 +17,9 @@ bootstrapApplication(AppComponent, {
             CommonModule,
             BrowserModule,
             MatDialogModule,
+            LazyLoaderModule.forRoot({
+                entries: [],
+            }),
             ServiceWorkerModule.register('ngsw-worker.js', {
                 enabled: !isTauriEnvironment && !isDevMode(),
                 // Register the ServiceWorker as soon as the application is stable

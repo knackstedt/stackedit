@@ -37,8 +37,12 @@ a {
     --menu-guide-color: #313131;
     --menu-text-color: #ccc;
     --menu-background-color: #181818;
-    --menu-item-hover-color: #292c2d;
-    --splitter-hover-background-color: rgb(7, 250, 135);
+    --menu-item-background-color: #1c1e1f;
+    --menu-item-fill-color: #69f0aeaa;
+    --menu-item-selected-fill-color: #69f0ae;
+    --button-primary-background-color: #69f0ae;
+    --menu-item-hover-background-color: #292c2d;
+    --splitter-hover-background-color: #07fa87;
     --splitter-background-color: #555;
     --splitter-transition: 200ms ease;
 }
@@ -50,7 +54,7 @@ a {
     --menu-guide-color: #bebebe;
     --menu-text-color: #333;
     --menu-background-color: #181818;
-    --menu-item-hover-color: #292c2d;
+    --menu-item-hover-background-color: #292c2d;
     --splitter-hover-background-color: rgb(7, 250, 135);
     --splitter-background-color: #999;
 }
