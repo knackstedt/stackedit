@@ -8,12 +8,13 @@
         [class.hidden]="mode != 'edit'"
         [class.expand]="showPreview == 'off' || !showPreview"
         [class.show-toc]="showToc && showToc != 'off'"
+        style="background-color: var(--editor-background-color); cursor: text"
+        (click)="editorSvc.clEditor.focus()"
     >
         <div
             class="editor markdown-highlighting"
             style="width: 100%"
             [class.linenumbers]="showLineNumbers"
-            (click)="editorSvc.clEditor.focus()"
         >
             <div class="editor-underlay"></div>
             <div class="editor-inner"></div>
@@ -27,6 +28,7 @@
         [class.hidden]="showPreview == 'off' || !showPreview"
         [class.expand]="mode != 'edit'"
         [class.show-toc]="showToc && showToc != 'off'"
+        style="background-color: var(--preview-background-color)"
     >
         <div
             class="preview"
