@@ -228,7 +228,10 @@ export default (Prism) => {
         },
     });
 
-    Prism.languages.insertBefore('markdown', 'comment', { 'span-styled': spanStyled });
+    Prism.languages.insertBefore('markdown', 'comment', {
+        'comment': /<!--.*?-->/s,
+        'span-styled': spanStyled
+    });
     const basicRules = {
         color: Prism.languages.markdown.color,
         bold: Prism.languages.markdown.bold,
