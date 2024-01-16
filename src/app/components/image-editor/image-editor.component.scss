@@ -1,0 +1,67 @@
+:host {
+    display: block;
+    width: 75vw;
+    height: 85vh;
+}
+
+
+// Dark theme override
+::ng-deep .dark app-image-editor,
+::ng-deep .dark .SfxModal-Wrapper {
+
+    .FIE_color-picker-triggerer {
+        background-color: var(--menu-item-background-color);
+    }
+
+    .SfxInput-root {
+        background-color: var(--menu-item-background-color);
+        border: 1px solid var(--menu-guide-color);
+        color: #eee;
+    }
+
+    // .FIE_spinner-wrapper,
+    // &>div {
+    //     background-color: var(--menu-background-color);
+    // }
+
+    // .FIE_tab {
+    //     background-color: var(--menu-item-background-color);
+
+    //     &:hover {
+    //         background-color: var(--menu-item-hover-background-color);
+    //         color: #000;
+    //     }
+    // }
+
+    // label {
+    //     color: #eee;
+    // }
+
+    // svg {
+    //     color: var(--menu-item-fill-color);
+    // }
+
+    // .FIE_tab[aria-selected='true'] * {
+    //     color: var(--menu-item-selected-fill-color);
+    // }
+
+    // .FIE_text-tool-button {
+    //     background-color: var(--button-primary-background-color);
+    //     color: #000;
+    // }
+
+    // .FIE_canvas-node {
+    //     background-color: var(--menu-item-hover-background-color);
+    //     border-radius: 6px;
+    // }
+
+    // .FIE_topbar {
+    //     border-bottom: 1px solid var(--splitter-background-color);
+    // }
+
+
+
+    // .FIE_carousel-item[aria-selected='true'] {
+    //     background: var(--button-primary-background-color);
+    // }
+}
