@@ -29,7 +29,7 @@
                                 style="width: 24px; height: 24px"
                                 [style.background-color]="color + 'ee'"
                                 [style.border-color]="color + ''"
-                                (click)="colorizeText(currentTextColor = color); dialog.close()"
+                                (click)="actions.colorizeText(currentTextColor = color); dialog.close()"
                                 (pointerenter)="ctx.color = color"
                             >
                             </div>
@@ -43,7 +43,7 @@
 
 <!-- Bold -->
 <mat-icon
-    (mousedown)="boldText(); $event.preventDefault()"
+    (mousedown)="actions.boldText(); $event.preventDefault()"
     [class.reflect]="cursorIsInBold"
     matTooltip="Bold"
 >
@@ -51,7 +51,7 @@
 </mat-icon>
 <!-- Italic -->
 <mat-icon
-    (mousedown)="italicizeText(); $event.preventDefault()"
+    (mousedown)="actions.italicizeText(); $event.preventDefault()"
     [class.reflect]="cursorIsInItalic"
     matTooltip="Italic"
 >
@@ -59,7 +59,7 @@
 </mat-icon>
 <!-- Strikethrough -->
 <mat-icon
-    (mousedown)="strikethroughText(); $event.preventDefault()"
+    (mousedown)="actions.strikethroughText(); $event.preventDefault()"
     [class.reflect]="cursorIsInStrikethrough"
     matTooltip="Strikethrough"
 >
@@ -70,7 +70,7 @@
 
 <!-- Quote -->
 <mat-icon
-    (mousedown)="blockQuoteText(); $event.preventDefault()"
+    (mousedown)="actions.blockQuoteText(); $event.preventDefault()"
     [class.reflect]="cursorIsInBlockquote"
     matTooltip="Blockquote"
 >
@@ -80,17 +80,17 @@
 <mat-icon
     matTooltip="Insert a Link"
     [class.reflect]="cursorIsInLink"
-    (mousedown)="openLinkDialog(); $event.preventDefault()"
+    (mousedown)="actions.openLinkDialog(); $event.preventDefault()"
 >
     link
 </mat-icon>
 
 <!-- Ordered list -->
-<mat-icon (mousedown)="insertOrderedList(); $event.preventDefault()" [class.reflect]="cursorIsInOrderedList" matTooltip="Ordered List">format_list_numbered</mat-icon>
+<mat-icon (mousedown)="actions.insertOrderedList(); $event.preventDefault()" [class.reflect]="cursorIsInOrderedList" matTooltip="Ordered List">format_list_numbered</mat-icon>
 <!-- Unordered list -->
-<mat-icon (mousedown)="insertList(); $event.preventDefault()" [class.reflect]="cursorIsInList" matTooltip="Unordered list">format_list_bulleted</mat-icon>
+<mat-icon (mousedown)="actions.insertList(); $event.preventDefault()" [class.reflect]="cursorIsInList" matTooltip="Unordered list">format_list_bulleted</mat-icon>
 <!-- Checklist -->
-<mat-icon (mousedown)="insertCheckList(); $event.preventDefault()" [class.reflect]="cursorIsInChecklist" matTooltip="Checklist">rule</mat-icon>
+<mat-icon (mousedown)="actions.insertCheckList(); $event.preventDefault()" [class.reflect]="cursorIsInChecklist" matTooltip="Checklist">rule</mat-icon>
 
 <!-- Table -->
 <mat-icon [ngx-tooltip]="tablePopup" [ngx-tooltip-config]="{ triggers: ['click'], position: 'bottom' }" [class.reflect]="cursorIsInTable">table_chart</mat-icon>
@@ -110,7 +110,7 @@
                                 class="col-cell"
                                 [class.selected]="ctx.cols >= col && ctx.rows >= row"
                                 (pointerenter)="ctx.cols = col; ctx.rows = row"
-                                (click)="insertTable(ctx.cols, ctx.rows); dialog.close()"
+                                (click)="actions.insertTable(ctx.cols, ctx.rows); dialog.close()"
                             ></div>
                         }
                     </div>
@@ -123,7 +123,7 @@
 <!-- Image -->
 <mat-icon
     matTooltip="Insert an image"
-    (mousedown)="openImageDialog(); $event.preventDefault()"
+    (mousedown)="actions.openImageDialog(); $event.preventDefault()"
 >
     add_photo_alternate
 </mat-icon>
@@ -131,7 +131,7 @@
 
 <!-- Inline code -->
 <mat-icon
-    (mousedown)="insertInlineCode(); $event.preventDefault()"
+    (mousedown)="actions.insertInlineCode(); $event.preventDefault()"
     [class.reflect]="cursorIsInInlineCode"
     matTooltip="Inline highlight"
 >
@@ -139,7 +139,7 @@
 </mat-icon>
 <!-- Code Block -->
 <mat-icon
-    (mousedown)="insertCodeBlock(); $event.preventDefault()"
+    (mousedown)="actions.insertCodeBlock(); $event.preventDefault()"
     [class.reflect]="cursorIsInCode"
     matTooltip="Code block"
 >

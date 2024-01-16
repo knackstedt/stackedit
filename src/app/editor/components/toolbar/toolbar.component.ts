@@ -11,6 +11,7 @@ import { StackEditorComponent } from '../../editor.component';
 import { MatDialog } from '@angular/material/dialog';
 import { ImageInsertComponent } from './image-insert/image-insert.component';
 import { LinkInsertComponent } from './link-insert/link-insert.component';
+import { EditorActions } from '../../editor-actions';
 
 @Component({
     selector: 'app-toolbar',
@@ -79,219 +80,19 @@ export class ToolbarComponent {
     cursorIsInCode = false;
     currentTextColor = "#f00";
 
-
-    colorizeText(color: string) {
-        this.wrapSelection(`<span style="color: ${color}">`, "</span>");
-    }
-
-    setTextFont(font: string) {
-        this.wrapSelection(`<span style="font-family: ${font}">`, "</span>");
-    }
-
-    boldText() {
-        this.wrapSelection("**", "**");
-    }
-
-    italicizeText() {
-        this.wrapSelection("_", "_");
-    }
-
-    strikethroughText() {
-        this.wrapSelection("~~", "~~");
-    }
-
-    blockQuoteText() {
-        this.wrapSelection("> ", '', null, true);
-    }
-
-    insertOrderedList() {
-        this.wrapSelection(" 1. ", '', null, true);
-    }
-
-    insertList() {
-        this.wrapSelection(" - ", '', null, true);
-    }
-
-    insertCheckList() {
-        this.wrapSelection(" - [ ] ", '', null, true);
-    }
-
-    insertInlineCode() {
-        this.wrapSelection("`", "`");
-    }
-
-    insertCodeBlock() {
-        // TODO: align to start of line
-        this.wrapSelection("```\n", "\n```", null, true);
-    }
-    insertComment() {
-        this.wrapSelection("<!-- ", " -->", null, true);
-    }
-
-    /**
-      * | Heading 1 |     |
-        | ---       | --- |
-        |           |     |
-     */
-    insertTable(cols: number, rows: number) {
-        let text: string[] = [];
-
-        for (let i = 0; i < rows + 2; i++) {
-            // Empty cell
-            let placeholder = ''.padStart(8 + (cols.toString().length), ' ');
-            let cells: string[] = [];
-
-            // If we're on the second row, we place dashes in the cell.
-            if (i == 1)
-                placeholder = ''.padStart(8 + (cols.toString().length), '-');
-
-            for (let j = 0; j < cols; j++) {
-                // If we're on the first row, we use "Heading 1" etc.
-                if (i == 0)
-                    placeholder = "Heading " + (j + 1);
-
-                cells.push(placeholder);
-            }
-
-            text.push("| " + cells.join(" | ") + " |");
-        }
-
-        const table = text.join('\n');
-        this.wrapSelection('', '\n' + table, null, true);
-    }
-
-    private keybindings: Subscription[] = [];
+    actions: EditorActions;
 
     constructor(
-        private readonly keyboard: KeyboardService,
         public readonly stackEditor: StackEditorComponent,
         private readonly dialog: MatDialog,
-        public readonly theme: ThemeService
-    ) { }
+        public readonly theme: ThemeService,
+    ) {
+        this.actions = new EditorActions(stackEditor, dialog);
+    }
 
     bindEditorEvents() {
         // Handle cursor position updates
         this.stackEditor.editorSvc.on("selectionRange", this.onSelectionChange.bind(this))
-
-        this.keybindings = [
-            this.keyboard.onKeyCommand({
-                label: "Comment",
-                key: "/",
-                ctrl: true
-            }).subscribe(this.insertComment.bind(this)),
-            this.keyboard.onKeyCommand({
-                label: "Bold",
-                key: "b",
-                ctrl: true
-            }).subscribe(this.boldText.bind(this)),
-            this.keyboard.onKeyCommand({
-                label: "Bold",
-                key: "*",
-                ctrl: true
-            }).subscribe(() => this.wrapSelection("**", "**")),
-            this.keyboard.onKeyCommand({
-                label: "Italic",
-                key: "i",
-                ctrl: true
-            }).subscribe(this.italicizeText.bind(this)),
-            this.keyboard.onKeyCommand({
-                label: "Bold",
-                key: "_",
-                ctrl: true
-            }).subscribe(this.italicizeText.bind(this)),
-            // this.keyboard.onKeyCommand({
-            //     label: "Select All",
-            //     key: "/",
-            //     ctrl: true
-            // }).subscribe(this.insertComment.bind(this)),
-            this.keyboard.onKeyCommand({
-                label: "Select Line",
-                key: "l",
-                ctrl: true
-            }).subscribe(() => {
-                const text = this.editor.getContent();
-                const { selectionStart, selectionEnd } = this.editor.selectionMgr;
-
-                // select the current line
-                if (selectionStart == selectionEnd) {
-                    const line = this.editor.getLine(selectionStart, text);
-                    this.editor.selectionMgr.setSelection(line.lineStart, line.lineEnd);
-                }
-                // Expand the selection to the start of the first line, and the end of the last line
-                // If that is already the case, select the next line below the end.
-                else {
-                    const startLine = this.editor.getLine(selectionStart, text);
-                    const endLine = this.editor.getLine(selectionEnd, text);
-
-                    // Select the next line below the selection
-                    if (startLine.lineStart == selectionStart && endLine.lineEnd == selectionEnd) {
-                        const nextLine = this.editor.getLine(endLine.lineEnd+1, text);
-
-                        this.editor.selectionMgr.setSelection(startLine.lineStart, nextLine.lineEnd);
-                    }
-                    // Expand the selection to the start and end of the first and last lines.
-                    else {
-                        this.editor.selectionMgr.setSelection(startLine.lineStart, endLine.lineEnd);
-                    }
-                }
-            }),
-            this.keyboard.onKeyCommand({
-                label: "Duplicate Current Line",
-                key: "d",
-                ctrl: true,
-                shift: true
-            }).subscribe(() => {
-                const text = this.editor.getContent();
-                const { selectionStart, selectionEnd } = this.editor.selectionMgr;
-
-                // Duplicate the current line
-                if (selectionStart == selectionEnd) {
-                    const line = this.editor.getLine(selectionStart, text);
-                    const copy = '\n' + line.line;
-                    const patched = text.slice(0, line.lineEnd) + copy + text.slice(line.lineEnd);
-
-                    this.editor.setContent(patched);
-
-                    // Run this on the next tick to give the browser time to settle things
-                    // Observe an issue on duplicating content at the last line.
-                    setTimeout(() => {
-                        this.editor.setSelection(selectionStart + copy.length, selectionEnd + copy.length);
-                    })
-                }
-                // Expand the selection to the start of the first line, and the end of the last line
-                // Duplicate the contents through the start and the end.
-                else {
-                    const startLine = this.editor.getLine(selectionStart, text);
-                    const endLine = this.editor.getLine(selectionEnd, text);
-                    const copyLines = '\n' + text.slice(startLine.lineStart, endLine.lineEnd);
-                    const patched = text.slice(0, endLine.lineEnd) + copyLines + text.slice(endLine.lineEnd);
-
-                    this.editor.setContent(patched);
-
-                    // Run this on the next tick to give the browser time to settle things
-                    // Observe an issue on duplicating content at the last line.
-                    setTimeout(() => {
-                        this.editor.setSelection(selectionStart + copyLines.length, selectionEnd + copyLines.length);
-                    })
-                }
-            }),
-            this.keyboard.onKeyCommand({
-                label: "BREAKPOINT",
-                key: "pause"
-            }).subscribe(() => {debugger})
-        ];
-    }
-
-    ngOnDestroy() {
-        this.keybindings.forEach(k => k.unsubscribe());
-    }
-
-    openImageDialog() {
-        this.dialog.open(ImageInsertComponent, { data: { stackEditor: this.stackEditor } })
-    }
-
-    openLinkDialog() {
-        this.dialog.open(LinkInsertComponent, { data: { stackEditor: this.stackEditor } })
     }
 
     async onSelectionChange() {

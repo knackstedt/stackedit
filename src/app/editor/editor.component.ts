@@ -2,7 +2,7 @@ import { Component, EventEmitter, Inject, InjectionToken, Input, Optional, Outpu
 import { NgClass, NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TooltipDirective, MenuDirective, ThemeService } from '@dotglitch/ngx-common';
+import { TooltipDirective, MenuDirective, ThemeService, DialogService, LazyLoaderService, CommandPaletteService } from '@dotglitch/ngx-common';
 import { MermaidConfig } from 'mermaid';
 
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
@@ -13,6 +13,8 @@ import { installMonaco, waitForMonacoInstall } from './monaco';
 import { Subscription } from 'rxjs';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { AngularSplitModule } from 'angular-split';
+import { MatDialog } from '@angular/material/dialog';
+import { KeyCommands } from './key-commands';
 
 type StackEditConfig = Partial<{
     /**
@@ -219,10 +221,15 @@ export class StackEditorComponent {
     private width = 0;
     private height = 0;
     private subscriptions: Subscription[];
+    private keyCommands: KeyCommands;
 
     constructor(
         private readonly viewContainer: ViewContainerRef,
-        private readonly themeService: ThemeService,
+        private readonly lazyLoader: LazyLoaderService,
+        private readonly commandPalette: CommandPaletteService,
+        public  readonly themeService: ThemeService,
+        public  readonly dialog: DialogService,
+        public  readonly matDialog: MatDialog,
         @Optional() @Inject(NGX_STACKEDIT_CONFIG) private config: StackEditConfig = {}
     ) {
         this.options = {
@@ -236,7 +243,13 @@ export class StackEditorComponent {
                     t == "dark" ? "vs-dark" : "vs"
                 );
             })
-        ]
+        ];
+
+        lazyLoader.registerComponent({
+            id: "image-editor",
+            group: "@dotglitch",
+            load: () => import('../components/image-editor/image-editor.component')
+        })
     }
 
     ngOnChanges() {
@@ -264,6 +277,8 @@ export class StackEditorComponent {
         this.editorSvc = new Editor(this, editorElt, previewElt, tocElt);
         this.toolbar.bindEditorEvents();
 
+        this.keyCommands = new KeyCommands(editorElt, this.commandPalette, this, this.matDialog);
+
         // Bind the 'value' property
         this.editorSvc.on("loaded", () => {
             this.editorSvc.clEditor.setContent(this.value);
@@ -288,7 +303,7 @@ export class StackEditorComponent {
     ngOnDestroy() {
         clearInterval(this.resizeChecker);
         this.subscriptions.forEach(s => s.unsubscribe());
-        this.editorSvc.destroy();
+        this.editorSvc?.destroy();
     }
 
     public finalizeImageUpload({ label, link }) {
@@ -299,4 +314,16 @@ export class StackEditorComponent {
     private triggerResize() {
 
     }
+
+    toggleEditor() {
+        this.mode = this.mode == 'view' ? 'edit' : 'view';
+        if (this.mode == 'view' && !this.showPreview)
+            this.showPreview = !this.showPreview;
+    }
+}
+
+
+export const renderMarkdown = (input: string) => {
+    // const converter = markdownConversionSvc.createConverter();
+    // this.initConverter(converter, defaults.markdownIt);
 }
