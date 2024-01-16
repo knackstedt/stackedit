@@ -32,18 +32,18 @@ export const sleep = ms => new Promise(r => setTimeout(r, ms));
     styleUrls: ['./app.component.scss'],
     standalone: true,
     imports: [
-    StackEditorComponent,
-    VscodeComponent,
-    FetchPageComponent,
-    DiagramComponent,
-    MenuComponent,
-    MatTabsModule,
-    MatIconModule,
-    MatTooltipModule,
-    MatButtonModule,
-    MenuDirective,
-    AngularSplitModule
-]
+        StackEditorComponent,
+        VscodeComponent,
+        FetchPageComponent,
+        DiagramComponent,
+        MenuComponent,
+        MatTabsModule,
+        MatIconModule,
+        MatTooltipModule,
+        MatButtonModule,
+        MenuDirective,
+        AngularSplitModule
+    ]
 })
 export class AppComponent {
     @ViewChild(MenuComponent) menu: MenuComponent;
@@ -86,6 +86,8 @@ export class AppComponent {
         }
 
         window['root'] = this;
+
+        // Force the refresh keybind for Tauri env
         keyboard.onKeyCommand({
             key: "f5",
         }).subscribe(k => {
@@ -94,12 +96,25 @@ export class AppComponent {
 
         config.subscribe(c => {
             if (c.telemetry == null && window['dtrum']) {
+
+                // Prevent duplicate popups from appearing
                 if (!window['__SHOW_TELEMETRY_DIALOG']) {
-                    dialog.open(TelemetryDialogComponent, { disableClose: true });
                     window['__SHOW_TELEMETRY_DIALOG'] = true;
+
+                    dialog.open(TelemetryDialogComponent, { disableClose: true })
+                    .afterClosed().subscribe(() => {
+                        if (window['showDirectoryPicker']) {
+                            // TODO: Show "use Vivialdi dialog"
+                        }
+                    });
+
                 }
             }
             else {
+                if (!window['showDirectoryPicker']) {
+                    // TODO: Show "use Vivialdi dialog"
+                }
+
                 if (c.telemetry)
                     window['dtrum']?.enable();
                 else
@@ -107,25 +122,33 @@ export class AppComponent {
             }
 
             if (c.hasInstalledDefaultPages == null) {
-                Promise.all([
-                    import("./assets/sample-markdown"),
-                    import("./assets/sample-diagram"),
-                    import("./assets/sample-fetch"),
-                    import("./assets/sample-code")
-                ]).then(async (files) => {
-                    for (let {page} of files) {
-                        await this.pages.addTab(page as any);
-                        this.pages.flatPages.push(page as any);
-                        this.pages.savePage(page as any);
-                    };
-                    this.pages.calculatePageTree();
-                    this.pages.selectedTabIndex = 0;
-                })
-                config.set("hasInstalledDefaultPages", true);
+                this.installDefaultPages();
             }
+
             theme.setTheme(c.theme || "dark" as any);
         });
+
         config.init();
+    }
+
+    installDefaultPages() {
+        this.config.set("hasInstalledDefaultPages", true);
+
+        Promise.all([
+            import("./assets/sample-markdown"),
+            import("./assets/sample-diagram"),
+            import("./assets/sample-fetch"),
+            import("./assets/sample-code")
+        ]).then(async (files) => {
+            for (let { page } of files) {
+                await this.pages.savePage(page as any);
+                await this.pages.addTab(page as any);
+                this.pages.flatPages.push(page as any);
+            };
+
+            this.pages.calculatePageTree();
+            this.pages.selectedTabIndex = 0;
+        });
     }
 
     // @HostListener("window:resize", ["$event"])
