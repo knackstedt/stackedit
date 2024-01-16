@@ -651,7 +651,7 @@ export class VanillaMirror extends EventEmittingClass {
 
             // Move the selection to what was before adding the text
             this.selectionMgr.selectionStart -= before.length;
-            this.selectionMgr.selectionEnd -= before.length;
+            this.selectionMgr.selectionEnd -= (before.length + after.length);
 
             // Clear before and after for re-use of the update logic.
             before = '';
