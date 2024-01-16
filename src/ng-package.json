@@ -1,12 +1,13 @@
 {
-  "$schema": "../node_modules/ng-packagr/ng-package.schema.json",
-  "dest": "../dist/stackedit",
-  "lib": {
-    "entryFile": "app/editor/editor.component.ts"
-  },
+    "$schema": "../node_modules/ng-packagr/ng-package.schema.json",
+    "dest": "../dist/stackedit",
+    "lib": {
+        "entryFile": "app/editor/editor.component.ts"
+    },
     "allowedNonPeerDependencies": [
         "diff-match-patch",
         "dompurify",
+        "filerobot-image-editor",
         "markdown-it",
         "markdown-it-abbr",
         "markdown-it-deflist",
@@ -20,6 +21,7 @@
         "mermaid",
         "monaco-editor",
         "prismjs",
+        "react-filerobot-image-editor",
         "turndown"
     ]
 }

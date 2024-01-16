@@ -34,6 +34,7 @@
     "tslib": "^2.3.0",
     "diff-match-patch": "^1.0.0",
     "dompurify": "^3.0.5",
+    "filerobot-image-editor": ">=4.7.0",
     "markdown-it": "^13.0.1",
     "markdown-it-abbr": "^1.0.4",
     "markdown-it-deflist": "^2.1.0",
@@ -47,6 +48,7 @@
     "monaco-editor": ">=0.40.0",
     "mermaid": "^9.4.3",
     "prismjs": "^1.29.0",
+    "react-filerobot-image-editor": ">=4.7.0",
     "turndown": "^7.1.2"
   },
   "sideEffects": false
