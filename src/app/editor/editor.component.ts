@@ -248,7 +248,7 @@ export class StackEditorComponent {
         lazyLoader.registerComponent({
             id: "image-editor",
             group: "@dotglitch",
-            load: () => import('../components/image-editor/image-editor.component')
+            load: () => import('./components/image-editor/image-editor.component')
         })
     }
 

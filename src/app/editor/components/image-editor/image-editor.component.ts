@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, ViewContainerRef } from '@angular/core';
 import FilerobotImageEditor from 'filerobot-image-editor';
 import { FilerobotImageEditorConfig, TABS, TOOLS } from 'react-filerobot-image-editor';
-import { Section } from '../../editor/editor/highlighter';
+import { Section } from '../../editor/highlighter';
 import { MatDialogRef } from '@angular/material/dialog';
 import { ThemeService } from '@dotglitch/ngx-common';
 
