@@ -60,6 +60,14 @@
         --prism-ts-punctuation-color: #ccc;
         --prism-url-color: #569cd6;
         --prism-table-header-color: #d7ba7d;
+
+        *::selection {
+            background-color: #3a3d41 !important;
+        }
+
+        *:focus *::selection {
+            background-color: #264f78 !important;
+        }
     }
 
     .light {
@@ -103,6 +111,15 @@
         --prism-ts-punctuation-color: #333;
         --prism-url-color: #0000ff;
         --prism-table-header-color: #800000;
+
+        *::selection {
+            background-color: #e5ebf1 !important;
+        }
+
+        *:focus *::selection {
+            background-color: #add6ff !important;
+        }
+
     }
 }
 
@@ -178,8 +195,6 @@ ng-scrollbar {
         // overflow: auto;
         // font-family: var(--stackedit-font-family);
         font-family: var(--stackedit-font-family-mono);
-        background-color: var(--editor-background-color);
-        cursor: text;
         flex-direction: column;
         padding: 10px 24px 0px;
         margin: 0;
@@ -216,12 +231,6 @@ ng-scrollbar {
             }
         }
 
-        *::selection {
-            // background-color: # !important;
-            background-color: var(--selection-color) !important;
-            // Should be the color when the page has focus
-            // background-color: #3a3d41 !important;
-        }
         img::selection {
             // ???
             background-color: var(--selection-color);
@@ -272,7 +281,6 @@ ng-scrollbar {
         }
 
         .editor-inner {
-            cursor: text;
             min-height: 100%;
         }
 
@@ -332,7 +340,6 @@ ng-scrollbar {
     }
 
     .preview {
-        background-color: var(--preview-background-color);
         line-height: 24px;
         height: 100%;
 
@@ -721,10 +728,7 @@ ng-scrollbar {
         caret-color: var(--text-color);
         font-family: inherit;
         font-size: inherit;
-        -webkit-font-smoothing: auto;
-        -moz-osx-font-smoothing: auto;
         font-weight: 400;
-        cursor: default;
 
         .code_custom, .tag, .pre, .entity, .table {
             font-family: var(--stackedit-font-family-mono);
@@ -763,28 +767,65 @@ ng-scrollbar {
             color: var(--text-color);
         }
 
-        .img-wrapper {
+        .img-block {
             text-wrap: wrap;
             word-break: break-all;
+            position: relative;
+            // display: inline-block !important;
 
-            .img {
-                max-width: 100%;
-                padding: 0 .15em;
-                box-sizing: content-box;
+            .img-button {
+                position: absolute;
+                top: 4px;
+                right: 4px;
+                width: 32px;
+                height: 32px;
+                padding: 4px;
+                border-radius: 50%;
+                color: #fff8;
+                background-color: #0000;
+                transition: background-color 200ms ease, opacity 200ms ease, color 200ms ease;
+                cursor: pointer;
+
+                &:hover {
+                    opacity: 1;
+                    color: #000;
+                    background-color: #69f0ae;
+                }
+
+                &.delete::before {
+                    content: "delete"
+                }
+                &.edit::before {
+                    content: "edit"
+                }
             }
 
-            &.img-block {
+            .img-wrapper {
+                position: relative;
+                width: fit-content;
+                user-select: none;
+                display: inline-block;
+
                 img {
                     border-radius: 6px;
                 }
-
-                .token.img::before {
-                    // This is the char for newlines apparently.
+                &::after {
+                    // newline (\n).
                     content: "\A";
                 }
             }
-        }
 
+            img::after {
+                content: "";
+                width: 64px;
+                height: 64px;
+                // background: url();
+            }
+
+            img {
+                cursor: default;
+            }
+        }
 
         .cl-toc {
             font-size: 2.8em;
