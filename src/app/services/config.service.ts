@@ -1,8 +1,13 @@
 import { Injectable } from '@angular/core';
 import type fs from '@tauri-apps/api/fs';
 import { BaseDirectory, FileEntry, writeTextFile } from '@tauri-apps/api/fs';
-import localforage from 'localforage';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { createInstance } from 'localforage';
+import { Subject } from 'rxjs';
+
+const localforage = createInstance({
+    name: "@dotglitch",
+    storeName: "ScratchDown"
+});
 
 // Mangled import so tauri doesn't throw errors if it's not injected
 const { readDir, readTextFile, createDir }
