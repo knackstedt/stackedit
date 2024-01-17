@@ -143,14 +143,14 @@ export class Editor extends EventEmittingClass {
                     lastScrollEvent = Date.now();
                     onScroll(evt);
                 }
-            });
+            }, { passive: false });
             previewElt.parentElement.parentElement.parentElement.addEventListener('scroll', evt => {
                 if (scrollMode == "preview" || lastScrollEvent + scrollDebounceTime < Date.now()) {
                     scrollMode = "preview";
                     lastScrollEvent = Date.now();
                     onScroll(evt);
                 }
-            });
+            }, { passive: false });
 
             const refreshPreview = allowDebounce(() => {
                 this.convert();
