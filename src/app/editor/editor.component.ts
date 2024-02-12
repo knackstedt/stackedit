@@ -90,7 +90,7 @@ export const NGX_STACKEDIT_CONFIG = new InjectionToken<StackEditConfig>('stacked
 
 @Component({
     selector: 'ngx-stackedit-img-dialog',
-    template: '<img [src]=url (click)="dialog.close()">',
+    template: '<img [src]="url" (click)="dialog.close()">',
     styles: `:host{max-width: min(90vh, 90vw); max-height: min(90vh, 90vw)} img { border-radius: 6px }`,
     standalone: true
 })
