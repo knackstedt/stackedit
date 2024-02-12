@@ -13,7 +13,7 @@ import { installMonaco, waitForMonacoInstall } from './monaco';
 import { Subscription } from 'rxjs';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { AngularSplitModule } from 'angular-split';
-import { MatDialog } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { KeyCommands } from './key-commands';
 
 type StackEditConfig = Partial<{
@@ -89,6 +89,19 @@ const defaults = {
 export const NGX_STACKEDIT_CONFIG = new InjectionToken<StackEditConfig>('stackedit-config');
 
 @Component({
+    selector: 'ngx-stackedit-img-dialog',
+    template: '<img [src]=url (click)="dialog.close()">',
+    styles: `:host{max-width: min(90vh, 90vw); max-height: min(90vh, 90vw)} img { border-radius: 6px }`,
+    standalone: true
+})
+class ImageComponent {
+    constructor(
+        @Inject(MAT_DIALOG_DATA) public readonly url: string,
+        public readonly dialog: MatDialogRef<any>
+    ) {}
+}
+
+@Component({
     selector: 'ngx-stackedit',
     templateUrl: './editor.component.html',
     styleUrls: ['./editor.component.scss'],
@@ -103,6 +116,9 @@ export const NGX_STACKEDIT_CONFIG = new InjectionToken<StackEditConfig>('stacked
         NgScrollbarModule,
         AngularSplitModule
     ],
+    host: {
+        "(pointerdown)": "onPointerDown($event)"
+    },
     standalone: true
 })
 export class StackEditorComponent {
@@ -319,6 +335,12 @@ export class StackEditorComponent {
         this.mode = this.mode == 'view' ? 'edit' : 'view';
         if (this.mode == 'view' && !this.showPreview)
             this.showPreview = !this.showPreview;
+    }
+
+    onPointerDown(e: PointerEvent) {
+        if (e.target instanceof HTMLImageElement) {
+            this.matDialog.open(ImageComponent, { data: e.target.src })
+        }
     }
 }
 
