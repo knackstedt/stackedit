@@ -33,7 +33,7 @@
   "dependencies": {
     "tslib": "^2.3.0",
     "diff-match-patch": "^1.0.0",
-    "dompurify": "^3.0.5",
+    "dompurify": ">=3.0.0",
     "filerobot-image-editor": ">=4.7.0",
     "markdown-it": "^13.0.1",
     "markdown-it-abbr": "^1.0.4",
