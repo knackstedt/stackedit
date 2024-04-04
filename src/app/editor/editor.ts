@@ -751,7 +751,12 @@ export class Editor extends EventEmittingClass {
 
         this.conversionCtx.htmlSectionDiff.forEach((item) => {
             for (let i = 0; i < item[1]?.length; i++) {
-                const section = this.conversionCtx.sectionList[sectionIdx];
+                const section = this.conversionCtx.sectionList?.[sectionIdx];
+
+                // In rare cases sections may fail to render and cause
+                // the editor to spit out errors
+                if (!item || !section)
+                    continue;
 
                 if (item[0] === 0) {
                     let sectionDesc = this.previewCtx.sectionDescList[sectionDescIdx] as SectionDesc;
