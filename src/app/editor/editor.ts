@@ -110,9 +110,9 @@ export class Editor extends EventEmittingClass {
         markdownGFM(this);
 
         Promise.all([
-            (!ngEditor.options.disableEmoji)
-                ? import('./extensions/emojiExtension').then((ext) => ext.default(this))
-                : null,
+            // (!ngEditor.options.disableEmoji)
+            //     ? import('./extensions/emojiExtension').then((ext) => ext.default(this))
+            //     : null,
             (!ngEditor.options.disableMermaid)
                 ? import('./extensions/mermaidExtension').then((ext) => ext.default(this))
                 : null,
@@ -137,20 +137,20 @@ export class Editor extends EventEmittingClass {
                 );
             };
 
-            editorElt.parentElement.parentElement.addEventListener('scroll', evt => {
+            editorElt.parentElement.parentElement.onscroll = evt => {
                 if (scrollMode == "editor" || lastScrollEvent + scrollDebounceTime < Date.now()) {
                     scrollMode = "editor";
                     lastScrollEvent = Date.now();
                     onScroll(evt);
                 }
-            }, { passive: false });
-            previewElt.parentElement.parentElement.parentElement.addEventListener('scroll', evt => {
+            };
+            previewElt.parentElement.parentElement.parentElement.onscroll = evt => {
                 if (scrollMode == "preview" || lastScrollEvent + scrollDebounceTime < Date.now()) {
                     scrollMode = "preview";
                     lastScrollEvent = Date.now();
                     onScroll(evt);
                 }
-            }, { passive: false });
+            };
 
             const refreshPreview = allowDebounce(() => {
                 this.convert();
@@ -795,7 +795,10 @@ export class Editor extends EventEmittingClass {
                     this.tocElt.removeChild(sectionTocElt);
                 }
                 else if (item[0] === 1) {
-                    const html = dompurify.sanitize(this.conversionCtx.htmlSectionList[sectionIdx]);
+                    const html = dompurify.sanitize(this.conversionCtx.htmlSectionList[sectionIdx], {
+                        // URIs should always follow this format
+                        ALLOWED_URI_REGEXP: /(?<url>(?<host>(?<protocol>[A-Za-z]{3,9}:(?:\/\/)?)?(?<domain>(?:[a-z]+\.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-:]+))(?<path>(?:\/[\+~%\/.\w_-]*)?\??(?:[-\+=&;%@.\w_\/\[\] ]*)#?(?:[\w]*))?)/
+                    });
                     sectionIdx++;
 
                     // Create preview section element
