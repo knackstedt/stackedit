@@ -179,7 +179,7 @@
 @if (stackEditor.showPreview != 'off' && stackEditor.mode != 'viewonly') {
     <mat-icon
         (mousedown)="toggleEditor(); $event.preventDefault()"
-        matTooltip="Toggle Editor"
+        [matTooltip]="stackEditor.mode == 'view' ? 'Toggle Editor': 'Editor'"
     >
         edit
     </mat-icon>
@@ -188,7 +188,7 @@
 @if (stackEditor.showPreview != 'off') {
     <mat-icon
         (mousedown)="togglePreview(); $event.preventDefault()"
-        matTooltip="Toggle Preview"
+        [matTooltip]="stackEditor.showPreview ? 'Close Preview': 'Open Preview'"
     >
         visibility
     </mat-icon>
