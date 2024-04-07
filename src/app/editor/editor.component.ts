@@ -204,11 +204,19 @@ export class StackEditorComponent {
      */
     @Input() hideWritingSymbols: boolean = false;
 
+    private _value = '';
     /**
      * Initial value of the editor.
      * 2-way binding capable.
      */
-    @Input() value: string = '';
+    @Input() set value (value: string) {
+        this._value = value;
+
+        if (this.editorSvc) {
+            this.editorSvc.clEditor.setContent(value, true);
+        }
+    }
+    get value() { return this._value };
     /**
      * Emits when the value of the editor changed.
      * Can be used standalone or in 2-way binding.
