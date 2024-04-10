@@ -116,6 +116,11 @@ export class VanillaMirror extends EventEmittingClass {
 
     // TODO: may need to debounce this -- has been seen to cause CPU locking
     onSelectionChange: () => void = (() => {
+
+        // If the editor isn't focused, don't perform updates
+        if (!document.activeElement?.classList?.contains("editor-inner"))
+            return;
+
         this.selectionMgr.saveSelectionState();
         this.selectionMgr.updateCursorCoordinates(true);
 

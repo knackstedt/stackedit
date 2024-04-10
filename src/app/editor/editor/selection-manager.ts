@@ -356,9 +356,9 @@ export class SelectionMgr extends EventEmittingClass {
                 }
             }
             else if (endOffset.offset === container.textContent.length) {
-                console.log("This hasn't happened yet")
+                // When cursor starts at 0 ...?
                 // Need to calculate offset+1
-                // endOffset = inputOffset + 1;
+                endOffset = inputOffset + 1;
             }
             else {
                 endOffset.offset += 1;
