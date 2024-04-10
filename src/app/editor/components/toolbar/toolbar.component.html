@@ -170,7 +170,7 @@
     <mat-icon
 
         (mousedown)="toggleTOC(); $event.preventDefault()"
-        matTooltip="Table of Contents"
+        [matTooltip]="stackEditor.showToc ? 'Close Table of Contents' : 'Open Table of Contents'"
     >
         toc
     </mat-icon>
@@ -179,17 +179,17 @@
 @if (stackEditor.showPreview != 'off' && stackEditor.mode != 'viewonly') {
     <mat-icon
         (mousedown)="toggleEditor(); $event.preventDefault()"
-        [matTooltip]="stackEditor.mode == 'view' ? 'Toggle Editor': 'Editor'"
+        matTooltip="Close Editor"
     >
-        edit
+        check
     </mat-icon>
 }
 
 @if (stackEditor.showPreview != 'off') {
     <mat-icon
         (mousedown)="togglePreview(); $event.preventDefault()"
-        [matTooltip]="stackEditor.showPreview ? 'Close Preview': 'Open Preview'"
+        [matTooltip]="stackEditor.showPreview ? 'Hide Preview': 'Open Preview'"
     >
-        visibility
+        visibility_off
     </mat-icon>
 }

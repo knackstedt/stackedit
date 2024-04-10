@@ -2,8 +2,9 @@
 
 @if (mode == 'view') {
     <mat-icon
+        class="edit_btn"
         (mousedown)="toggleEditor(); $event.preventDefault()"
-        matTooltip="Toggle Editor"
+        matTooltip="Edit Description"
     >
         edit
     </mat-icon>
