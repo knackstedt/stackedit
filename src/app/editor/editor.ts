@@ -802,7 +802,7 @@ export class Editor extends EventEmittingClass {
                 else if (item[0] === 1) {
                     const html = dompurify.sanitize(this.conversionCtx.htmlSectionList[sectionIdx], {
                         // URIs should always follow this format
-                        ALLOWED_URI_REGEXP: /(?<url>(?<host>(?<protocol>[A-Za-z]{3,9}:(?:\/\/)?)?(?<domain>(?:[a-z]+\.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.-:]+))?(?<path>(?:\/[\+~%\/.\w_-]*)?\??(?:[-\+=&;%@.\w_\/\[\] ]*)#?(?:[\w]*))?)/
+                        ALLOWED_URI_REGEXP: /(?<url>(?<host>(?<protocol>[A-Za-z]{3,9}:(?:\/\/)?)?(?<domain>(?:[a-z]+\.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.\-:]+))?(?<path>(?:\/[\+~%\/.\w_\-]*)?\??(?:[\-\+=&;%@.\w_\/\[\] ]*)#?(?:[\w]*))?)/
                     });
                     sectionIdx++;
 
