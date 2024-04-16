@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Inject, InjectionToken, Input, Optional, Output, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, EventEmitter, Inject, InjectionToken, Input, Optional, Output, Sanitizer, ViewChild, ViewContainerRef } from '@angular/core';
 import { NgClass, NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -15,6 +15,7 @@ import { NgScrollbarModule } from 'ngx-scrollbar';
 import { AngularSplitModule } from 'angular-split';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { KeyCommands } from './key-commands';
+import { DomSanitizer } from '@angular/platform-browser';
 
 type StackEditConfig = Partial<{
     /**
@@ -254,6 +255,7 @@ export class StackEditorComponent {
         public  readonly themeService: ThemeService,
         public  readonly dialog: DialogService,
         public  readonly matDialog: MatDialog,
+        public readonly  sanitizer: DomSanitizer,
         @Optional() @Inject(NGX_STACKEDIT_CONFIG) private config: StackEditConfig = {}
     ) {
         this.options = {

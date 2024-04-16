@@ -1,7 +1,7 @@
 import DiffMatchPatch from 'diff-match-patch';
 import MarkdownIt from 'markdown-it';
 import { ulid } from 'ulidx';
-import dompurify from 'dompurify';
+// import dompurify from 'dompurify';
 import type * as Monaco from 'monaco-editor';
 
 import Prism from './prism';
@@ -14,6 +14,7 @@ import markdownGFM from './extensions/markdownExtension';
 import { Section } from './editor/highlighter';
 import { MonacoAliasMap, invokableLanguages, waitForMonacoInstall } from './monaco';
 import { RenderMermaid } from './extensions/mermaidExtension';
+import { SecurityContext } from '@angular/core';
 
 declare const monaco: typeof Monaco;
 
@@ -800,10 +801,13 @@ export class Editor extends EventEmittingClass {
                     this.tocElt.removeChild(sectionTocElt);
                 }
                 else if (item[0] === 1) {
-                    const html = dompurify.sanitize(this.conversionCtx.htmlSectionList[sectionIdx], {
-                        // URIs should always follow this format
-                        ALLOWED_URI_REGEXP: /(?<url>(?<host>(?<protocol>[A-Za-z]{3,9}:(?:\/\/)?)?(?<domain>(?:[a-z]+\.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.\-:]+))?(?<path>(?:\/[\+~%\/.\w_\-]*)?\??(?:[\-\+=&;%@.\w_\/\[\] ]*)#?(?:[\w]*))?)/
-                    });
+                    // const html = dompurify.sanitize(this.conversionCtx.htmlSectionList[sectionIdx], {
+                    //     // URIs should always follow this format
+                    //     ALLOWED_URI_REGEXP: /.*/i
+                    //     // ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp|xxx):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i
+                    //     // ALLOWED_URI_REGEXP: /^(?<url>(?<host>(?<protocol>[A-Za-z]{3,9}:(?:\/\/)?)?(?<domain>(?:[a-z]+\.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.\-:]+))?(?<path>(?:\/[\+~%\/.\w_\-]*)?\??(?:[\-\+=&;%@.\w_\/\[\] ]*)#?(?:[\w]*))?)/i
+                    // });
+                    const html = this.ngEditor.sanitizer.sanitize(SecurityContext.HTML, this.conversionCtx.htmlSectionList[sectionIdx]);
                     sectionIdx++;
 
                     // Create preview section element
