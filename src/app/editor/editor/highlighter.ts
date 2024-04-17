@@ -174,50 +174,56 @@ export class Highlighter extends EventEmittingClass {
         });
 
         this.editor.watcher.noWatch(() => {
-            if (isInit) {
-                this.contentElt.innerHTML = '';
-                this.contentElt.appendChild(newSectionEltList);
+            try {
+                if (isInit) {
+                    this.contentElt.innerHTML = '';
+                    this.contentElt.appendChild(newSectionEltList);
+                    this.addTrailingNode();
+                    return;
+                }
+
+                // Remove outdated sections
+                sectionsToRemove.forEach((section) => {
+                    // section may be already removed
+                    if (section.elt.parentNode === this.contentElt) {
+                        this.contentElt.removeChild(section.elt);
+                    }
+                    // To detect sections that come back with built-in undo
+                    section.elt['section'] = undefined;
+                });
+
+                if (this.insertBeforeSection !== undefined) {
+                    this.contentElt.insertBefore(newSectionEltList, this.insertBeforeSection.elt);
+                }
+                else {
+                    this.contentElt.appendChild(newSectionEltList);
+                }
+
+                // Remove unauthorized nodes (text nodes outside of sections or
+                // duplicated sections via copy/paste)
+                let childNode = this.contentElt.firstChild;
+                while (childNode) {
+                    const nextNode = childNode.nextSibling;
+                    if (!childNode['section']) {
+                        this.contentElt.removeChild(childNode);
+                    }
+                    childNode = nextNode;
+                }
                 this.addTrailingNode();
-                return;
-            }
+                this.$trigger('highlighted');
 
-            // Remove outdated sections
-            sectionsToRemove.forEach((section) => {
-                // section may be already removed
-                if (section.elt.parentNode === this.contentElt) {
-                    this.contentElt.removeChild(section.elt);
+                if (this.editor.selectionMgr.hasFocus) {
+                    this.editor.selectionMgr.restoreSelection();
+                    this.editor.selectionMgr.updateCursorCoordinates();
                 }
-                // To detect sections that come back with built-in undo
-                section.elt['section'] = undefined;
-            });
 
-            if (this.insertBeforeSection !== undefined) {
-                this.contentElt.insertBefore(newSectionEltList, this.insertBeforeSection.elt);
+                if (this.editor.ngEditor.showLineNumbers)
+                    this.calcLineNumbers();
             }
-            else {
-                this.contentElt.appendChild(newSectionEltList);
+            catch(err) {
+                // Handle the error to prevent the watcher from failing.
+                console.error(err);
             }
-
-            // Remove unauthorized nodes (text nodes outside of sections or
-            // duplicated sections via copy/paste)
-            let childNode = this.contentElt.firstChild;
-            while (childNode) {
-                const nextNode = childNode.nextSibling;
-                if (!childNode['section']) {
-                    this.contentElt.removeChild(childNode);
-                }
-                childNode = nextNode;
-            }
-            this.addTrailingNode();
-            this.$trigger('highlighted');
-
-            if (this.editor.selectionMgr.hasFocus) {
-                this.editor.selectionMgr.restoreSelection();
-                this.editor.selectionMgr.updateCursorCoordinates();
-            }
-
-            if (this.editor.ngEditor.showLineNumbers)
-                this.calcLineNumbers();
         });
 
         return this.sectionList;
