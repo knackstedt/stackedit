@@ -302,6 +302,11 @@ export class SelectionMgr extends EventEmittingClass {
     };
 
     private getCoordinates(offset: {node, offset}) {
+        if (!offset) return {
+            top: 0,
+            height: 0,
+            left: 0
+        }
         const container = offset.node;
         const offsetInContainer = offset.offset;
 
