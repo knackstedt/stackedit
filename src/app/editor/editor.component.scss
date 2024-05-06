@@ -141,6 +141,7 @@
 
 ng-scrollbar {
     width: 100%;
+    overflow: hidden;
 }
 
 :host ::ng-deep {
