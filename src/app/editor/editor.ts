@@ -751,6 +751,8 @@ export class Editor extends EventEmittingClass {
         let loadingImages = [];
 
         this.conversionCtx.htmlSectionDiff.forEach((item) => {
+            if (!item) return;
+
             for (let i = 0; i < item[1]?.length; i++) {
                 const section = this.conversionCtx.sectionList?.[sectionIdx];
 
@@ -760,7 +762,7 @@ export class Editor extends EventEmittingClass {
                     continue;
 
                 if (item[0] === 0) {
-                    let sectionDesc = this.previewCtx.sectionDescList[sectionDescIdx] as SectionDesc;
+                    let sectionDesc = this.previewCtx.sectionDescList?.[sectionDescIdx] as SectionDesc;
 
                     // ??? This occurs sometimes
                     if (!sectionDesc) continue;
