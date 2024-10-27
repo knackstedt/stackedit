@@ -1,10 +1,10 @@
 import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
 import { WrappableComponent } from './excalidraw';
-import { AppState, BinaryFiles, ExcalidrawInitialDataState, Gesture, LibraryItems, PointerDownState, UIAppState } from '@excalidraw/excalidraw/types/types';
-import { ExcalidrawElement, ExcalidrawEmbeddableElement, NonDeleted, NonDeletedExcalidrawElement, Theme } from '@excalidraw/excalidraw/types/element/types';
+import { AppState, BinaryFiles, ExcalidrawInitialDataState, LibraryItems, PointerDownState } from '@excalidraw/excalidraw/types/types';
+import { ExcalidrawElement, NonDeletedExcalidrawElement } from '@excalidraw/excalidraw/types/element/types';
 import { ClipboardData } from '@excalidraw/excalidraw/types/clipboard';
 import { Language } from '@excalidraw/excalidraw/types/i18n';
-import { ReactMagicWrapperComponent } from './react-magic-wrapper.component';
+import { ReactMagicWrapperComponent } from '@dotglitch/ngx-common';
 
 // https://infoheap.com/online-react-jsx-to-javascript/
 

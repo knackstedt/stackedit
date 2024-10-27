@@ -1,12 +1,14 @@
 import { EventEmitter, Injectable } from '@angular/core';
-import { FilesService } from './files.service';
-import { Page } from '../types/page';
 import { ulid } from 'ulidx';
 import { debounceTime } from 'rxjs';
+import JSON5 from 'json5';
+import { FilesService } from './files.service';
+import { Page } from '../types/page';
 import { ConfigService } from './config.service';
 
 const $debounce = Symbol("debounce");
 const basePath = `data/`;
+const metadata_ext = "_metadata.json5";
 
 @Injectable({
     providedIn: 'root'
@@ -38,6 +40,14 @@ export class PagesService {
     // A map of dir URLs to pages
     private dirMap: { [key: string]: Page[] } = {};
 
+    private workspaceHandle: FileSystemDirectoryHandle;
+    private dirHandles: {
+        [key: string]: {
+            handle: FileSystemDirectoryHandle,
+            entries: any
+        }
+    } = {};
+
     constructor(
         private readonly files: FilesService,
         private readonly config: ConfigService
@@ -68,8 +78,144 @@ export class PagesService {
     private saveTabsState() {
         this.config.set("tabsState", {
             selectedTabIndex: this.selectedTabIndex,
-            tabs: this.tabs.map(t => t.path)
+            tabs: this.tabs
+                .filter(t => !t.isPreviewTab)
+                .map(t => t.path)
         });
+    }
+
+    // Open a workspace via WFSA
+    async openWorkspace() {
+        const dirHandle = this.workspaceHandle = await window['showDirectoryPicker']({
+            mode: "readwrite"
+        });
+
+        const files: Page[] = [];
+        const flatPages: Page[] = [];
+
+        // TODO: make this run in parallel?
+        const traverseDirs = async (dir: FileSystemDirectoryHandle, path: string) => {
+            const results = [];
+            const metadataFiles: FileSystemFileHandle[] = [];
+            const files: FileSystemFileHandle[] = [];
+            const dirs: FileSystemDirectoryHandle[] = [];
+
+            // @ts-ignore .values()
+            for await (const entry of dir.values()) {
+                if (entry.kind == "directory")
+                    dirs.push(entry);
+                else if (entry.name.endsWith(metadata_ext))
+                    metadataFiles.push(entry);
+                else
+                    files.push(entry);
+            }
+
+            // Metadata files will sort to the start
+            files.sort((a,b) => {
+                if (a.name.endsWith(metadata_ext))
+                    return -1;
+                if (b.name.endsWith(metadata_ext))
+                    return 1;
+                // Default to alphabetical sort
+                return a.name > b.name ? 1 : -1;
+            });
+            console.log("sorted files", files)
+
+            // Only perform lookup _after_ all entries in the dir have
+            // resolved -- this lets us check if there are other
+            // relevant files in the directory
+
+            for (const dir of dirs) {
+                const index = path + dir.name + '/';
+                this.dirHandles[index] = {
+                    handle: dir,
+                    entries: await traverseDirs(dir, index)
+                };
+                // results.push(...this.dirHandles[index].entries);
+            }
+
+            for (const metadata of metadataFiles) {
+                const fileName = metadata.name.replace(metadata_ext, '');
+                const dataFile = files.findIndex(f => f.name == fileName);
+
+                if (dataFile == -1) {
+                    console.warn("Found metadata, but not data file!")
+                }
+                else {
+                    const data = await metadata.getFile();
+                    const text = await data.text();
+                    const json = JSON5.parse(text) as Page;
+
+                    json.path = "wfsa://" + path;
+                    json.metadataEntry = metadata;
+                    json.fileEntry = files[dataFile];
+                    json.hasLoaded = false;
+                    json.content = '';
+                    results.push(json);
+                    flatPages.push(json);
+
+                    // Remove the file -- it's added already
+                    files.splice(dataFile, 1);
+                }
+            }
+
+            for (const file of files) {
+                const obj: Page = {
+                    path: "wfsa://" + path,
+                    content: undefined,
+                    hasLoaded: false,
+                    created: 0,
+                    modified: Date.now(),
+                    kind: "raw",
+                    name: file.name,
+                    fileEntry: file
+                };
+
+                results.push(obj);
+                flatPages.push(obj);
+            }
+
+            return results;
+        }
+
+        const roots = await traverseDirs(dirHandle, '');
+
+        Object.entries(this.dirHandles).forEach(([path, handle]) => {
+
+        })
+
+        console.log({
+            roots,
+            files,
+            dirs: this.dirHandles
+        });
+
+        this.flatPages = flatPages;
+        this.pages = roots;
+
+        this.calculatePageTree();
+    }
+
+    public loadCurrentPageContent() {
+        return this.loadPageContent(this.tabs[this._selectedTabIndex]);
+    }
+
+    public async loadPageContent(page: Page) {
+        if (!page.hasLoaded) {
+            if (page.fileEntry) {
+                const file = await page.fileEntry.getFile();
+                page.content = await file.text();
+                // page.content = await file.stream();
+                console.log("Load the fucking thing", file, page.content)
+            }
+            else {
+                const path = page.path + '.@data';
+                const res = await this.files.readFile(path) as any;
+                if (!res)
+                    debugger;
+                page.content = res;
+            }
+        }
     }
 
     public calculatePageTree() {
@@ -111,6 +257,9 @@ export class PagesService {
     }
 
     async savePage(page: Page) {
+        if (page.isPreviewTab) {
+            page.isPreviewTab = undefined;
+        }
 
         // Raw markdown files are always saved
         // without metadata.
@@ -120,10 +269,18 @@ export class PagesService {
         }
         page.modified = Date.now();
 
-        if (page.autoName || page.name.length < 2) {
-            page.name = page.content?.trim()?.split('\n')?.[0]?.slice(0, 20);
-            if (!page.name || page.name.trim().length < 2)
-                page.name = "untitled";
+        if (page.autoName || page.name?.trim().length < 2) {
+            if (page.kind == "canvas") {
+                page.name = "Untitled Diagram";
+            }
+            else if (page.kind == "fetch") {
+                page.name = "Fetch Request";
+            }
+            else {
+                page.name = page.content?.trim()?.split('\n')?.[0]?.slice(0, 20);
+                if (!page.name || page.name.trim().length < 2)
+                    page.name = "Untitled";
+            }
         }
 
         await this.files.saveFileMetadata(page);
@@ -147,7 +304,7 @@ export class PagesService {
             }
 
             const page: Page = {
-                path: (path ? path + "/" : basePath) + ulid() + '.json',
+                path: (path ? path + "/" : basePath) + ulid(),
                 content: '',
                 created: Date.now(),
                 kind: "markdown",
@@ -201,26 +358,46 @@ export class PagesService {
         this.pageMap[page.path] = undefined;
     }
 
-    async addTab(tab: Page) {
+    async addTab(tab: Page, isPreview = false) {
+        tab.isPreviewTab = undefined;
+
         let index = this.tabs.indexOf(tab);
-        if (index == -1) {
-            const emitter = new EventEmitter();
-            emitter
-                .pipe(debounceTime(300)).subscribe(() => {
-                    this.savePage(tab);
-                });
-
-            tab[$debounce] = emitter;
-
-            if (tab.content == undefined || tab.content == null) {
-                const text = await this.files.readFile(tab.path.replace(/\.json$/, '.md')) as any;
-                tab.content = text;
-            }
-
-            index = this.tabs.push(tab);
+        if (index != -1) {
+            this.selectedTabIndex = index;
+            return;
         }
 
-        this.selectedTabIndex = index;
+        const emitter = new EventEmitter();
+        emitter
+            .pipe(debounceTime(300)).subscribe(() => {
+                this.savePage(tab);
+            });
+
+        tab[$debounce] = emitter;
+
+        if (tab.content == undefined || tab.content == null) {
+            const text = await this.files.readFile(tab.path + '.@data') as any;
+            tab.content = text;
+        }
+
+        if (isPreview) {
+            tab.isPreviewTab = true;
+
+            // Check for and replace any current preview tab
+            const previewIndex = this.tabs.findIndex(t => t.isPreviewTab);
+            if (previewIndex != -1) {
+                this.tabs.splice(previewIndex, 1, tab);
+                this.selectedTabIndex = previewIndex;
+            }
+            else {
+                this.tabs.splice(this.selectedTabIndex+1, 0, tab);
+                this.selectedTabIndex += 1;
+            }
+        }
+        else {
+            this.tabs.splice(this.selectedTabIndex + 1, 0, tab);
+            this.selectedTabIndex = this.selectedTabIndex + 1;
+        }
     }
 
     onPageContentChange(page: Page, value: string) {

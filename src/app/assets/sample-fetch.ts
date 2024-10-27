@@ -1,5 +1,5 @@
 export const page = {
-    "path": "data/01HEHFG0Q9W98R55ETQ8ME80TK.json",
+    "path": "data/01HEHFG0Q9W98R55ETQ8ME80TK",
     "created": 1699246244585,
     "kind": "fetch",
     "modified": 1699486512382,

@@ -1,5 +1,5 @@
 export const page = {
-    "path": "data/01HERME9WAFSXNNSHGKHRX6SV5.json",
+    "path": "data/01HERME9WAFSXNNSHGKHRX6SV5",
     "created": 1699486312330,
     "kind": "code",
     "modified": 1699486325593,

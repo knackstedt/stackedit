@@ -52,8 +52,8 @@ const inlineBaseRules2 = [
     // 'text_collapse'
 ];
 export default (editorSvc: Editor) => {
-    editorSvc.onGetOptions((options, properties) => Object
-        .assign(options, properties.extensions.markdown));
+    // editorSvc.onGetOptions((options, properties) => Object
+    //     .assign(options, properties.extensions.markdown));
 
     editorSvc.onInitConverter(0, (markdown: MarkdownIt, options) => {
         markdown.set({
@@ -139,6 +139,8 @@ export default (editorSvc: Editor) => {
                         a.style.position = 'fixed';
                         a.style.left = '-1000vw';
                         a.target = '_blank';
+                        a.setAttribute("rel", 'noopener');
+
                         document.body.appendChild(a);
                         a.click();
                         a.remove();

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import type fs from '@tauri-apps/api/fs';
 import { BaseDirectory, FileEntry, removeFile, renameFile, writeTextFile } from '@tauri-apps/api/fs';
 import { Page } from '../types/page';
-import localforage from 'localforage';
+import { createInstance } from 'localforage';
 
 /**
  * Schemas
@@ -14,6 +14,11 @@ const { readDir, readTextFile, createDir }
     = window['__TAURI__']?.['fs'] as typeof fs || {};
 
 const useTauri = !!readDir;
+
+const localforage = createInstance({
+    name: "@dotglitch",
+    storeName: "ScratchDown"
+});
 
 
 let dbPromise;
@@ -28,6 +33,7 @@ export class FilesService extends Subject<any> {
 
     constructor() {
         super();
+
         dbPromise = localforage.setDriver([
             localforage.INDEXEDDB
         ]);
@@ -36,7 +42,7 @@ export class FilesService extends Subject<any> {
     private async validateDir(path: string) {
         if (!useTauri) return true;
 
-        if (path.endsWith(".json"))
+        if (path.endsWith(".@meta"))
             path = path.split('/').slice(0, -1).join("/");
 
         await createDir(path, { dir: BaseDirectory.AppData, recursive: true });
@@ -48,13 +54,16 @@ export class FilesService extends Subject<any> {
 
         const page = structuredClone(pageMetadata);
         page.content = undefined;
+        page.children = undefined;
+        // page.path = undefined;
 
+        const path = pageMetadata.path + '.@meta';
         if (useTauri) {
             const jsonText = JSON.stringify(page);
-            await writeTextFile(page.path, jsonText, { dir: BaseDirectory.AppData });
+            await writeTextFile(path, jsonText, { dir: BaseDirectory.AppData });
         }
         else {
-            await localforage.setItem(page.path, page)
+            await localforage.setItem(path, page)
         }
     }
 
@@ -67,12 +76,12 @@ export class FilesService extends Subject<any> {
         if (page.content == undefined || page.content == null)
             return;
 
+        const path = page.path + '.@data';
         if (useTauri) {
-            const path = page.path.replace(/\.json$/, '.md');
-            await writeTextFile(path, page.content, { dir: BaseDirectory.AppData });
+            const text = typeof page.content == "string" ? page.content : JSON.stringify(page.content);
+            await writeTextFile(path, text, { dir: BaseDirectory.AppData });
         }
         else {
-            const path = page.path.replace(/\.json$/, '.md');
             await localforage.setItem(path, page.content);
         }
     }
@@ -91,8 +100,8 @@ export class FilesService extends Subject<any> {
             return await removeFile(page.path, { dir: BaseDirectory.AppData });
         }
         else {
-            await localforage.removeItem(page.path);
-            await localforage.removeItem(page.path.replace(/\.json$/, '.md'));
+            await localforage.removeItem(page.path + '.@meta');
+            await localforage.removeItem(page.path + '.@data');
         }
     }
 
@@ -101,6 +110,7 @@ export class FilesService extends Subject<any> {
         const targetPath = page.path.replace(/^data\//, 'trash/');
         const srcPathMd = srcPath.replace(/\.json$/, '.md');
         const targetPathMd = targetPath.replace(/\.json$/, '.md');
+        page.deleted = Date.now();
 
         if (useTauri) {
             createDir(targetPath.split('/').slice(0, -1).join("/"), { dir: BaseDirectory.AppData });
@@ -176,7 +186,7 @@ export class FilesService extends Subject<any> {
             const slug = pathTarget.replace(/[^a-z0-9_\-]/g, '');
             const keys = await localforage.keys();
             const jsonKeys = keys
-                .filter(key => key.endsWith(".json"))
+                .filter(key => key.endsWith(".@meta"))
                 .filter(key => key.startsWith(slug));
 
             pages = await Promise.all(jsonKeys.map(k => localforage.getItem(k))) as any;
@@ -185,7 +195,6 @@ export class FilesService extends Subject<any> {
                     p.autoName = true;
                 }
             })
-
         }
 
         pages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));

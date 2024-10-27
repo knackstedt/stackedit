@@ -15,17 +15,23 @@ import { loadLibs } from './libs';
     ],
     standalone: true
 })
-export class DiagramComponent implements OnInit {
+export class DiagramComponent {
     @ViewChild(ExcalidrawComponent) excalidrawWrapper: ExcalidrawComponent;
 
-    @Input() page: Page;
+    private _page: Page;
+    @Input() set page(value: Page) {
+        this._page = value;
+        this.ngOnInit();
+    }
+    get page() { return this._page }
 
     contentData: ExcalidrawInitialDataState = {};
     appState: Partial<AppState> = {};
-    private subscriptions: Subscription[];
 
+    private subscriptions: Subscription[];
     private dataChangeEmitter = new BehaviorSubject(null);
     private dataChange$ = this.dataChangeEmitter.pipe(debounceTime(300));
+    private hasInitialized = false;
 
     constructor(
         private readonly pages: PagesService
@@ -40,34 +46,34 @@ export class DiagramComponent implements OnInit {
     }
 
     async ngOnInit() {
-        try {
-            let data = JSON.parse(this.page.content);
-
-            const libItems = loadLibs()
-                .then(l =>
-                    l
-                    .map(l => l['default'])
-                    .map(l => l['libraryItems'] || l['library'])
-                    .flat()
-                    .filter(i => !!i)
-                );
-
-            this.contentData = {
-                scrollToContent: true,
-                elements: data.elements,
-                libraryItems: libItems,
-                files: data.files
-            };
-            this.appState = {
-                frameRendering: {
-                    enabled: true
-                } as any,
-            }
+        if (!this.page.hasLoaded || !this.page.content) {
+            await this.pages.loadPageContent(this.page);
         }
-        catch(ex) {
-            // TODO: consider resetting page value? May cause data loss.
-            console.warn("Failed to deserialize JSON for page " + this.page.name)
+
+        let data = this.page.content as any;
+
+        const libItems = loadLibs()
+            .then(l =>
+                l
+                .map(l => l['default'])
+                .map(l => l['libraryItems'] || l['library'])
+                .flat()
+                .filter(i => !!i)
+            );
+
+        this.contentData = {
+            scrollToContent: true,
+            elements: data.elements,
+            libraryItems: libItems,
+            files: data.files
+        };
+        this.appState = {
+            frameRendering: {
+                enabled: true
+            } as any,
         }
+
+        this.hasInitialized = true;
     }
 
     async ngOnDestroy() {
@@ -84,8 +90,8 @@ export class DiagramComponent implements OnInit {
     }
 
     private saveState() {
-        this.page.content = JSON.stringify(this.dataChangeEmitter.value);
+        if (!this.hasInitialized) return null;
 
-        return this.pages.savePage(this.page);
+        return this.pages.onPageContentChange(this.page, this.dataChangeEmitter.value);
     }
 }

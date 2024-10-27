@@ -1,5 +1,5 @@
 export const page = {
-    "path": "data/01HE5GSV1P5AA9VNX2VKR1J0TQ.json",
+    "path": "data/01HE5GSV1P5AA9VNX2VKR1J0TQ",
     "created": 1698844961846,
     "kind": "markdown",
     "modified": 1699485729611,
@@ -96,12 +96,12 @@ bootstrapApplication(AppComponent, {
 \`\`\`css
 body { margin: 0; }
 html, body {
-    height: 100 %;
-    width: 100 %;
+    height: 100%;
+    width: 100%;
     overflow: hidden;
     font-family: 'Fira Sans', Arial;
-    background-color: var(--background - color, #121212);
-    color: var(--text - color);
+    background-color: var(--background-color, #121212);
+    color: var(--text-color);
 }
 \`\`\`
 
