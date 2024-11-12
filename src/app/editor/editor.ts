@@ -809,7 +809,15 @@ export class Editor extends EventEmittingClass {
                     //     // ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|cid|xmpp|xxx):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i
                     //     // ALLOWED_URI_REGEXP: /^(?<url>(?<host>(?<protocol>[A-Za-z]{3,9}:(?:\/\/)?)?(?<domain>(?:[a-z]+\.|[-;:&=\+\$,\w]+@)[A-Za-z0-9.\-:]+))?(?<path>(?:\/[\+~%\/.\w_\-]*)?\??(?:[\-\+=&;%@.\w_\/\[\] ]*)#?(?:[\w]*))?)/i
                     // });
-                    const html = this.ngEditor.sanitizer.sanitize(SecurityContext.HTML, this.conversionCtx.htmlSectionList[sectionIdx]);
+                    let markdown = this.conversionCtx.htmlSectionList[sectionIdx];
+
+                    // Run all before render hooks against the text
+                    this.ngEditor.hooks?.filter(h => h?.kind == "beforeRender")
+                        .forEach(hook => {
+                            markdown = hook.fn(markdown);
+                        });
+
+                    const html = this.ngEditor.sanitizer.sanitize(SecurityContext.HTML, markdown);
                     sectionIdx++;
 
                     // Create preview section element

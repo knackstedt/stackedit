@@ -1,8 +1,7 @@
 import { Component, EventEmitter, Inject, InjectionToken, Input, Optional, Output, Sanitizer, ViewChild, ViewContainerRef } from '@angular/core';
-import { NgClass, NgStyle } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TooltipDirective, MenuDirective, ThemeService, DialogService, LazyLoaderService, CommandPaletteService } from '@dotglitch/ngx-common';
+import { ThemeService, DialogService, LazyLoaderService, CommandPaletteService } from '@dotglitch/ngx-common';
 import { MermaidConfig } from 'mermaid';
 
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
@@ -12,7 +11,6 @@ import { Editor } from './editor';
 import { installMonaco, waitForMonacoInstall } from './monaco';
 import { Subscription } from 'rxjs';
 import { NgScrollbarModule } from 'ngx-scrollbar';
-import { AngularSplitModule } from 'angular-split';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { KeyCommands } from './key-commands';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -63,6 +61,18 @@ type StackEditConfig = Partial<{
 
 }>;
 
+type Hook = (
+    {
+        /**
+         * Runs immediately before a chunk of markdown is rendered. Output will be sanitized by Angular's sanitizer.
+         */
+        kind: "beforeRender",
+        fn: (markdown: string) => string
+    }
+) & {
+    options: Object;
+}
+
 const defaults = {
     markdownIt: {
         "emoji": true,
@@ -107,15 +117,13 @@ class ImageComponent {
     templateUrl: './editor.component.html',
     styleUrls: ['./editor.component.scss'],
     imports: [
-        NgClass,
-        NgStyle,
         MatIconModule,
         MatTooltipModule,
-        TooltipDirective,
-        MenuDirective,
+        // TooltipDirective,
+        // MenuDirective,
         ToolbarComponent,
         NgScrollbarModule,
-        AngularSplitModule
+        // AngularSplitModule
     ],
     host: {
         "(pointerdown)": "onPointerDown($event)"
@@ -204,6 +212,11 @@ export class StackEditorComponent {
      * and code block rendering
      */
     @Input() hideWritingSymbols: boolean = false;
+
+    /**
+     * Event hooks that may be provided to perform mutations
+     */
+    @Input() hooks: Hook[] = [];
 
     private _value = '';
     /**
