@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, ElementRef, Input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { KeyboardService, MenuDirective, MenuItem, ThemeService, TooltipDirective } from '@dotglitch/ngx-common';
@@ -12,6 +12,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ImageInsertComponent } from './image-insert/image-insert.component';
 import { LinkInsertComponent } from './link-insert/link-insert.component';
 import { EditorActions } from '../../editor-actions';
+import { NgTemplateOutlet } from '@angular/common';
 
 @Component({
     selector: 'app-toolbar',
@@ -22,6 +23,7 @@ import { EditorActions } from '../../editor-actions';
         MatTooltipModule,
         MatButtonModule,
         TooltipDirective,
+        NgTemplateOutlet,
         MenuDirective
     ],
     standalone: true
@@ -31,6 +33,9 @@ export class ToolbarComponent {
     get wrapSelection() {
         return this.editor.wrapSelection.bind(this.editor) as typeof this.editor.wrapSelection;
     }
+    get el() { return this.elementRef.nativeElement as HTMLElement }
+
+    collapse = false;
 
     // 2D array of color hex codes that show up for the color picker.
     @Input() colorList = [
@@ -82,12 +87,39 @@ export class ToolbarComponent {
 
     actions: EditorActions;
 
+    private resizeObserver: ResizeObserver;
+
     constructor(
         public readonly stackEditor: StackEditorComponent,
         private readonly dialog: MatDialog,
         public readonly theme: ThemeService,
+        private readonly elementRef: ElementRef
     ) {
         this.actions = new EditorActions(stackEditor, dialog);
+    }
+
+    ngAfterViewInit() {
+        this.resizeObserver = new ResizeObserver(() => this.calculateBounds());
+        this.resizeObserver.observe(this.el);
+        this.calculateBounds();
+    }
+
+    ngOnDestroy() {
+        this.resizeObserver.disconnect();
+    }
+
+    calculateBounds() {
+        const width = this.el.clientWidth;
+        const iconCount = 18; // TODO: count this properly.
+        const iconWidth = 36;
+
+        // Collapse the icons if they would begin clipping.
+        this.collapse = (iconCount * iconWidth) > width;
+        console.log({
+            width,
+            iconCount,
+            c: this.collapse
+        })
     }
 
     bindEditorEvents() {

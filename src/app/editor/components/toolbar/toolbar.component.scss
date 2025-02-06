@@ -28,40 +28,39 @@
     color: var(--toolbar-icon-color);
     background-color: var(--toolbar-background-color);
     overflow: hidden;
+}
+mat-icon {
+    cursor: pointer;
+    line-height: 24px;
+    padding: 6px;
+    width: 36px;
+    height: 36px;
 
-    mat-icon {
-        cursor: pointer;
-        line-height: 24px;
-        padding: 6px;
-        width: 36px;
-        height: 36px;
+    // border-radius: 50%;
+    transition: background-color 200ms ease;
+    position: relative;
 
-        // border-radius: 50%;
-        transition: background-color 200ms ease;
-        position: relative;
+    &:hover {
+        background-color: var(--toolbar-icon-hover-background-color);
+        color: var(--toolbar-icon-hover-color);
+    }
 
-        &:hover {
-            background-color: var(--toolbar-icon-hover-background-color);
-            color: var(--toolbar-icon-hover-color);
-        }
+    &::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        height: 2px;
+        width: 0px;
+        transition: width 200ms ease;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #007acc;
+    }
+
+    &.reflect {
 
         &::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            height: 2px;
-            width: 0px;
-            transition: width 200ms ease;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #007acc;
-        }
-
-        &.reflect {
-
-            &::after {
-                width: 100%;
-            }
+            width: 100%;
         }
     }
 }
@@ -139,4 +138,9 @@
         color: var(--primary-color);
         font-size: 12px;
     }
+}
+
+
+.floating-menu {
+    padding: 12px;
 }
