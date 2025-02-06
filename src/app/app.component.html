@@ -85,6 +85,8 @@
 
                         @default {
                             <ngx-stackedit
+                                mode="edit"
+                                [showPreview]="false"
                                 [showCodeRunButton]="true"
                                 codeRunner="piston"
                                 [(value)]="page.content"
