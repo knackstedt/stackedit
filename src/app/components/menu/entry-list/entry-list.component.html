@@ -10,6 +10,7 @@
     @for (page of items; track page; let i = $index) {
         <mat-expansion-panel
             cdkDrag
+            [class.selected]="page.path == pages.tabs[pages.selectedTabIndex]?.path"
             [class.isleaf]="!page['children'] || page['children'].length == 0"
             [disabled]="!page['children'] || page['children'].length == 0"
             [(expanded)]="page['expanded']"
@@ -65,9 +66,10 @@
             <mat-icon>add</mat-icon>
             Diagram
         </span>
-        <span (click)="create('fetch')">
+        <!-- This one is very broken everywhere. -->
+        <!-- <span (click)="create('fetch')">
             <mat-icon>add</mat-icon>
             Fetch
-        </span>
+        </span> -->
     </div>
 }

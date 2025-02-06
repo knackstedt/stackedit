@@ -52,6 +52,10 @@ app-entry-list {
     .mat-expansion-panel {
         box-shadow: none !important;
         background-color: #0000;
+
+        &.selected {
+            background-color: #37373d;
+        }
         .mat-content {
             flex-direction: column;
             margin-left: 24px;
