@@ -5,9 +5,9 @@
             <input
                 #_
                 matInput
-                [(ngModel)]="page.name"
+                [(ngModel)]="page.label"
                 type="text"
-                (keyup)="page.autoName = _.value.length < 2"
+                (keyup)="page.autoLabel = _.value.length < 2"
             >
         </mat-form-field>
 

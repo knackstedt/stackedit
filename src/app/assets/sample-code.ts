@@ -1,15 +1,16 @@
 export const page = {
-    "path": "data/01HERME9WAFSXNNSHGKHRX6SV5",
+    "path": "/examples/",
+    "filename": "code.ts",
     "created": 1699486312330,
     "kind": "code",
     "modified": 1699486325593,
-    "autoName": false,
+    "autoLabel": false,
     "options": { "language": "typescript" },
     "tags": [],
     "icon": "code",
     "variables": { },
     "order": -20,
-    "name": "Sample Code Page",
+    "label": "Sample Code Page",
     "content":
 `/* Game of Life
  * Implemented in TypeScript

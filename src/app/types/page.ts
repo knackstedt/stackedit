@@ -16,7 +16,17 @@ export const PageKinds = [
  * All properties will trigger filesystem reflect updates.
  */
 export type Page = {
+    /**
+     * unix-like directory the page exists in
+     * should start and end with forward slashes.
+     * e.g.
+     * /project/goal/
+     */
     path: string,
+    /**
+     * Filename in the FS. Can be interpreted from the label.
+     */
+    filename: string,
     /**
      * markdown => normal Stackedit markdown file (with
      *      partner json file)
@@ -31,8 +41,8 @@ export type Page = {
           "canvas" |
           "code" |
           "fetch";
-    name?: string;
-    autoName?: boolean;
+    label?: string;
+    autoLabel?: boolean;
     order?: number;
     expanded?: boolean;
     icon?: string; // mat icon
@@ -59,7 +69,5 @@ export type Page = {
      * If the tab is being previewed (not completely added to tab list)
      */
     isPreviewTab?: true;
-    metadataEntry?: FileSystemFileHandle;
-    fileEntry?: FileSystemFileHandle;
 };
 

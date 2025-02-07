@@ -1,203 +1,95 @@
 import { Injectable } from '@angular/core';
-import type fs from '@tauri-apps/api/fs';
-import { BaseDirectory, FileEntry, removeFile, renameFile, writeTextFile } from '@tauri-apps/api/fs';
 import { Page } from '../types/page';
-import { createInstance } from 'localforage';
+import { BrowserFS } from 'src/app/utils/browser-fs';
+import { useElectron, ElectronFS } from 'src/app/utils/electron-fs';
 
-/**
- * Schemas
- */
-import { Subject, map } from 'rxjs';
-
-// Mangled import so tauri doesn't throw errors if it's not injected
-const { readDir, readTextFile, createDir }
-    = window['__TAURI__']?.['fs'] as typeof fs || {};
-
-const useTauri = !!readDir;
-
-const localforage = createInstance({
-    name: "@dotglitch",
-    storeName: "ScratchDown"
-});
-
-
-let dbPromise;
-/**
- *
- */
+const fs: BrowserFS = useElectron ? new ElectronFS() as any : new BrowserFS();
 
 @Injectable({
     providedIn: 'root'
 })
-export class FilesService extends Subject<any> {
+export class FilesService {
 
-    constructor() {
-        super();
-
-        dbPromise = localforage.setDriver([
-            localforage.INDEXEDDB
-        ]);
-    }
-
-    private async validateDir(path: string) {
-        if (!useTauri) return true;
-
-        if (path.endsWith(".@meta"))
-            path = path.split('/').slice(0, -1).join("/");
-
-        await createDir(path, { dir: BaseDirectory.AppData, recursive: true });
-        return true
-    }
-
-    async saveFileMetadata(pageMetadata: Page) {
-        await this.validateDir(pageMetadata.path);
-
-        const page = structuredClone(pageMetadata);
-        page.content = undefined;
-        page.children = undefined;
-        // page.path = undefined;
-
-        const path = pageMetadata.path + '.@meta';
-        if (useTauri) {
-            const jsonText = JSON.stringify(page);
-            await writeTextFile(path, jsonText, { dir: BaseDirectory.AppData });
+    async readDir(path: string): Promise<Page[]> {
+        const exists = await fs.exists(path);
+        if (!exists) {
+            console.log("path is a lie", path);
+            await fs.mkdir(path, { recursive: true });
+            return [];
         }
-        else {
-            await localforage.setItem(path, page)
-        }
-    }
+        console.log("readdir from path", path);
+        return fs.readDir(path)
+            .then(items => {
+                const files = items.filter(i => i.isFile()).filter(i => !i.name.startsWith("."));
+                const dirs = items.filter(i => i.isDirectory());
+                // TODO: directory support.
 
-    async saveFileContents(page: Page) {
-        await this.validateDir(page.path);
+                console.log("file from path", files);
 
-        // Do not set page contents to `undefined` or `null`.
-        // This gets called when an update comes through before
-        // a page loads it's contents
-        if (page.content == undefined || page.content == null)
-            return;
+                return Promise.all(files.map(async f => {
+                    console.log("read file", path + f.name);
 
-        const path = page.path + '.@data';
-        if (useTauri) {
-            const text = typeof page.content == "string" ? page.content : JSON.stringify(page.content);
-            await writeTextFile(path, text, { dir: BaseDirectory.AppData });
-        }
-        else {
-            await localforage.setItem(path, page.content);
-        }
-    }
+                    const metadata = await this.readFile(path + '.' + f.name).catch(e => null)
+                    // If we have a metadata file, load that.
+                    if (metadata) {
+                        // Ensure that if something is moved in the real FS, we catch it and update the path we try to use.
+                        const meta = JSON.parse(metadata || "{}") as Page;
+                        meta.path = f.path || '/';
+                        meta.filename = f.name;
 
-    async readFile(path: string) {
-        if (useTauri) {
-            return await readTextFile(path, { dir: BaseDirectory.AppData });
-        }
-        else {
-            return await localforage.getItem(path)
-        }
-    }
-
-    async deleteFile(page: Page) {
-        if (useTauri) {
-            return await removeFile(page.path, { dir: BaseDirectory.AppData });
-        }
-        else {
-            await localforage.removeItem(page.path + '.@meta');
-            await localforage.removeItem(page.path + '.@data');
-        }
-    }
-
-    async trashFile(page: Page) {
-        const srcPath = page.path;
-        const targetPath = page.path.replace(/^data\//, 'trash/');
-        const srcPathMd = srcPath.replace(/\.json$/, '.md');
-        const targetPathMd = targetPath.replace(/\.json$/, '.md');
-        page.deleted = Date.now();
-
-        if (useTauri) {
-            createDir(targetPath.split('/').slice(0, -1).join("/"), { dir: BaseDirectory.AppData });
-            await renameFile(srcPath, targetPath, { dir: BaseDirectory.AppData });
-            await renameFile(srcPathMd, targetPathMd, { dir: BaseDirectory.AppData });
-        }
-        else {
-            const oldFile = await localforage.getItem(srcPath);
-            await localforage.setItem(targetPath, oldFile);
-
-            const oldFileMd = await localforage.getItem(srcPathMd);
-            await localforage.setItem(targetPathMd, oldFileMd);
-
-            await localforage.removeItem(srcPath);
-            await localforage.removeItem(srcPathMd);
-        }
-    }
-
-    async listFiles(pathTarget: string) {
-        let pages: Page[] = [];
-
-        if (pathTarget.trim().length < 3)
-            pathTarget = "data";
-
-        // if (!pathTarget.startsWith("/"))
-            // pathTarget = "/" + pathTarget;
-        if (!pathTarget.endsWith("/"))
-            pathTarget += "/";
-
-        const path = pathTarget;
-
-        if (useTauri) {
-            await createDir(path, { dir: BaseDirectory.AppData, recursive: true });
-            const entries = await readDir(path, { dir: BaseDirectory.AppData, recursive: true });
-
-            const processEntries = async (entries: FileEntry[], parent?) => {
-                for (const entry of entries) {
-                    if (entry.name.endsWith(".md") || entry.name.endsWith(".mdx")) {
-                        const jsonFile = entry.path.replace(/\.mdx?$/, '.json');
-                        if (!entries.find(e => e.path == jsonFile)) {
-                            // Markdown files that don't have corresponding json
-                            // files. This scenario usually happens when
-                            // opening a doc repo folder.
-
-                            pages.push({
-                                path: entry.path,
-                                kind: "raw",
-                                name: entry.path.split('/').pop(),
-                                modified: 0,
-                                created: 0,
-                                content: ''
-                            })
-                        }
+                        // console.log("incoming metadata", meta);
+                        return meta;
                     }
+                    // Otherwise, attempt to guess metadata based on file hints.
+                    else {
+                        const contents = await this.readFile(path + f.name);
 
-                    if (entry.children) {
-                        await processEntries(entry.children, entry);
+                        return {
+                            path: f.path || '/',
+                            filename: f.name,
+                            created: f.stats.ctimeMs,
+                            modified: f.stats.mtimeMs,
+                            kind: "code",
+                            autoLabel: true,
+                            content: contents
+                        } as Page
                     }
-
-                    // skip any non json files
-                    if (!entry.name.endsWith(".json"))
-                        continue;
-
-                    const jsonText = await readTextFile(entry.path, { dir: BaseDirectory.AppData });
-                    const page = JSON.parse(jsonText);
-                    pages.push(page);
-                }
-            };
-            await processEntries(entries);
-        }
-        else {
-            await dbPromise;
-            const slug = pathTarget.replace(/[^a-z0-9_\-]/g, '');
-            const keys = await localforage.keys();
-            const jsonKeys = keys
-                .filter(key => key.endsWith(".@meta"))
-                .filter(key => key.startsWith(slug));
-
-            pages = await Promise.all(jsonKeys.map(k => localforage.getItem(k))) as any;
-            pages.forEach(p => {
-                if (!p.name || p.name.trim().length < 2) {
-                    p.autoName = true;
-                }
+                }))
             })
-        }
+    }
 
-        pages.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-        return pages;
+    async saveFileMetadata(file: Page): Promise<void> {
+        const data = structuredClone(file);
+        data.content = '';
+
+        // console.log("sfm", file.path + file.filename);
+        return fs.writeFile(file.path + '.' + file.filename, JSON.stringify(data));
+    }
+
+    async saveFileContents(file: Page): Promise<void> {
+        if (file.kind == "fetch") {
+            file.content = '';
+        };
+        // console.log("sfc", file.path + file.filename);
+        return fs.writeFile(file.path + file.filename, file.content);
+    }
+
+    /**
+     * Read the file content at the given path + filename
+     */
+    async readFile(path: string): Promise<string> {
+        return fs.readFile(path, 'utf8')
+    }
+
+    // This also deletes directories
+    async deleteFile(path: string): Promise<void> {
+        // Delete both the .md and the .md.json files.
+        return fs.unlink(path)
+    }
+
+    metadataToPage(metadata: string, contents?: string): Page {
+        const data = JSON.parse(metadata) as Page;
+        data.content = contents;
+        return data;
     }
 }

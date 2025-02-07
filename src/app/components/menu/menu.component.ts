@@ -123,7 +123,7 @@ export class MenuComponent {
                 label: "Delete",
                 action: async page => {
                     await this.util.confirmAction("Confirm"
-                        , `Are you sure you want to delete ${page.name}?`);
+                        , `Are you sure you want to delete ${page.label}?`);
                     this.pages.deletePage(page);
                 }
             },

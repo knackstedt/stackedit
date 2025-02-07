@@ -50,7 +50,7 @@ export class DiagramComponent {
             await this.pages.loadPageContent(this.page);
         }
 
-        let data = this.page.content as any;
+        const data = JSON.parse(this.page.content || '{}');
 
         const libItems = loadLibs()
             .then(l =>
@@ -92,6 +92,6 @@ export class DiagramComponent {
     private saveState() {
         if (!this.hasInitialized) return null;
 
-        return this.pages.onPageContentChange(this.page, this.dataChangeEmitter.value);
+        return this.pages.onPageContentChange(this.page, JSON.stringify(this.dataChangeEmitter.value));
     }
 }

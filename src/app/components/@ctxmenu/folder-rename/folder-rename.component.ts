@@ -40,20 +40,21 @@ export class FolderRenameComponent implements OnInit {
                 name: ''
             } as any;
         }
-        this.isRename = this.data?.name.length > 0;
+        this.isRename = this.data?.label.length > 0;
 
-        this.originalName = this.data?.name;
+        this.originalName = this.data?.label;
     }
 
     ngOnDestroy() {
         if (this.data && !this.hasSaved)
-            this.data.name = this.originalName;
+            this.data.label = this.originalName;
     }
 
     onSave() {
         this.hasSaved = true;
-        if (this.data?.name?.length > 2)
-            this.data.autoName = false;
+        if (this.data?.label?.length > 2)
+            this.data.autoLabel = false;
+
         this.dialog.close(this.data);
         this.pages.savePage(this.data);
     }

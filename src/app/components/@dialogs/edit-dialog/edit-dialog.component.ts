@@ -44,7 +44,7 @@ export class EditDialogComponent implements OnInit {
         private pages: PagesService
     ) {
         this.page = structuredClone(data) || {};
-        this.page.path = this.page.path ?? "data/temp_" + ulid() + '.json'
+        this.page.path = this.page.path ?? "/tmp/" + ulid() + '.md'
         this.page.created = this.page.created ?? Date.now();
         this.page.kind = this.page.kind ?? "markdown";
         this.page.options = this.page.options ?? {};

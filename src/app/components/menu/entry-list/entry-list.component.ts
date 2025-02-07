@@ -56,10 +56,11 @@ export class EntryListComponent implements OnInit {
             await this.pages.savePage(this.items[i]);
     }
 
-    create(kind: string) {
+    create(kind: string, icon: string) {
         this.pages.createPage({
             order: this.items?.length ?? 0,
-            kind: kind as any
+            kind: kind as any,
+            icon
         }, this.item as any);
     }
 }

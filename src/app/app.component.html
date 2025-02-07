@@ -29,7 +29,7 @@
                         >
                             <mat-icon [fontIcon]="page.icon || 'edit_document'"></mat-icon>
                             <span style="flex: 1">
-                                <span>{{page.name?.slice(0, 20)}}</span>
+                                <span>{{page.label?.slice(0, 20)}}</span>
                             </span>
 
                             <mat-icon class="close-button" (click)="closeTab(page)">close</mat-icon>
@@ -59,6 +59,7 @@
                                 [colorDecorators]="page.options?.['colorDecorators']"
                                 [tabSize]="page.options?.['tabSize']"
                                 [tabSize]="4"
+                                [installationLocation]="'./lib/monaco/vs'"
                             />
                         }
 

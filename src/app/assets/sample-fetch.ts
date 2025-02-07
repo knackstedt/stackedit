@@ -1,9 +1,10 @@
 export const page = {
-    "path": "data/01HEHFG0Q9W98R55ETQ8ME80TK",
+    "path": "/examples/",
+    "filename": "fetch.se",
     "created": 1699246244585,
     "kind": "fetch",
     "modified": 1699486512382,
-    "autoName": false,
+    "autoLabel": false,
     "options": {
         "url": "https://dotglitch.dev",
         "method": "GET",
@@ -14,5 +15,5 @@ export const page = {
     "variables": {},
     "icon": "podcasts",
     "order": -10,
-    "name": "Sample Fetch Page"
+    "label": "Sample Fetch Page"
 };

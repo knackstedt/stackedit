@@ -1,14 +1,12 @@
 import { EventEmitter, Injectable } from '@angular/core';
 import { ulid } from 'ulidx';
 import { debounceTime } from 'rxjs';
-import JSON5 from 'json5';
 import { FilesService } from './files.service';
 import { Page } from '../types/page';
 import { ConfigService } from './config.service';
 
 const $debounce = Symbol("debounce");
-const basePath = `data/`;
-const metadata_ext = "_metadata.json5";
+const basePath = `/`;
 
 @Injectable({
     providedIn: 'root'
@@ -54,29 +52,25 @@ export class PagesService {
     ) {
 
         (async() => {
-            const [
-                pages,
-                trash,
-                { tabs, selectedTabIndex }
-            ] = await Promise.all([
-                this.files.listFiles("data"),
-                this.files.listFiles("trash"),
-                this.config.get("tabsState")
-                    .then(r => r || { tabs: [], selectedTabIndex: 0 })
-            ]);
+            const pages = await this.files.readDir("/");
+            const { tabs, selectedTabIndex } = await this.config.get("tabs-state")
+                .then(r => r || { tabs: [], selectedTabIndex: 0 })
 
-            this.flatPages = pages;
-            this.trash = trash;
+            this.flatPages = this.pages = pages;
 
             this.tabs = this.pages.filter(p => tabs.find(t => t.path == p.path));
             this.selectedTabIndex = selectedTabIndex;
 
-            this.calculatePageTree();
+            if (this.pages.length > 0 && this.tabs.length == 0)
+                this.addTab(this.pages[0]);
+
+            // debugger;
+            // this.calculatePageTree();
         })();
     }
 
     private saveTabsState() {
-        this.config.set("tabsState", {
+        this.config.set("tabs-state", {
             selectedTabIndex: this.selectedTabIndex,
             tabs: this.tabs
                 .filter(t => !t.isPreviewTab)
@@ -85,116 +79,116 @@ export class PagesService {
     }
 
     // Open a workspace via WFSA
-    async openWorkspace() {
-        const dirHandle = this.workspaceHandle = await window['showDirectoryPicker']({
-            mode: "readwrite"
-        });
+    // async openWorkspace() {
+    //     const dirHandle = this.workspaceHandle = await window['showDirectoryPicker']({
+    //         mode: "readwrite"
+    //     });
 
-        const files: Page[] = [];
-        const flatPages: Page[] = [];
+    //     const files: Page[] = [];
+    //     const flatPages: Page[] = [];
 
-        // TODO: make this run in parallel?
-        const traverseDirs = async (dir: FileSystemDirectoryHandle, path: string) => {
-            const results = [];
-            const metadataFiles: FileSystemFileHandle[] = [];
-            const files: FileSystemFileHandle[] = [];
-            const dirs: FileSystemDirectoryHandle[] = [];
+    //     // TODO: make this run in parallel?
+    //     const traverseDirs = async (dir: FileSystemDirectoryHandle, path: string) => {
+    //         const results = [];
+    //         const metadataFiles: FileSystemFileHandle[] = [];
+    //         const files: FileSystemFileHandle[] = [];
+    //         const dirs: FileSystemDirectoryHandle[] = [];
 
-            // @ts-ignore .values()
-            for await (const entry of dir.values()) {
-                if (entry.kind == "directory")
-                    dirs.push(entry);
-                else if (entry.name.endsWith(metadata_ext))
-                    metadataFiles.push(entry);
-                else
-                    files.push(entry);
-            }
+    //         // @ts-ignore .values()
+    //         for await (const entry of dir.values()) {
+    //             if (entry.kind == "directory")
+    //                 dirs.push(entry);
+    //             else if (entry.name.endsWith(metadata_ext))
+    //                 metadataFiles.push(entry);
+    //             else
+    //                 files.push(entry);
+    //         }
 
-            // Metadata files will sort to the start
-            files.sort((a,b) => {
-                if (a.name.endsWith(metadata_ext))
-                    return -1;
-                if (b.name.endsWith(metadata_ext))
-                    return 1;
-                // Default to alphabetical sort
-                return a.name > b.name ? 1 : -1;
-            });
-            console.log("sorted files", files)
+    //         // Metadata files will sort to the start
+    //         files.sort((a,b) => {
+    //             if (a.name.endsWith(metadata_ext))
+    //                 return -1;
+    //             if (b.name.endsWith(metadata_ext))
+    //                 return 1;
+    //             // Default to alphabetical sort
+    //             return a.name > b.name ? 1 : -1;
+    //         });
+    //         console.log("sorted files", files)
 
-            // Only perform lookup _after_ all entries in the dir have
-            // resolved -- this lets us check if there are other
-            // relevant files in the directory
+    //         // Only perform lookup _after_ all entries in the dir have
+    //         // resolved -- this lets us check if there are other
+    //         // relevant files in the directory
 
-            for (const dir of dirs) {
-                const index = path + dir.name + '/';
-                this.dirHandles[index] = {
-                    handle: dir,
-                    entries: await traverseDirs(dir, index)
-                };
-                // results.push(...this.dirHandles[index].entries);
-            }
+    //         for (const dir of dirs) {
+    //             const index = path + dir.name + '/';
+    //             this.dirHandles[index] = {
+    //                 handle: dir,
+    //                 entries: await traverseDirs(dir, index)
+    //             };
+    //             // results.push(...this.dirHandles[index].entries);
+    //         }
 
-            for (const metadata of metadataFiles) {
-                const fileName = metadata.name.replace(metadata_ext, '');
-                const dataFile = files.findIndex(f => f.name == fileName);
+    //         for (const metadata of metadataFiles) {
+    //             const fileName = metadata.name.replace(metadata_ext, '');
+    //             const dataFile = files.findIndex(f => f.name == fileName);
 
-                if (dataFile == -1) {
-                    console.warn("Found metadata, but not data file!")
-                }
-                else {
-                    const data = await metadata.getFile();
-                    const text = await data.text();
-                    const json = JSON5.parse(text) as Page;
+    //             if (dataFile == -1) {
+    //                 console.warn("Found metadata, but not data file!")
+    //             }
+    //             else {
+    //                 const data = await metadata.getFile();
+    //                 const text = await data.text();
+    //                 const json = JSON5.parse(text) as Page;
 
-                    json.path = "wfsa://" + path;
-                    json.metadataEntry = metadata;
-                    json.fileEntry = files[dataFile];
-                    json.hasLoaded = false;
-                    json.content = '';
-                    results.push(json);
-                    flatPages.push(json);
+    //                 json.path = "wfsa://" + path;
+    //                 json.metadataEntry = metadata;
+    //                 json.fileEntry = files[dataFile];
+    //                 json.hasLoaded = false;
+    //                 json.content = '';
+    //                 results.push(json);
+    //                 flatPages.push(json);
 
-                    // Remove the file -- it's added already
-                    files.splice(dataFile, 1);
-                }
-            }
+    //                 // Remove the file -- it's added already
+    //                 files.splice(dataFile, 1);
+    //             }
+    //         }
 
-            for (const file of files) {
-                const obj: Page = {
-                    path: "wfsa://" + path,
-                    content: undefined,
-                    hasLoaded: false,
-                    created: 0,
-                    modified: Date.now(),
-                    kind: "raw",
-                    name: file.name,
-                    fileEntry: file
-                };
+    //         for (const file of files) {
+    //             const obj: Page = {
+    //                 path: "wfsa://" + path,
+    //                 content: undefined,
+    //                 hasLoaded: false,
+    //                 created: 0,
+    //                 modified: Date.now(),
+    //                 kind: "raw",
+    //                 name: file.name,
+    //                 fileEntry: file
+    //             };
 
-                results.push(obj);
-                flatPages.push(obj);
-            }
+    //             results.push(obj);
+    //             flatPages.push(obj);
+    //         }
 
-            return results;
-        }
+    //         return results;
+    //     }
 
-        const roots = await traverseDirs(dirHandle, '');
+    //     const roots = await traverseDirs(dirHandle, '');
 
-        Object.entries(this.dirHandles).forEach(([path, handle]) => {
+    //     Object.entries(this.dirHandles).forEach(([path, handle]) => {
 
-        })
+    //     })
 
-        console.log({
-            roots,
-            files,
-            dirs: this.dirHandles
-        });
+    //     console.log({
+    //         roots,
+    //         files,
+    //         dirs: this.dirHandles
+    //     });
 
-        this.flatPages = flatPages;
-        this.pages = roots;
+    //     this.flatPages = flatPages;
+    //     this.pages = roots;
 
-        this.calculatePageTree();
-    }
+    //     this.calculatePageTree();
+    // }
 
     public loadCurrentPageContent() {
         return this.loadPageContent(this.tabs[this._selectedTabIndex]);
@@ -202,19 +196,8 @@ export class PagesService {
 
     public async loadPageContent(page: Page) {
         if (!page.hasLoaded) {
-            if (page.fileEntry) {
-                const file = await page.fileEntry.getFile();
-                page.content = await file.text();
-                // page.content = await file.stream();
-                console.log("Load the fucking thing", file, page.content)
-            }
-            else {
-                const path = page.path + '.@data';
-                const res = await this.files.readFile(path) as any;
-                if (!res)
-                    debugger;
-                page.content = res;
-            }
+            const res = await this.files.readFile(page.path + page.filename) as any;
+            page.content = res;
         }
     }
 
@@ -234,12 +217,12 @@ export class PagesService {
             this.dirMap[dir].push(p);
         });
 
-        Object.entries(this.dirMap).forEach(([k, v]) => {
-            const parent = this.pageMap[k];
-            if (parent) {
-                parent.children = v;
-            }
-        });
+        // Object.entries(this.dirMap).forEach(([k, v]) => {
+        //     const parent = this.pageMap[k];
+        //     if (parent) {
+        //         parent.children = v;
+        //     }
+        // });
 
         const keys = Object.keys(this.dirMap).sort((a, b) => a.length - b.length)
         this.pages = this.dirMap[keys[0]] || [];
@@ -269,22 +252,10 @@ export class PagesService {
         }
         page.modified = Date.now();
 
-        if (page.autoName || page.name?.trim().length < 2) {
-            if (page.kind == "canvas") {
-                page.name = "Untitled Diagram";
-            }
-            else if (page.kind == "fetch") {
-                page.name = "Fetch Request";
-            }
-            else {
-                page.name = page.content?.trim()?.split('\n')?.[0]?.slice(0, 20);
-                if (!page.name || page.name.trim().length < 2)
-                    page.name = "Untitled";
-            }
-        }
+        this.genLabel(page);
 
-        await this.files.saveFileMetadata(page);
-        await this.files.saveFileContents(page);
+        await this.files.saveFileMetadata(page).catch(e => {debugger});
+        await this.files.saveFileContents(page).catch(e => {debugger});
 
         this.pageMap[page.path] = page;
     }
@@ -304,12 +275,18 @@ export class PagesService {
             }
 
             const page: Page = {
-                path: (path ? path + "/" : basePath) + ulid(),
+                path: (path ? path + "/" : basePath),
                 content: '',
-                created: Date.now(),
                 kind: "markdown",
+                created: Date.now(),
                 modified: Date.now(),
-                autoName: true,
+                filename: ulid() + {
+                    markdown: ".md",
+                    code: ".code",
+                    raw: ".raw",
+                    canvas: ".canvas"
+                }[abstract.kind],
+                autoLabel: true,
                 options: {},
                 tags: [],
                 variables: {},
@@ -318,7 +295,7 @@ export class PagesService {
             await this.savePage(page);
 
             this.flatPages.push(page);
-            this.calculatePageTree();
+            // this.calculatePageTree();
 
             if (openTab)
                 this.addTab(page);
@@ -335,11 +312,24 @@ export class PagesService {
      */
     async deletePage(page: Page, destroy = false) {
         if (destroy) {
-            await this.files.deleteFile(page);
+            await this.files.deleteFile(page.path);
             this.trash.splice(this.trash.indexOf(page), 1);
         }
         else {
-            await this.files.trashFile(page);
+            const c = await this.files.readFile(page.path + page.filename);
+            const m = await this.files.readFile(page.path + '.' + page.filename);
+
+            const trashedPage = this.files.metadataToPage(m, c);
+
+            trashedPage.deleted = Date.now();
+            trashedPage.modified = Date.now();
+            trashedPage.path = `/.trash/`;
+
+            await this.files.saveFileMetadata(trashedPage);
+            await this.files.saveFileContents(trashedPage);
+
+            await this.files.deleteFile(page.path);
+
             this.trash.push(page);
         }
         const tabIndex = this.tabs.indexOf(page),
@@ -376,7 +366,7 @@ export class PagesService {
         tab[$debounce] = emitter;
 
         if (tab.content == undefined || tab.content == null) {
-            const text = await this.files.readFile(tab.path + '.@data') as any;
+            const text = await this.files.readFile(tab.path + tab.filename) as any;
             tab.content = text;
         }
 
@@ -400,12 +390,24 @@ export class PagesService {
         }
     }
 
-    onPageContentChange(page: Page, value: string) {
-        if (page.autoName) {
-            page.name = page.content?.trim()?.split('\n')?.[0]?.slice(0, 20);
-            if (page.name.trim().length < 2)
-                page.name = "untitled";
+    genLabel(page: Page) {
+        if (page.autoLabel || page.label?.trim().length < 2) {
+            if (page.kind == "canvas") {
+                page.label = "Untitled Diagram";
+            }
+            else if (page.kind == "fetch") {
+                page.label = "Fetch Request";
+            }
+            else {
+                page.label = page.content?.trim()?.split('\n')?.[0]?.slice(0, 20);
+                if (!page.label || page.label.trim().length < 2)
+                    page.label = "Untitled";
+            }
         }
+    }
+
+    onPageContentChange(page: Page, value: string) {
+        this.genLabel(page);
 
         page.content = value;
         page[$debounce].next();

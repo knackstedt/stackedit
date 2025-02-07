@@ -95,31 +95,31 @@ export class AppComponent {
         });
 
         config.subscribe(c => {
-            if (c.telemetry == null && window['dtrum']) {
+            // if (c.telemetry == null && window['dtrum']) {
 
-                // Prevent duplicate popups from appearing
-                if (!window['__SHOW_TELEMETRY_DIALOG']) {
-                    window['__SHOW_TELEMETRY_DIALOG'] = true;
+            //     // Prevent duplicate popups from appearing
+            //     if (!window['__SHOW_TELEMETRY_DIALOG']) {
+            //         window['__SHOW_TELEMETRY_DIALOG'] = true;
 
-                    dialog.open(TelemetryDialogComponent, { disableClose: true })
-                    .afterClosed().subscribe(() => {
-                        if (window['showDirectoryPicker']) {
-                            // TODO: Show "use Vivialdi dialog"
-                        }
-                    });
+            //         dialog.open(TelemetryDialogComponent, { disableClose: true })
+            //         .afterClosed().subscribe(() => {
+            //             if (window['showDirectoryPicker']) {
+            //                 // TODO: Show "use Vivialdi dialog"
+            //             }
+            //         });
 
-                }
-            }
-            else {
-                if (!window['showDirectoryPicker']) {
-                    // TODO: Show "use Vivialdi dialog"
-                }
+            //     }
+            // }
+            // else {
+            //     if (!window['showDirectoryPicker']) {
+            //         // TODO: Show "use Vivialdi dialog"
+            //     }
 
-                if (c.telemetry)
-                    window['dtrum']?.enable();
-                else
-                    window['dtrum']?.disable();
-            }
+            //     if (c.telemetry)
+            //         window['dtrum']?.enable();
+            //     else
+            //         window['dtrum']?.disable();
+            // }
 
             if (c.hasInstalledDefaultPages == null) {
                 this.installDefaultPages();
@@ -137,7 +137,7 @@ export class AppComponent {
         Promise.all([
             import("./assets/sample-markdown"),
             import("./assets/sample-diagram"),
-            import("./assets/sample-fetch"),
+            // import("./assets/sample-fetch"),
             import("./assets/sample-code")
         ]).then(async (files) => {
             for (let { page } of files) {

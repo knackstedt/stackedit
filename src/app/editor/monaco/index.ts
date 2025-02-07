@@ -4,16 +4,15 @@ import { setupRegexLanguage } from './regex-tokenizer';
 import { setupLogLanguage } from './log-tokenizer';
 
 let isMonacoInstalled = false;
-const installationLocation = '/lib/monaco/vs';
+const installationLocation = './lib/monaco/vs';
 
 export function installMonaco() {
     if (isMonacoInstalled || window['monaco']) return;
 
     // Monaco has a UMD loader that requires this
     // Merge with any pre-existing global require objects.
-    if (!window['require']) window['require'] = {} as any;
-    if (!window['require']['paths']) window['require']['paths'] = {};
-
+    window['require'] ??= {} as any;
+    window['require']['paths'] ??= {};
     window['require']['paths'].vs = installationLocation;
 
     const monacoFiles = [
@@ -24,6 +23,7 @@ export function installMonaco() {
 
     for (let i = 0; i < monacoFiles.length; i++) {
         const script = document.createElement("script");
+        script.setAttribute("monaco", "");
         script.setAttribute("defer", "");
         script.setAttribute("src", installationLocation + '/' + monacoFiles[i]);
         document.body.append(script);

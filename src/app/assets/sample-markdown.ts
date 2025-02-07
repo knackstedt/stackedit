@@ -1,11 +1,12 @@
 export const page = {
-    "path": "data/01HE5GSV1P5AA9VNX2VKR1J0TQ",
+    "path": "/examples/",
+    "filename": "markdown.md",
     "created": 1698844961846,
     "kind": "markdown",
     "modified": 1699485729611,
-    "autoName": false,
+    "autoLabel": false,
     "order": -40,
-    "name": "Sample Markdown Page",
+    "label": "Sample Markdown Page",
     "options": {},
     "icon": "ondemand_video",
     "content": `# @dotglitch StackEdit

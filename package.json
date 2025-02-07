@@ -2,22 +2,25 @@
   "name": "stackedit",
   "version": "0.0.0",
   "description": "Free, open-source, full-featured Markdown editor",
-  "author": "Andrew Knackstedt",
+  "author": {
+    "name": "Andrew Knackstedt",
+    "email": "andrewk@vivaldi.net"
+  },
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/knackstedt/stackedit/issues"
   },
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "dev": "ng serve --port 4400 --ssl",
-    "dev:tauri": "tauri dev",
+    "dev:electron": "electron electron/main.js",
     "dev:http": "ng serve --port 8081",
     "dev:package": "ng build package --watch --configuration development",
     "versionset": "cd src && sed -i -e \"s/__VERSION__/$(npm version --json | jq \".[\\\"ngx-stackedit\\\"]\" | tr -d '\"')/g\" ./app/editor/editor.component.ts",
     "build": "ng build --project package",
     "build:app": "ng build --project dotglitch",
-    "build:tauri": "tauri build",
-    "tauri": "tauri"
+    "prebuild:electron": "ng build --project dotglitch",
+    "build:electron": "electron-builder"
   },
   "dependencies": {
     "@angular/animations": "^17.0.9",
@@ -36,9 +39,12 @@
     "@fontsource/fira-sans": "^5.1.1",
     "@fontsource/material-icons-outlined": "^5.0.11",
     "@tauri-apps/api": "^1.5.3",
+    "@zenfs/core": "^1.9.4",
+    "@zenfs/dom": "^1.1.5",
     "angular-split": "^17.2.0",
     "diff-match-patch": "^1.0.5",
     "dompurify": "^3.2.4",
+    "electron-better-ipc": "^2.0.1",
     "filerobot-image-editor": "^4.7.0",
     "json5": "^2.2.3",
     "localforage": "^1.10.0",
@@ -77,6 +83,8 @@
     "@types/react": "^18.2.36",
     "@types/react-dom": "^18.2.14",
     "@types/wicg-file-system-access": "^2023.10.5",
+    "electron": "^34.1.0",
+    "electron-builder": "^25.1.8",
     "ng-packagr": "^17.0.3",
     "path-browserify": "^1.0.1",
     "ts-node": "^10.9.2",

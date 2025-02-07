@@ -1,0 +1,56 @@
+{
+    "appId": "dev.dotglitch.md",
+    "artifactName": "StackEdit",
+    "files": [
+        {
+            "from": "dist/stackedit/browser",
+            "filter": "**/*",
+            "to": "."
+        },
+        {
+            "from": "electron",
+            "filter": "**/*",
+            "to": "."
+        },
+        "package.json"
+    ],
+    "mac": {
+        "category": "Business",
+        "target": {
+            "target": "default",
+            "arch": [
+                "x64",
+                "arm64"
+            ]
+        }
+    },
+    "linux": {
+        "category": "Office",
+        "target": [
+            "AppImage",
+            "rpm"
+        ]
+    },
+    "flatpak": {
+        "branch": "master"
+    },
+    "deb": {
+        "compression": "bzip2"
+    },
+    "rpm": {
+        "fpm": [
+            "--rpm-rpmbuild-define",
+            "_build_id_links none"
+        ]
+    },
+    "win": {
+        "target": {
+            "target": "nsis",
+            "arch": [
+                "x64",
+                "arm64"
+            ]
+        },
+        "rfc3161TimeStampServer": "http://timestamp.comodoca.com"
+    }
+}

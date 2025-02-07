@@ -1,13 +1,8 @@
 import { HttpClient, HttpContext, HttpHeaders, HttpParams } from "@angular/common/http";
 import { Injectable, isDevMode } from '@angular/core';
-import type http from '@tauri-apps/api/http';
 import { retry } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { ResponseType } from '@tauri-apps/api/http';
-
-const { fetch }
-    = window['__TAURI__']?.['http'] as typeof http || {};
-
 
 // Total number of _retries_ if there is a 429 response code.
 const retryCount = 2;
@@ -64,41 +59,41 @@ export class Fetch {
         options.responseType = options.responseType || "json";
         options.observe = "response";
 
-        if (fetch) {
-            const res = await fetch<any>(url, {
-                method: method.toUpperCase() as any,
-                body: (method == "post" || method == "put") && options.body ? {
-                    type: "Json", // Form Json Text Bytes
-                    payload: options.body
-                } : null,
-                headers: options.headers,
-                responseType: ResponseType.Binary,
-            });
+        // if (fetch) {
+        //     const res = await fetch<any>(url, {
+        //         method: method.toUpperCase() as any,
+        //         body: (method == "post" || method == "put") && options.body ? {
+        //             type: "Json", // Form Json Text Bytes
+        //             payload: options.body
+        //         } : null,
+        //         headers: options.headers,
+        //         responseType: ResponseType.Binary,
+        //     });
 
-            let data;
-            let originalData = res.data;
-            window['__data'] = originalData;
-            const contentType = res.headers['content-type'] as string;
-            switch(true) {
-                case (contentType.startsWith("application/json")): {
-                    let text = res.data.map(code => String.fromCharCode(code)).join('');
-                    data = res.data = JSON.parse(text);
-                    break;
-                }
-                // Media types all return as blobs
-                case (/image\//.test(contentType)): {
-                    data = res.data = new Blob(res.data);
-                    break;
-                }
-                default: {
-                    let text = res.data.map(code => String.fromCharCode(code)).join('');
-                    data = res.data = text;
-                }
-            }
+        //     let data;
+        //     let originalData = res.data;
+        //     window['__data'] = originalData;
+        //     const contentType = res.headers['content-type'] as string;
+        //     switch(true) {
+        //         case (contentType.startsWith("application/json")): {
+        //             let text = res.data.map(code => String.fromCharCode(code)).join('');
+        //             data = res.data = JSON.parse(text);
+        //             break;
+        //         }
+        //         // Media types all return as blobs
+        //         case (/image\//.test(contentType)): {
+        //             data = res.data = new Blob(res.data);
+        //             break;
+        //         }
+        //         default: {
+        //             let text = res.data.map(code => String.fromCharCode(code)).join('');
+        //             data = res.data = text;
+        //         }
+        //     }
 
-            return returnDetails ? res : data as any;
-        }
-        else {
+        //     return returnDetails ? res : data as any;
+        // }
+        // else {
 
             const p = new Promise((resolve, reject) => {
                 const o = this.http.request(method, url, options)
@@ -127,6 +122,6 @@ export class Fetch {
                     });
             });
             return p as Promise<T>;
-        }
+        // }
     }
 }
