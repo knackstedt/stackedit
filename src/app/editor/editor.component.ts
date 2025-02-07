@@ -227,7 +227,7 @@ export class StackEditorComponent {
         this._value = value;
 
         if (this.editorSvc) {
-            this.editorSvc.clEditor.setContent(value, true);
+            this.editorSvc.clEditor?.setContent(value, true);
         }
     }
     get value() { return this._value };
