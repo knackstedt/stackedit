@@ -110,16 +110,17 @@ export class ToolbarComponent {
 
     calculateBounds() {
         const width = this.el.clientWidth;
-        const iconCount = 18; // TODO: count this properly.
+        // TODO: count this properly.
+        const iconCount = 18 +1;
         const iconWidth = 36;
 
         // Collapse the icons if they would begin clipping.
         this.collapse = (iconCount * iconWidth) > width;
-        console.log({
-            width,
-            iconCount,
-            c: this.collapse
-        })
+        // console.log({
+        //     width,
+        //     iconCount,
+        //     c: this.collapse
+        // })
     }
 
     bindEditorEvents() {
