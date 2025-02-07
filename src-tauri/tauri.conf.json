@@ -4,7 +4,7 @@
         "beforeBuildCommand": "npm run build:app",
         "beforeDevCommand": "npm run dev:http",
         "devPath": "http://localhost:8081",
-        "distDir": "../dist/stackedit",
+        "distDir": "../dist/stackedit/browser",
         "withGlobalTauri": true
     },
     "package": {
