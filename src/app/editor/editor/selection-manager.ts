@@ -250,21 +250,21 @@ export class SelectionMgr extends EventEmittingClass {
                 // The trees have diverged!
                 if (!focusTree[i]) {
                     const commonElement = focusTree[i - 1];
-                    const nodes = [...commonElement.childNodes as any];
+                    const nodes = [...(commonElement?.childNodes || []) as any];
                     return nodes.indexOf(selection.focusNode) < nodes.indexOf(anchorTree[i]);
                 }
 
                 // The trees have diverged!
                 if (!anchorTree[i]) {
                     const commonElement = anchorTree[i - 1];
-                    const nodes = [...commonElement.childNodes as any];
+                    const nodes = [...(commonElement?.childNodes || []) as any];
                     return nodes.indexOf(focusTree[i]) < nodes.indexOf(selection.anchorNode);
                 }
 
                 // The trees have diverged!
                 if (anchorTree[i] != focusTree[i]) {
                     const commonElement = anchorTree[i - 1];
-                    const nodes = [...commonElement.childNodes as any];
+                    const nodes = [...(commonElement?.childNodes || []) as any];
                     return nodes.indexOf(focusTree[i]) < nodes.indexOf(anchorTree[i]);
                 }
             }
