@@ -2,7 +2,6 @@ import { HttpClient, HttpContext, HttpHeaders, HttpParams } from "@angular/commo
 import { Injectable, isDevMode } from '@angular/core';
 import { retry } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { ResponseType } from '@tauri-apps/api/http';
 
 // Total number of _retries_ if there is a 429 response code.
 const retryCount = 2;

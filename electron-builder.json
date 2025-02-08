@@ -27,8 +27,7 @@
     "linux": {
         "category": "Office",
         "target": [
-            "AppImage",
-            "rpm"
+            "AppImage"
         ]
     },
     "flatpak": {
@@ -50,7 +49,6 @@
                 "x64",
                 "arm64"
             ]
-        },
-        "rfc3161TimeStampServer": "http://timestamp.comodoca.com"
+        }
     }
 }

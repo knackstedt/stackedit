@@ -133,6 +133,24 @@ app-entry-list {
     }
 }
 
+.add__list {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    gap: 6px;
+    width: 200px;
+
+    .add__btn {
+        cursor: pointer;
+        background: #0000;
+        transition: background 200ms ease;
+
+        &:hover {
+            background-color: #2a2d2e;
+        }
+    }
+}
+
 hr {
     width: 90%;
     border: 1px solid #434343;

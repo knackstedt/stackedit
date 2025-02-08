@@ -36,7 +36,8 @@ export type Page = {
      * code => any text file
      * fetch => postman-like interface
      */
-    kind: "markdown" |
+    kind: "directory" |
+          "markdown" |
           "raw" |
           "canvas" |
           "code" |

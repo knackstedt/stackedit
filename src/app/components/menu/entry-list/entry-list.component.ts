@@ -2,7 +2,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MenuItem, MenuDirective } from '@dotglitch/ngx-common';
+import { MenuItem, MenuDirective, TooltipDirective } from '@dotglitch/ngx-common';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { Page } from '../../../types/page';
@@ -21,6 +21,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         MatButtonModule,
         MatExpansionModule,
         MatTooltipModule,
+        TooltipDirective,
         MenuDirective
     ],
     standalone: true

@@ -54,18 +54,30 @@
     <hr/>
 
     <div class="add-line">
-        <span (click)="create('markdown', 'markdown')">
-            <mat-icon>add</mat-icon>
-            Markdown
+        <span [ngx-tooltip]="addTooltip" [ngx-tooltip-config]="{ position: 'bottom', triggers: ['click'], stayOpen: true }">
+            <mat-icon>note_add</mat-icon>
+            New
         </span>
-        <span (click)="create('code', 'code_blocks')">
-            <mat-icon>add</mat-icon>
-            Code
-        </span>
-        <span (click)="create('canvas', 'network_node')">
-            <mat-icon>add</mat-icon>
-            Diagram
-        </span>
+        <ng-template #addTooltip>
+            <div class="add__list">
+                <span class="add__btn" (click)="create('markdown', 'markdown')">
+                    <mat-icon>folder</mat-icon>
+                    Folder
+                </span>
+                <span class="add__btn" (click)="create('markdown', 'markdown')">
+                    <mat-icon>markdown</mat-icon>
+                    Markdown
+                </span>
+                <span class="add__btn" (click)="create('code', 'code_blocks')">
+                    <mat-icon>code_blocks</mat-icon>
+                    Code
+                </span>
+                <span class="add__btn" (click)="create('canvas', 'network_node')">
+                    <mat-icon>network_node</mat-icon>
+                    Diagram
+                </span>
+            </div>
+        </ng-template>
         <!-- This one is very broken everywhere. -->
         <!-- <span (click)="create('fetch')">
             <mat-icon>add</mat-icon>

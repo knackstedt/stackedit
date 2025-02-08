@@ -1,5 +1,5 @@
 /* You can add global styles to this file, and also import other style files */
-@import "@fontsource/material-icons-outlined";
+@import "@fontsource/material-symbols-outlined";
 @import "@fontsource/fira-sans/400";
 @import "@fontsource/fira-sans/600";
 @import "@fontsource/fira-mono";
@@ -8,6 +8,7 @@
 @import "print.scss";
 @import "scrollbar.scss";
 @import "splitter.scss";
+@import "ngx-overrides.scss";
 
 
 body { margin: 0 }
