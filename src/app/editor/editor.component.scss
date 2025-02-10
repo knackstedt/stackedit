@@ -751,6 +751,7 @@ ng-scrollbar {
             padding: 6px 12px;
             border-radius: 5px;
             display: inline-block !important;
+            overflow-x: hidden;
         }
 
         .code_custom:not(.code-snippet),
@@ -780,7 +781,12 @@ ng-scrollbar {
             text-wrap: wrap;
             word-break: break-all;
             position: relative;
-            // display: inline-block !important;
+            overflow: hidden;
+            max-width: 100%;
+
+            // Test cases: image wider than viewport
+            // ?
+            display: inline-block !important;
 
             .img-button {
                 position: absolute;
@@ -833,6 +839,8 @@ ng-scrollbar {
 
             img {
                 cursor: default;
+                max-width: 100%;
+                border-radius: 6px;
             }
         }
 
