@@ -41,7 +41,7 @@
     "@fontsource/material-symbols-outlined": "^5.1.4",
     "@zenfs/core": "^1.9.5",
     "@zenfs/dom": "^1.1.5",
-    "angular-split": "^19.0.0",
+    "angular-split": "^17.0.0",
     "diff-match-patch": "^1.0.5",
     "dompurify": "^3.2.4",
     "electron-better-ipc": "^2.0.1",

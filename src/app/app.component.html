@@ -2,7 +2,7 @@
     direction="horizontal"
     [gutterSize]="2"
     [unit]="'pixel'"
-    (dragEnd)="config.set('menuSize', menuSplit.size)"
+    (dragEnd)="config.set('menuSize', menuSplit.clientWidth)"
 >
     <as-split-area
         #menuSplit
