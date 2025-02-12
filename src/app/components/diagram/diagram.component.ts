@@ -1,9 +1,9 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { ExcalidrawComponent } from './excalidraw.component';
-import { Page } from '../../types/page';
-import { PagesService } from '../../services/pages.service';
-import { BehaviorSubject, Subscription, debounceTime } from 'rxjs';
+import { Component, Input, ViewChild } from '@angular/core';
 import { AppState, ExcalidrawInitialDataState } from '@excalidraw/excalidraw/types/types';
+import { BehaviorSubject, Subscription, debounceTime } from 'rxjs';
+import { PagesService } from '../../services/pages.service';
+import { Page } from '../../types/page';
+import { ExcalidrawComponent } from './excalidraw.component';
 import { loadLibs } from './libs';
 
 @Component({
@@ -61,17 +61,16 @@ export class DiagramComponent {
                 .filter(i => !!i)
             );
 
+        const appState: AppState = data.appState || {};
+        appState.collaborators = new Map();
+
         this.contentData = {
-            scrollToContent: true,
+            appState: appState,
             elements: data.elements,
             libraryItems: libItems,
             files: data.files
         };
-        this.appState = {
-            frameRendering: {
-                enabled: true
-            } as any,
-        }
+        this.appState = appState;
 
         this.hasInitialized = true;
     }
@@ -90,8 +89,9 @@ export class DiagramComponent {
     }
 
     private saveState() {
-        if (!this.hasInitialized) return null;
+        if (!this.hasInitialized || this.dataChangeEmitter.value == null) return null;
 
+        // console.log("Save diagram", this)
         return this.pages.onPageContentChange(this.page, JSON.stringify(this.dataChangeEmitter.value));
     }
 }

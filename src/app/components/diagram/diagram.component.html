@@ -1,8 +1,5 @@
-@if (contentData.scrollToContent) {
-    <app-excalidraw
-        [initialData]="contentData"
-        [autoFocus]="true"
-        [appState]="appState"
-        (onChange)="onChange($event)"
-    />
-}
+<app-excalidraw
+    [initialData]="contentData"
+    [appState]="appState"
+    (onChange)="onChange($event)"
+/>

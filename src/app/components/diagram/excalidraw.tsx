@@ -1,8 +1,12 @@
 import { Excalidraw, WelcomeScreen, restoreAppState } from '@excalidraw/excalidraw';
+import { ExcalidrawProps } from '@excalidraw/excalidraw/types/types';
 import * as React from 'react';
 import { FunctionComponent } from 'react';
 
-export const WrappableComponent: FunctionComponent<any> = ({ props }) => {
+export const WrappableComponent: FunctionComponent<any> = ({ props }: { props: ExcalidrawProps }) => {
+    const appState = props['appState'];
+    restoreAppState(appState, null);
+
     return (
         <Excalidraw
             { ...props as any }
