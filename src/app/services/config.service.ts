@@ -1,13 +1,7 @@
 import { Injectable } from '@angular/core';
-import { createInstance } from 'localforage';
 import { Subject } from 'rxjs';
 
-const localforage = createInstance({
-    name: "@dotglitch",
-    storeName: "ScratchDown"
-});
-
-// key prefix used by localforage
+// key prefix
 const prefix = `config-`;
 
 type Config = Partial<{
@@ -40,32 +34,27 @@ export class ConfigService extends Subject<Config> {
 
     constructor() {
         super();
-        dbPromise = localforage.setDriver([
-            localforage.INDEXEDDB
-        ]);
-
     }
 
     init() {
-        dbPromise.then(async () => {
-            for (let i = 0; i < knownKeys.length; i++) {
-                const k = knownKeys[i];
-                const value = await this.get(k);
-                this.value[k] = value;
-            }
-
-            this.next(this.value);
-        });
-    }
-
-    async set(key: string, value: any) {
-        this.value[key] = value;
-        await localforage.setItem(prefix + key, value);
-
+        for (let i = 0; i < knownKeys.length; i++) {
+            const k = knownKeys[i];
+            const value = this.get(k);
+            this.value[k] = value;
+        }
         this.next(this.value);
     }
 
-    async get<T = any>(key: string) {
-        return await localforage.getItem(prefix + key) as T;
+    set(key: string, value: any) {
+        this.value[key] = value;
+        localStorage[prefix + key] = JSON.stringify(value || 'null');
+        this.next(this.value);
+    }
+
+    get<T = any>(key: string) {
+        const value = localStorage[prefix + key];
+        if (value === null || value === undefined)
+            return value;
+        return this.value[key] = JSON.parse(value) as T;
     }
 }
