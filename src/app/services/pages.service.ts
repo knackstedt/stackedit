@@ -53,19 +53,20 @@ export class PagesService {
 
         (async() => {
             const pages = await this.files.readDir("/");
-            const { tabs, selectedTabIndex } = await this.config.get("tabs-state")
-                .then(r => r || { tabs: [], selectedTabIndex: 0 })
+            const tabsState = this.config.get("tabs-state");
+            const tabs = tabsState?.tabs || [];
+            const selectedTabIndex = tabsState?.selectedTabIndex || 0;
 
             this.flatPages = this.pages = pages;
 
-            this.tabs = this.pages.filter(p => tabs.find(t => t.path == p.path));
+            // TODO: This doesn't recurse subfolders at all!
+            this.tabs = this.pages.filter(p => tabs.find(t => t == p.path + p.filename));
             this.selectedTabIndex = selectedTabIndex;
 
             if (this.pages.length > 0 && this.tabs.length == 0)
                 this.addTab(this.pages[0]);
 
-            // debugger;
-            // this.calculatePageTree();
+            this.saveTabsState();
         })();
     }
 
@@ -74,7 +75,7 @@ export class PagesService {
             selectedTabIndex: this.selectedTabIndex,
             tabs: this.tabs
                 .filter(t => !t.isPreviewTab)
-                .map(t => t.path)
+                .map(t => t.path + t.filename)
         });
     }
 
@@ -195,10 +196,21 @@ export class PagesService {
     }
 
     public async loadPageContent(page: Page) {
+        if (!page) {
+            console.trace(page);
+        }
         if (!page.hasLoaded) {
             const res = await this.files.readFile(page.path + page.filename) as any;
             page.content = res;
         }
+    }
+
+    async loadPageChildren(page: Page) {
+        if (page.kind != "directory") return;
+
+        const contents = await this.files.readDir(page.path + page.filename + '/');
+        page.children = contents;
+        page.expanded = true;
     }
 
     public calculatePageTree() {
@@ -254,6 +266,9 @@ export class PagesService {
 
         this.genLabel(page);
 
+        if (page.content === 'null' || page.content === null)
+            debugger;
+
         await this.files.saveFileMetadata(page).catch(e => {debugger});
         await this.files.saveFileContents(page).catch(e => {debugger});
 
@@ -262,46 +277,47 @@ export class PagesService {
 
     async createPage(abstract: Partial<Page>, parent?: Page, openTab = true) {
         const isUpdate = !!abstract.path && !parent;
-        // This is an update action
+
         if (isUpdate) {
+            // This is an update action
             abstract.modified = Date.now();
             await this.files.saveFileMetadata(abstract as any);
             return abstract;
         }
-        else {
-            let path;
-            if (parent && parent.path?.length > 2) {
-                path = parent.path.split(".")?.slice(0, -1)?.join('.');
-            }
 
-            const page: Page = {
-                path: (path ? path + "/" : basePath),
-                content: '',
-                kind: "markdown",
-                created: Date.now(),
-                modified: Date.now(),
-                filename: ulid() + {
-                    markdown: ".md",
-                    code: ".code",
-                    raw: ".raw",
-                    canvas: ".canvas"
-                }[abstract.kind],
-                autoLabel: true,
-                options: {},
-                tags: [],
-                variables: {},
-                ...abstract
-            };
-            await this.savePage(page);
+        // This is a create -- we need to preform more actions to build the object.
 
-            this.flatPages.push(page);
-            // this.calculatePageTree();
-
-            if (openTab)
-                this.addTab(page);
-
-            return page;
+        let path;
+        if (parent && parent.path?.length > 2) {
+            path = parent.path.split(".")?.slice(0, -1)?.join('.');
         }
+
+        const page: Page = {
+            path: (path ? path + "/" : basePath),
+            content: '',
+            kind: "markdown",
+            created: Date.now(),
+            modified: Date.now(),
+            filename: ulid() + {
+                markdown: ".md",
+                code: ".code",
+                raw: ".raw",
+                canvas: ".canvas"
+            }[abstract.kind],
+            autoLabel: true,
+            options: {},
+            tags: [],
+            variables: {},
+            ...abstract
+        };
+        await this.savePage(page);
+
+        this.flatPages.push(page);
+
+        if (openTab)
+            this.addTab(page);
+
+        return page;
     }
 
     /**
@@ -346,9 +362,13 @@ export class PagesService {
         })
 
         this.pageMap[page.path] = undefined;
+        this.saveTabsState();
     }
 
     async addTab(tab: Page, isPreview = false) {
+        // I'm not even sure where this comes from
+        if (tab.kind == "directory") return;
+
         tab.isPreviewTab = undefined;
 
         let index = this.tabs.indexOf(tab);
@@ -357,13 +377,7 @@ export class PagesService {
             return;
         }
 
-        const emitter = new EventEmitter();
-        emitter
-            .pipe(debounceTime(300)).subscribe(() => {
-                this.savePage(tab);
-            });
-
-        tab[$debounce] = emitter;
+        this.attachPageChangeEmitter(tab);
 
         if (tab.content == undefined || tab.content == null) {
             const text = await this.files.readFile(tab.path + tab.filename) as any;
@@ -388,6 +402,8 @@ export class PagesService {
             this.tabs.splice(this.selectedTabIndex + 1, 0, tab);
             this.selectedTabIndex = this.selectedTabIndex + 1;
         }
+
+        this.saveTabsState();
     }
 
     genLabel(page: Page) {
@@ -410,6 +426,19 @@ export class PagesService {
         this.genLabel(page);
 
         page.content = value;
+
+        if (!page[$debounce])
+            this.attachPageChangeEmitter(page);
         page[$debounce].next();
+    }
+
+    attachPageChangeEmitter(page: Page) {
+        const emitter = new EventEmitter();
+        emitter
+            .pipe(debounceTime(300)).subscribe(() => {
+                this.savePage(page);
+            });
+
+        page[$debounce] = emitter;
     }
 }
