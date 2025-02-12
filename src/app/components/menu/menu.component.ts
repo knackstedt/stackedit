@@ -94,25 +94,34 @@ export class MenuComponent {
     async ngAfterViewInit() {
         this.pageContextMenu = [
             {
-                label: "Create Child (Markdown)",
+                label: "Add subdirectory",
+                isVisible: data => data.kind == "directory",
                 action: (data) =>
-                    this.pages.createPage({ kind: "markdown" }, data)
+                    this.pages.createPage({ kind: "directory", path: data.path + data.filename }, data)
             },
             {
-                label: "Create Child (Diagram)",
-                action: (data) =>
-                    this.pages.createPage({ kind: "canvas" }, data)
+                label: "Add new Markdown file",
+                isVisible: data => data.kind == "directory",
+                action: (parent) =>
+                    this.pages.createPage({ kind: "markdown" }, parent)
             },
             {
-                label: "Create Child (Code)",
-                action: (data) =>
-                    this.pages.createPage({ kind: "code" }, data)
+                label: "Add new Diagram file",
+                isVisible: data => data.kind == "directory",
+                action: (parent) =>
+                    this.pages.createPage({ kind: "canvas" }, parent)
             },
             {
-                label: "Create Child (Fetch)",
-                action: (data) =>
-                    this.pages.createPage({ kind: "fetch" }, data)
+                label: "Add new Code file",
+                isVisible: data => data.kind == "directory",
+                action: (parent) =>
+                    this.pages.createPage({ kind: "code" }, parent)
             },
+            // {
+            //     label: "Create Child (Fetch)",
+            //     action: (data) =>
+            //         this.pages.createPage({ kind: "fetch" }, data)
+            // },
             "separator",
             {
                 label: "Set Icon",
@@ -130,6 +139,7 @@ export class MenuComponent {
             {
                 label: "Rename",
                 childTemplate: this.renameTemplate,
+                isVisible: page => page.kind != "directory",
                 action: async page => {
                     this.pages.savePage(page);
                 }
