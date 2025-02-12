@@ -3,6 +3,7 @@
     [gutterSize]="2"
     [unit]="'pixel'"
     (dragEnd)="config.set('menuSize', menuSplit.clientWidth)"
+    [disabled]="config.value.menuCollapsed"
 >
     <as-split-area
         #menuSplit
@@ -98,6 +99,16 @@
                     }
                 </div>
             }
+        }
+        @empty {
+            <div>
+                <div class="logo">
+                    <img src="/assets/app-icon.png"/>
+                </div>
+                <div>
+
+                </div>
+            </div>
         }
     </as-split-area>
 </as-split>

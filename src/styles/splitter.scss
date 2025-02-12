@@ -23,3 +23,7 @@
         left: 100%;
     }
 }
+as-split.as-disabled .as-split-gutter:hover {
+    background-color: var(--splitter-background-color) !important;
+    cursor: not-allowed;
+}

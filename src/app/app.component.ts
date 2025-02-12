@@ -146,7 +146,7 @@ export class AppComponent {
                 this.pages.flatPages.push(page as any);
             };
 
-            this.pages.calculatePageTree();
+            // this.pages.calculatePageTree();
             this.pages.selectedTabIndex = 0;
         });
     }
