@@ -4,7 +4,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatIconModule, MatIconRegistry } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { KeyboardService, MenuDirective, MenuItem, ThemeService, VscodeComponent } from '@dotglitch/ngx-common';
+import { CommandPaletteService, KeyboardService, MenuDirective, MenuItem, ThemeService, VscodeComponent } from '@dotglitch/ngx-common';
 import { MatDialog } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { AngularSplitModule } from 'angular-split';
@@ -21,6 +21,7 @@ import { FetchPageComponent } from './components/fetch-page/fetch-page.component
 import { Fetch } from './services/fetch.service';
 import { UtilService } from './services/util.service';
 import { DiagramComponent } from './components/diagram/diagram.component';
+import { InitializeCommandPalette } from 'src/app/commands';
 
 declare const dT_;
 export const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -49,7 +50,7 @@ export class AppComponent {
     @ViewChild(MenuComponent) menu: MenuComponent;
 
     readonly tabCtxMenu: MenuItem<Page>[] = [
-        { label: "Close", action: p => this.pages.tabs.splice(this.pages.tabs.indexOf(p), 1) },
+        { label: "Close", action: p => this.pages.closeTab(p) },
         { label: "Close Others", action: p => this.pages.tabs = this.pages.tabs.splice(this.pages.tabs.indexOf(p), 1) },
         { label: "Close to the right", action: p => this.pages.tabs.splice(this.pages.tabs.indexOf(p)) },
         { label: "Close to the left", action: p => this.pages.tabs.splice(0, this.pages.tabs.indexOf(p)) },
@@ -74,53 +75,17 @@ export class AppComponent {
         private readonly dialog: MatDialog,
         private readonly fetch: Fetch,
         private readonly changeDetector: ChangeDetectorRef,
-        private readonly theme: ThemeService
+        private readonly theme: ThemeService,
+        private readonly commandPalette: CommandPaletteService
     ) {
         utils.getPistonRuntimes().then(r => {
             this.changeDetector.detectChanges();
         });
 
         window['_fetch'] = this.fetch;
-        if (typeof dT_ != 'undefined' && dT_.initAngularNg) {
-            dT_.initAngularNg(http, HttpHeaders);
-        }
-
         window['root'] = this;
 
-        // Force the refresh keybind for Tauri env
-        keyboard.onKeyCommand({
-            key: "f5",
-        }).subscribe(k => {
-            window.location.reload()
-        });
-
         config.subscribe(c => {
-            // if (c.telemetry == null && window['dtrum']) {
-
-            //     // Prevent duplicate popups from appearing
-            //     if (!window['__SHOW_TELEMETRY_DIALOG']) {
-            //         window['__SHOW_TELEMETRY_DIALOG'] = true;
-
-            //         dialog.open(TelemetryDialogComponent, { disableClose: true })
-            //         .afterClosed().subscribe(() => {
-            //             if (window['showDirectoryPicker']) {
-            //                 // TODO: Show "use Vivialdi dialog"
-            //             }
-            //         });
-
-            //     }
-            // }
-            // else {
-            //     if (!window['showDirectoryPicker']) {
-            //         // TODO: Show "use Vivialdi dialog"
-            //     }
-
-            //     if (c.telemetry)
-            //         window['dtrum']?.enable();
-            //     else
-            //         window['dtrum']?.disable();
-            // }
-
             if (c.hasInstalledDefaultPages == null) {
                 this.installDefaultPages();
             }
@@ -129,6 +94,8 @@ export class AppComponent {
         });
 
         config.init();
+
+        InitializeCommandPalette(commandPalette, pages, config, utils, files, dialog, theme);
     }
 
     installDefaultPages() {
@@ -193,10 +160,5 @@ export class AppComponent {
             encoding: "utf-8",
             name: ulid()
         }]);
-    }
-
-    closeTab(page: Page) {
-        const index = this.pages.tabs.indexOf(page);
-        this.pages.tabs.splice(index, 1);
     }
 }

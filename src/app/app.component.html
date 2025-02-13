@@ -25,7 +25,7 @@
                         <div class="tab"
                             [ngx-contextmenu]="tabCtxMenu"
                             [ngx-menu-context]="page"
-                            (pointerdown)="$event.which == 2 && closeTab(page)"
+                            (pointerdown)="$event.which == 2 && pages.closeTab(page)"
                             [style.font-style]="page.isPreviewTab ? 'italic' : ''"
                         >
                             <mat-icon [fontIcon]="page.icon || 'edit_document'"></mat-icon>
@@ -33,12 +33,13 @@
                                 <span>{{page.label?.slice(0, 20)}}</span>
                             </span>
 
-                            <mat-icon class="close-button" (click)="closeTab(page)">close</mat-icon>
+                            <mat-icon class="close-button" (click)="pages.closeTab(page)">close</mat-icon>
                         </div>
                     </ng-template>
                 </mat-tab>
             }
         </mat-tab-group>
+
         @for (page of pages.tabs; track page; let i = $index) {
             @if (pages.selectedTabIndex == i) {
                 <div class="container">
