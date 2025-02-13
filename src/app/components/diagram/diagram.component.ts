@@ -1,6 +1,6 @@
 import { Component, Input, ViewChild } from '@angular/core';
 import { AppState, ExcalidrawInitialDataState } from '@excalidraw/excalidraw/types/types';
-import { BehaviorSubject, Subscription, debounceTime } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription, debounceTime } from 'rxjs';
 import { PagesService } from '../../services/pages.service';
 import { Page } from '../../types/page';
 import { ExcalidrawComponent } from './excalidraw.component';
@@ -25,22 +25,22 @@ export class DiagramComponent {
     }
     get page() { return this._page }
 
-    contentData: ExcalidrawInitialDataState = {};
-    appState: Partial<AppState> = {};
+    initialData: ExcalidrawInitialDataState;
 
     private subscriptions: Subscription[];
-    private dataChangeEmitter = new BehaviorSubject(null);
+    private dataChangeEmitter = new Subject();
     private dataChange$ = this.dataChangeEmitter.pipe(debounceTime(300));
     private hasInitialized = false;
+    private diagramData;
 
     constructor(
-        private readonly pages: PagesService
+        public readonly pages: PagesService
     ) {
         this.subscriptions = [
             this.dataChange$.subscribe(d => {
                 if (!d) return;
 
-                this.saveState();
+                this.saveState(this.diagramData = d);
             })
         ]
     }
@@ -64,34 +64,44 @@ export class DiagramComponent {
         const appState: AppState = data.appState || {};
         appState.collaborators = new Map();
 
-        this.contentData = {
+        this.initialData = {
             appState: appState,
             elements: data.elements,
             libraryItems: libItems,
             files: data.files
         };
-        this.appState = appState;
 
         this.hasInitialized = true;
     }
 
     async ngOnDestroy() {
-        await this.saveState();
         this.subscriptions.forEach(s => s.unsubscribe());
+        this.hasInitialized = false;
+        return this.pages.onPageContentChange(this.page, this.diagramData);
     }
 
     onChange([elements, appState, files]) {
-        this.dataChangeEmitter.next({
-            elements,
-            appState,
-            files: {...files}
-        });
+        if (this.hasInitialized) {
+            this.dataChangeEmitter.next({
+                elements,
+                appState,
+                files: {...files}
+            });
+        }
     }
 
-    private saveState() {
-        if (!this.hasInitialized || this.dataChangeEmitter.value == null) return null;
+    private saveState(value) {
+        // Excalidraw emits an event that clears everything when the appState
+        // is replaced, in order to mitigate that from wiping out our data
+        // we'll disable that scenario manually.
+        if (value.elements.length == 0 && this.initialData.elements.length > 0) {
+            this.ngOnInit();
+            return;
+        }
+
+        if (!this.hasInitialized || value == null) return;
 
         // console.log("Save diagram", this)
-        return this.pages.onPageContentChange(this.page, JSON.stringify(this.dataChangeEmitter.value));
+        return this.pages.onPageContentChange(this.page, JSON.stringify(value));
     }
 }

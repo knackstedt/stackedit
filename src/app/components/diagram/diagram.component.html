@@ -1,5 +1,6 @@
-<app-excalidraw
-    [initialData]="contentData"
-    [appState]="appState"
-    (onChange)="onChange($event)"
-/>
+@if (initialData) {
+    <app-excalidraw
+        [initialData]="initialData"
+        (onChange)="onChange($event)"
+    />
+}
