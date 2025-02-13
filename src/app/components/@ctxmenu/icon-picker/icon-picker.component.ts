@@ -1,4 +1,4 @@
-import { Component, Inject, Input } from '@angular/core';
+import { Component, Inject, Input, Optional } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
 import { MatButtonModule } from '@angular/material/button';
@@ -8,6 +8,7 @@ import { Page } from '../../../types/page';
 import { FormsModule } from '@angular/forms';
 import icons from './mat-icons-outlined.json';
 import { PagesService } from '../../../services/pages.service';
+import { ThemeService } from '@dotglitch/ngx-common';
 
 @Component({
     selector: 'app-icon-picker',
@@ -24,15 +25,18 @@ import { PagesService } from '../../../services/pages.service';
 export class IconPickerComponent {
 
     @Input() dialog: MatDialogRef<any>;
-    page: Page;
-    iconCount = 30;
+    @Input() page: Page;
+    @Input() disableAutoSave = false;
+
+    @Input() iconCount = 30;
     query = '';
     searchIcons: string[] = [];
 
     constructor(
         // public readonly dialog: MatDialogRef<any>,
-        @Inject(MAT_DIALOG_DATA) public readonly data,
-        private readonly pages: PagesService
+        @Optional() @Inject(MAT_DIALOG_DATA) public readonly data,
+        private readonly pages: PagesService,
+        public readonly theme: ThemeService
     ) {
         this.page = data.data;
         this.dialog = data.dialog;
@@ -56,21 +60,23 @@ export class IconPickerComponent {
                 icon.name.includes(query) ||
                 icon.categories.includes(query) ||
                 icon.tags.includes(query)
-                ) {
-                    matchedIcons.push(icon.name);
-                }
+            ) {
+                matchedIcons.push(icon.name);
+            }
         }
         this.searchIcons = matchedIcons;
     }
 
     async clearIcon() {
         this.page.icon = null;
-        await this.pages.savePage(this.page);
-        // this.dialog.close();
+
+        if (!this.disableAutoSave)
+            await this.pages.savePage(this.page);
     };
     async setIcon(icon: string) {
         this.page.icon = icon;
-        await this.pages.savePage(this.page);
-        // this.dialog.close();
+
+        if (!this.disableAutoSave)
+            await this.pages.savePage(this.page);
     };
 }

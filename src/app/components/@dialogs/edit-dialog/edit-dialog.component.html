@@ -10,6 +10,18 @@
                 (keyup)="page.autoLabel = _.value.length < 2"
             >
         </mat-form-field>
+        @if (page.kind != 'directory') {
+            <mat-form-field>
+                <mat-label>File Name</mat-label>
+                <input
+                    #_
+                    matInput
+                    [(ngModel)]="page.filename"
+                    type="text"
+                    (keyup)="page.autoFilename = _.value.length < 2"
+                >
+            </mat-form-field>
+        }
 
         <mat-form-field>
             <mat-label>Type</mat-label>
@@ -22,6 +34,24 @@
                     </mat-option>
                 }
             </mat-select>
+        </mat-form-field>
+
+        <mat-form-field>
+            <mat-label>Icon</mat-label>
+            <input matInput type="text" [(ngModel)]="page.icon">
+        </mat-form-field>
+
+        <app-icon-picker
+            class="embedded"
+            [page]="page"
+            [disableAutoSave]="true"
+            [iconCount]="54"
+            style="width: 100%; margin-bottom: 24px;"
+        />
+
+        <mat-form-field>
+            <mat-label>Color</mat-label>
+            <input matNativeControl type="color" [(ngModel)]="page.color">
         </mat-form-field>
 
         @if (page.kind == 'code') {
@@ -71,17 +101,6 @@
             </mat-form-field>
 
         }
-
-        <a href="https://fonts.google.com/icons?icon.set=Material+Icons&selected=Material+Icons+Outlined:settings:&icon.style=Outlined"></a>
-        <mat-form-field>
-            <mat-label>Icon</mat-label>
-            <input matInput type="text" [(ngModel)]="page.icon">
-        </mat-form-field>
-
-        <mat-form-field>
-            <mat-label>Color</mat-label>
-            <input matNativeControl type="color" [(ngModel)]="page.color">
-        </mat-form-field>
     </div>
 
     <div>

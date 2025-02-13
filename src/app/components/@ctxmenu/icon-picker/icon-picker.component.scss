@@ -1,12 +1,21 @@
 :host {
     width: 312px;
     display: block;
+    padding: 12px;
+
+    &.embedded {
+        width: 100%;
+        background-color: var(--menu-background-color);
+        padding: 0;
+    }
 }
 
 .icon-container {
     display: flex;
     flex-wrap: wrap;
-    padding: 12px;
+    margin-top: -24px;
+    justify-content: center;
+    padding-bottom: 12px;
 
     button {
         color: var(--text-subdued-color);
@@ -15,7 +24,10 @@
             color: var(--text-color);
         }
     }
+}
 
+mat-form-field {
+    width: 100%;
 }
 
 hr {
@@ -31,6 +43,6 @@ hr {
     }
 
     button.mat-mdc-icon-button.mat-mdc-button-base {
-        padding: 12px;
+        padding: 8px;
     }
 }

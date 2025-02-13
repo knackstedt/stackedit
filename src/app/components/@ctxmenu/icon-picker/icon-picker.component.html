@@ -1,14 +1,14 @@
 <div style="display: flex;">
-    <mat-form-field style="margin: 12px 24px 12px 24px; width: -webkit-fill-available;">
+    <mat-form-field>
         <mat-label>Type here to search...</mat-label>
         <input
             matInput
             type="text"
             [(ngModel)]="query"
-            (keydown)="filterResults()"
+            (ngModelChange)="filterResults()"
         />
     </mat-form-field>
-    <mat-icon (click)="clearIcon()">clear</mat-icon>
+    <!-- <mat-icon (click)="clearIcon()">clear</mat-icon> -->
 </div>
 
 <div class="icon-container">
@@ -16,7 +16,11 @@
         <button mat-icon-button (click)="setIcon(icon)">
             <mat-icon
                 [fontIcon]="icon"
-                [style.color]="icon == page?.icon ? '#fff' : ''"
+                [style.color]="
+                    theme.value == 'dark'
+                        ? icon == page?.icon ? '#fff' : '#eee'
+                        : icon == page?.icon ? '#000' : '#111'
+                "
             />
         </button>
     }

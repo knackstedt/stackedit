@@ -13,6 +13,7 @@ import { ulid } from 'ulidx';
 import { installMonaco } from '../../../editor/monaco';
 import { PagesService } from '../../../services/pages.service';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { IconPickerComponent } from 'src/app/components/@ctxmenu/icon-picker/icon-picker.component';
 
 
 @Component({
@@ -27,6 +28,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
         MatSlideToggleModule,
         MatTooltipModule,
         MatCheckboxModule,
+        IconPickerComponent,
         FormsModule
     ],
     standalone: true
@@ -55,7 +57,8 @@ export class EditDialogComponent implements OnInit {
         this.languages = window['monaco'].languages.getLanguages().map(l => l.id);
     }
 
-    async save() {
+
+    save() {
         // Apply changes
         Object.keys(this.page).forEach(k => this.data[k] = this.page[k]);
 
