@@ -34,6 +34,11 @@
               "src/manifest.webmanifest",
               {
                   "glob": "**/*",
+                  "input": "src/app/assets",
+                  "output": "./assets"
+              },
+              {
+                  "glob": "**/*",
                   "input": "node_modules/@dotglitch/ngx-common/assets/lib/vs/",
                   "output": "./lib/monaco/vs"
               },
