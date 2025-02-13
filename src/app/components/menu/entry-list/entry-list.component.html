@@ -10,7 +10,6 @@
     @for (page of items; track page; let i = $index) {
         <mat-expansion-panel
             cdkDrag
-            [class.selected]="page.path == pages.tabs[pages.selectedTabIndex]?.path"
             [class.isleaf]="!page['children'] || page['children'].length == 0"
             [disabled]="!page['children'] || page['children'].length == 0"
             [(expanded)]="page['expanded']"
@@ -24,15 +23,40 @@
                     [ngx-menu-context]="page"
                     [matTooltip]="page.label"
                     [matTooltipShowDelay]="750"
-                    (click)="pages.addTab(page)"
-                    (dblclick)="pages.addTab(page)"
+                    (click)="
+                        page.kind == 'directory'
+                            ? page.children
+                                ? null
+                                : pages.loadPageChildren(page)
+                            : pages.addTab(page)
+                    "
+                    (dblclick)="
+                        page.kind == 'directory'
+                            ? null
+                            : pages.addTab(page, false)
+                    "
                 >
                     @if (page.icon) {
                         <mat-icon
-
                             [fontIcon]="page.icon"
                             [style.color]="page.color"
                         />
+                    }
+                    @else if (page.kind == "directory") {
+                        <!-- Show a progress indicator when fetching children -->
+                        @if (page.loading) {
+                            <mat-progress-spinner
+                                mode="indeterminate"
+                                diameter="18"
+                                style="margin: 2px"
+                            />
+                        }
+                        @else {
+                            <mat-icon
+                                [fontIcon]="page.expanded ? 'folder_open' : 'folder'"
+                                [style.color]="page.color"
+                            />
+                        }
                     }
                     <span>{{page.label?.slice(0, 20)}}</span>
                 </div>
@@ -50,6 +74,7 @@
     }
 </mat-accordion>
 
+<!-- Only show this on the root level (this component is recursive) -->
 @if (depth == 0) {
     <hr/>
 

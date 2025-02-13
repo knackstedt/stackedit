@@ -10,6 +10,7 @@ import { MenuComponent } from '../menu.component';
 import { AppComponent } from '../../../app.component';
 import { PagesService } from '../../../services/pages.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'app-entry-list',
@@ -21,6 +22,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         MatButtonModule,
         MatExpansionModule,
         MatTooltipModule,
+        MatProgressSpinnerModule,
         TooltipDirective,
         MenuDirective
     ],
