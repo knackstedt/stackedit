@@ -27,6 +27,7 @@ export type Page = {
      * Filename in the FS. Can be interpreted from the label.
      */
     filename: string,
+    autoFilename?: boolean,
     /**
      * markdown => normal Stackedit markdown file (with
      *      partner json file)
@@ -61,14 +62,15 @@ export type Page = {
 
     /**
      * Computed properties:
-     * These shall not be saved to disk.
+     * These should not be saved to disk.
      */
-    hasLoaded?: boolean;
-    content?: string;
-    children?: Page[];
+    loading?: boolean; // Page is currently loading from the source
+    hasLoaded?: boolean; // page has fully loaded
+    content?: string; // page data (text / JSON)
+    children?: Page[]; // directory children
     /**
      * If the tab is being previewed (not completely added to tab list)
      */
-    isPreviewTab?: true;
+    isPreviewTab?: true; // Is the page a tab that is in preview mode
 };
 

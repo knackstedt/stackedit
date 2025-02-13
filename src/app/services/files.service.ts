@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import sanitizeFilename from "sanitize-filename";
 import { Page } from '../types/page';
 import { BrowserFS } from 'src/app/utils/browser-fs';
 import { useElectron, ElectronFS } from 'src/app/utils/electron-fs';
@@ -103,9 +104,19 @@ export class FilesService {
      * Saves page contents.
      */
     async saveFileContents(file: Page): Promise<void> {
+        if (file.autoFilename) {
+            const filename = sanitizeFilename(file.label || file.filename);
+            file.filename = filename;
+        }
+
         if (file.kind == "fetch") {
             file.content = '';
-        };
+        }
+        else if (file.kind == "directory") {
+            fs.mkdir(file.path + file.filename)
+            return;
+        }
+
         // console.log("sfc", file.path + file.filename);
         return fs.writeFile(file.path + file.filename, file.content);
     }

@@ -207,10 +207,11 @@ export class PagesService {
 
     async loadPageChildren(page: Page) {
         if (page.kind != "directory") return;
-
+        page.loading = true;
         const contents = await this.files.readDir(page.path + page.filename + '/');
         page.children = contents;
         page.expanded = true;
+        page.loading = false;
     }
 
     public calculatePageTree() {
@@ -269,8 +270,8 @@ export class PagesService {
         if (page.content === 'null' || page.content === null)
             debugger;
 
-        await this.files.saveFileMetadata(page).catch(e => {debugger});
         await this.files.saveFileContents(page).catch(e => {debugger});
+        await this.files.saveFileMetadata(page).catch(e => {debugger});
 
         this.pageMap[page.path] = page;
     }
@@ -304,6 +305,7 @@ export class PagesService {
                 raw: ".raw",
                 canvas: ".canvas"
             }[abstract.kind],
+            autoFilename: true,
             autoLabel: true,
             options: {},
             tags: [],
@@ -404,6 +406,39 @@ export class PagesService {
         }
 
         this.saveTabsState();
+    }
+
+    closeTab(page: Page) {
+        const index = this.tabs.indexOf(page);
+        this.tabs.splice(index, 1);
+        this.saveTabsState();
+    }
+
+    closeOtherTabs(page: Page) {
+        const index = this.tabs.indexOf(page);
+        this.tabs = this.tabs.splice(index, 1);
+        this.saveTabsState();
+    }
+
+    closeTabsToTheRight(page: Page) {
+        const index = this.tabs.indexOf(page);
+        this.tabs.splice(index);
+        this.saveTabsState();
+    }
+
+    closeTabsToTheLeft(page: Page) {
+        const index = this.tabs.indexOf(page);
+        this.tabs.splice(0, index);
+        this.saveTabsState();
+    }
+
+    closeAllTabs() {
+        this.tabs = [];
+        this.saveTabsState();
+    }
+
+    getFocusedTab() {
+        return this.tabs[this.selectedTabIndex];
     }
 
     genLabel(page: Page) {
