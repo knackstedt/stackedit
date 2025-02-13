@@ -47,7 +47,7 @@ export class ConfigService extends Subject<Config> {
 
     set(key: string, value: any) {
         this.value[key] = value;
-        localStorage[prefix + key] = JSON.stringify(value || 'null');
+        localStorage[prefix + key] = JSON.stringify(value ?? null);
         this.next(this.value);
     }
 
