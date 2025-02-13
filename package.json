@@ -66,6 +66,7 @@
     "react-dom": "^18.3.1",
     "react-filerobot-image-editor": "^4.9.1",
     "rxjs": "7.8.1",
+    "sanitize-filename": "^1.6.3",
     "tauri-plugin-window-state-api": "github:tauri-apps/tauri-plugin-window-state#v1",
     "tslib": "^2.8.1",
     "turndown": "^7.2.0",
