@@ -56,6 +56,6 @@ export class FolderRenameComponent implements OnInit {
             this.data.autoLabel = false;
 
         this.dialog.close(this.data);
-        this.pages.savePage(this.data);
+        this.pages.savePage(this.data, this.data._parent);
     }
 }

@@ -6,7 +6,14 @@ import { Page } from '../types/page';
 import { ConfigService } from './config.service';
 
 const $debounce = Symbol("debounce");
-const basePath = `/`;
+const JSON_PAGE_KINDS = ["canvas"];
+
+const getExtension = (kind) => ({
+    markdown: ".md",
+    code: ".code",
+    raw: ".raw",
+    canvas: ".canvas"
+}[kind]);
 
 @Injectable({
     providedIn: 'root'
@@ -30,7 +37,7 @@ export class PagesService {
      * All currently registered pages on the nav menu
      */
     public pages: Page[] = [];
-    public flatPages: Page[] = [];
+    // public flatPages: Page[] = [];
     public trash: Page[] = [];
 
     // A map of page URLs to the page
@@ -38,33 +45,27 @@ export class PagesService {
     // A map of dir URLs to pages
     private dirMap: { [key: string]: Page[] } = {};
 
-    private workspaceHandle: FileSystemDirectoryHandle;
-    private dirHandles: {
-        [key: string]: {
-            handle: FileSystemDirectoryHandle,
-            entries: any
-        }
-    } = {};
+    public rootPage: Page = {} as any;
 
     constructor(
         private readonly files: FilesService,
         private readonly config: ConfigService
     ) {
-
+        files.init(this);
         (async() => {
             const pages = await this.files.readDir("/");
             const tabsState = this.config.get("tabs-state");
             const tabs = tabsState?.tabs || [];
             const selectedTabIndex = tabsState?.selectedTabIndex || 0;
 
-            this.flatPages = this.pages = pages;
+            this.rootPage.children = pages;
 
             // TODO: This doesn't recurse subfolders at all!
             this.tabs = this.pages.filter(p => tabs.find(t => t == p.path + p.filename));
             this.selectedTabIndex = selectedTabIndex;
 
             if (this.pages.length > 0 && this.tabs.length == 0)
-                this.addTab(this.pages[0]);
+                this.addTab(this.pages[0], this.rootPage);
 
             this.saveTabsState();
         })();
@@ -80,6 +81,7 @@ export class PagesService {
     }
 
     // Open a workspace via WFSA
+    // TODO: Convert this into a FS interface. (zenfs might do this already?)
     // async openWorkspace() {
     //     const dirHandle = this.workspaceHandle = await window['showDirectoryPicker']({
     //         mode: "readwrite"
@@ -201,7 +203,13 @@ export class PagesService {
         }
         if (!page.hasLoaded) {
             const res = await this.files.readFile(page.path + page.filename) as any;
-            page.content = res;
+
+            if (JSON_PAGE_KINDS.includes(page.kind)) {
+                page.content = JSON.parse(res);
+            }
+            else {
+                page.content = res;
+            }
         }
     }
 
@@ -214,97 +222,62 @@ export class PagesService {
         page.loading = false;
     }
 
-    public calculatePageTree() {
-        this.dirMap = {};
-        this.pageMap = {};
-
-        this.flatPages.forEach(p => {
-            this.pageMap[
-                p.path.split('.').slice(0, -1).join('.')
-            ] = p;
-
-            const dir = p.path
-                .split('/').slice(0, -1).join('/');
-
-            this.dirMap[dir] = this.dirMap[dir] || [];
-            this.dirMap[dir].push(p);
-        });
-
-        // Object.entries(this.dirMap).forEach(([k, v]) => {
-        //     const parent = this.pageMap[k];
-        //     if (parent) {
-        //         parent.children = v;
-        //     }
-        // });
-
-        const keys = Object.keys(this.dirMap).sort((a, b) => a.length - b.length)
-        this.pages = this.dirMap[keys[0]] || [];
-
-        // console.log({
-        //     dirm: this.dirMap,
-        //     pm: this.pageMap,
-        //     pages: this.pages,
-        // });
-
-        // If there would otherwise be no tabs selected, preselect the
-        // first item in the list.
-        if (this.pages.length > 0 && this.tabs.length == 0)
-            this.addTab(this.pages[0]);
-    }
-
-    async savePage(page: Page) {
+    async savePage(page: Page, parent: Page) {
         if (page.isPreviewTab) {
             page.isPreviewTab = undefined;
         }
 
-        // Raw markdown files are always saved
-        // without metadata.
-        if (page.kind == "raw") {
-            await this.files.saveFileContents(page);
-            return;
-        }
         page.modified = Date.now();
+        if (page.kind != "directory") {
+            // Raw markdown files are always saved
+            // without metadata.
+            if (page.kind == "raw") {
+                await this.files.saveFileContents(page, parent, page.content);
+                return;
+            }
+            this.genLabel(page);
+            if (
+                page.content === 'null' ||
+                page.content === null
+            )
+                debugger;
 
-        this.genLabel(page);
+            let data = page.content;
+            if (typeof page.content == "object") {
+                data = JSON.stringify(page.content);
+            }
 
-        if (page.content === 'null' || page.content === null)
-            debugger;
-
-        await this.files.saveFileContents(page).catch(e => {debugger});
-        await this.files.saveFileMetadata(page).catch(e => {debugger});
+            await this.files.saveFileContents(page, parent, data).catch(e => console.error(e));
+        }
+        await this.files.saveMetadata(page).catch(e => console.error(e));
 
         this.pageMap[page.path] = page;
     }
 
-    async createPage(abstract: Partial<Page>, parent?: Page, openTab = true) {
+    async createPage(abstract: Partial<Page>, parent: Page, openTab = true) {
         const isUpdate = !!abstract.path && !parent;
 
         if (isUpdate) {
             // This is an update action
             abstract.modified = Date.now();
-            await this.files.saveFileMetadata(abstract as any);
+            await this.files.saveMetadata(abstract as any);
             return abstract;
         }
 
         // This is a create -- we need to preform more actions to build the object.
 
         let path;
-        if (parent && parent.path?.length > 2) {
-            path = parent.path.split(".")?.slice(0, -1)?.join('.');
+        if (parent) {
+            path = parent.path + parent.filename;
         }
 
         const page: Page = {
-            path: (path ? path + "/" : basePath),
+            path: (path ? path + "/" : '/'),
             content: '',
             kind: "markdown",
             created: Date.now(),
             modified: Date.now(),
-            filename: ulid() + {
-                markdown: ".md",
-                code: ".code",
-                raw: ".raw",
-                canvas: ".canvas"
-            }[abstract.kind],
+            filename: ulid() + getExtension(abstract.kind || "markdown"),
             autoFilename: true,
             autoLabel: true,
             options: {},
@@ -312,14 +285,34 @@ export class PagesService {
             variables: {},
             ...abstract
         };
-        await this.savePage(page);
 
-        this.flatPages.push(page);
+        if (abstract.kind == "directory") {
+            throw new Error("Not Implemented");
+        }
+        else {
+            await this.savePage(page, parent);
 
-        if (openTab)
-            this.addTab(page);
+            if (parent) {
+                parent.children ??= [];
+                parent.children.push(page);
+            }
+
+            if (openTab) {
+                this.addTab(page, parent);
+            }
+        }
 
         return page;
+    }
+
+    async createDirectory(partial: Page, parent: Page) {
+        partial.created = Date.now();
+        partial.modified = Date.now();
+
+        await this.files.createFolder(partial.path + '/' + partial.filename);
+        await this.files.saveMetadata(partial);
+
+        this.addTab(partial, parent);
     }
 
     /**
@@ -330,33 +323,51 @@ export class PagesService {
      */
     async deletePage(page: Page, destroy = false) {
         if (destroy) {
-            await this.files.deleteFile(page.path);
+            if (page.kind == "directory") {
+                await this.files.deleteFolder(page.path + page.filename);
+            }
+            else {
+                await this.files.deleteFile(page.path);
+            }
             this.trash.splice(this.trash.indexOf(page), 1);
         }
         else {
+            // TODO: Trash support
+            if (page.kind == "directory") {
+                await this.files.deleteFolder(page.path + page.filename);
+
+                // Tolerate issues if the metadata file does not exist.
+                this.files.deleteFile(page.path + '.' + page.filename);
+
+                // TODO: Delete from parent page (FIX: make a virtual "root" page)
+
+                return;
+            }
+
             const c = await this.files.readFile(page.path + page.filename);
             const m = await this.files.readFile(page.path + '.' + page.filename);
 
             const trashedPage = this.files.metadataToPage(m, c);
 
             trashedPage.deleted = Date.now();
-            trashedPage.modified = Date.now();
+            trashedPage.originalPath = trashedPage.path;
             trashedPage.path = `/.trash/`;
 
-            await this.files.saveFileMetadata(trashedPage);
-            await this.files.saveFileContents(trashedPage);
+            await this.files.saveMetadata(trashedPage);
+            await this.files.saveFileContents(trashedPage, page._parent, trashedPage.content);
 
-            await this.files.deleteFile(page.path);
+            await this.files.deleteFile(page.path + page.filename);
+            await this.files.deleteFile(page.path + '.' + page.filename);
 
             this.trash.push(page);
         }
-        const tabIndex = this.tabs.indexOf(page),
-              pageIndex = this.pages.indexOf(page),
-              flatIndex = this.flatPages.indexOf(page);
+        const tabIndex = this.tabs.indexOf(page);
+        const pageIndex = this.pages.indexOf(page);
+        // const flatIndex = this.flatPages.indexOf(page);
 
         tabIndex != -1 && this.tabs.splice(tabIndex, 1);
         pageIndex != -1 && this.pages.splice(pageIndex, 1);
-        flatIndex != -1 && this.flatPages.splice(flatIndex, 1);
+        // flatIndex != -1 && this.flatPages.splice(flatIndex, 1);
 
         Object.entries(this.dirMap).forEach(([key, entries]) => {
             const i = entries.indexOf(page);
@@ -367,41 +378,43 @@ export class PagesService {
         this.saveTabsState();
     }
 
-    async addTab(tab: Page, isPreview = false) {
+    async addTab(page: Page, parent: Page, isPreview = false) {
         // I'm not even sure where this comes from
-        if (tab.kind == "directory") return;
+        if (page.kind == "directory") return;
 
-        tab.isPreviewTab = undefined;
+        page['_parent'] = parent;
 
-        let index = this.tabs.indexOf(tab);
+        page.isPreviewTab = undefined;
+
+        let index = this.tabs.indexOf(page);
         if (index != -1) {
             this.selectedTabIndex = index;
             return;
         }
 
-        this.attachPageChangeEmitter(tab);
+        this.attachPageChangeEmitter(page);
 
-        if (tab.content == undefined || tab.content == null) {
-            const text = await this.files.readFile(tab.path + tab.filename) as any;
-            tab.content = text;
+        if (page.content == undefined || page.content == null) {
+            const text = await this.files.readFile(page.path + page.filename) as any;
+            page.content = text;
         }
 
         if (isPreview) {
-            tab.isPreviewTab = true;
+            page.isPreviewTab = true;
 
             // Check for and replace any current preview tab
             const previewIndex = this.tabs.findIndex(t => t.isPreviewTab);
             if (previewIndex != -1) {
-                this.tabs.splice(previewIndex, 1, tab);
+                this.tabs.splice(previewIndex, 1, page);
                 this.selectedTabIndex = previewIndex;
             }
             else {
-                this.tabs.splice(this.selectedTabIndex+1, 0, tab);
+                this.tabs.splice(this.selectedTabIndex+1, 0, page);
                 this.selectedTabIndex += 1;
             }
         }
         else {
-            this.tabs.splice(this.selectedTabIndex + 1, 0, tab);
+            this.tabs.splice(this.selectedTabIndex + 1, 0, page);
             this.selectedTabIndex = this.selectedTabIndex + 1;
         }
 
@@ -471,7 +484,7 @@ export class PagesService {
         const emitter = new EventEmitter();
         emitter
             .pipe(debounceTime(300)).subscribe(() => {
-                this.savePage(page);
+                this.savePage(page, page._parent);
             });
 
         page[$debounce] = emitter;

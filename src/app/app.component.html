@@ -11,7 +11,9 @@
         [minSize]="config.value.menuCollapsed ? 56 : 215"
         [maxSize]="config.value.menuCollapsed ? 56 : 400"
     >
-        <app-menu></app-menu>
+        @if (pages.rootPage.children) {
+            <app-menu></app-menu>
+        }
     </as-split-area>
     <as-split-area>
         <mat-tab-group
@@ -104,7 +106,7 @@
         @empty {
             <div>
                 <div class="logo">
-                    <img src="/assets/app-icon.png"/>
+                    <img src="/assets/app-icon.png" style="width: 300px;"/>
                 </div>
                 <div>
 

@@ -10,21 +10,23 @@ export class ElectronFS {
         return await electronFs.access(path).then(() => true).catch(() => false);
     }
 
-    readDir = async (path: string) => {
+    readDir = async (path: string, showHidden = false) => {
         return await electronFs.readdir(path, { withFileTypes: true }).then(result => {
-            return result.map(r => {
-                let path: string = r.path;
+            return result
+                .filter(r => showHidden || !r.name.startsWith('.'))
+                .map(r => {
+                    let path: string = r.path;
 
-                if (!path.startsWith('/'))
-                    path = '/' + path;
+                    if (!path.startsWith('/'))
+                        path = '/' + path;
 
-                return {
-                    name: r.name,
-                    path: r.path,
-                    isFile: () => r.isFile,
-                    isDirectory: () => r.isDirectory
-                }
-            });
+                    return {
+                        name: r.name,
+                        path: r.path,
+                        isFile: () => r.isFile,
+                        isDirectory: () => r.isDirectory
+                    }
+                });
         });
     }
 
@@ -45,6 +47,10 @@ export class ElectronFS {
 
     mkdir: FS['mkdir'] = async (...args) => {
         return await electronFs.mkdir.apply(null, args);
+    }
+
+    rmdir: FS['rmdir'] = async (...args) => {
+        return await electronFs.rmdir.apply(null, args);
     }
 
 }

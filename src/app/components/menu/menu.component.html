@@ -14,8 +14,7 @@
     <div (click)="pages.openWorkspace()">Open Workspace</div> -->
 
     <app-entry-list
-        [items]="pages.pages"
-        [ctxMenu]="pageContextMenu"
+        [items]="pages.rootPage.children"
         [style.display]="config.value.menuCollapsed ? 'none' : ''"
         style="overflow-y: auto"
     />
@@ -50,9 +49,3 @@
     </div>
 </div>
 
-<ng-template #renameTemplate let-data let-dialog="dialog">
-    <app-folder-rename
-        [dialog]="dialog"
-        [data]="data"
-    />
-</ng-template>

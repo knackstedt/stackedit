@@ -108,12 +108,11 @@ export class AppComponent {
             import("./assets/sample-code")
         ]).then(async (files) => {
             for (let { page } of files) {
-                await this.pages.savePage(page as any);
-                await this.pages.addTab(page as any);
-                this.pages.flatPages.push(page as any);
+                await this.pages.savePage(page as any, this.pages.rootPage);
+                await this.pages.addTab(page as any, this.pages.rootPage);
+                this.pages.rootPage.children.push(page as any);
             };
 
-            // this.pages.calculatePageTree();
             this.pages.selectedTabIndex = 0;
         });
     }

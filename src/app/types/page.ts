@@ -59,7 +59,7 @@ export type Page = {
     modified: number;
     deleted?: number;
 
-
+    originalPath?: string;
     /**
      * Computed properties:
      * These should not be saved to disk.
@@ -72,5 +72,8 @@ export type Page = {
      * If the tab is being previewed (not completely added to tab list)
      */
     isPreviewTab?: true; // Is the page a tab that is in preview mode
+
+    // This is the parent of the current page.
+    _parent?: Page;
 };
 

@@ -32,13 +32,11 @@ type Tag = {
         MatTooltipModule,
         MatIconModule,
         LogoComponent,
-        EntryListComponent,
-        FolderRenameComponent
+        EntryListComponent
     ],
     standalone: true
 })
 export class MenuComponent {
-    @ViewChild("renameTemplate", { read: TemplateRef }) renameTemplate: TemplateRef<any>;
     @ViewChild("createTemplate", { read: TemplateRef }) createTemplate: TemplateRef<any>;
 
     public readonly matIconRx = /[\/\.]/i;
@@ -81,7 +79,6 @@ export class MenuComponent {
         private readonly dialog: MatDialog,
         private readonly files: FilesService,
         public readonly config: ConfigService,
-        private readonly util: UtilService,
         private readonly changeDetector: ChangeDetectorRef
     ) {
 
@@ -92,60 +89,6 @@ export class MenuComponent {
     }
 
     async ngAfterViewInit() {
-        this.pageContextMenu = [
-            {
-                label: "Add subdirectory",
-                isVisible: data => data.kind == "directory",
-                action: (data) =>
-                    this.pages.createPage({ kind: "directory", path: data.path + data.filename }, data)
-            },
-            {
-                label: "Add new Markdown file",
-                isVisible: data => data.kind == "directory",
-                action: (parent) =>
-                    this.pages.createPage({ kind: "markdown" }, parent)
-            },
-            {
-                label: "Add new Diagram file",
-                isVisible: data => data.kind == "directory",
-                action: (parent) =>
-                    this.pages.createPage({ kind: "canvas" }, parent)
-            },
-            {
-                label: "Add new Code file",
-                isVisible: data => data.kind == "directory",
-                action: (parent) =>
-                    this.pages.createPage({ kind: "code" }, parent)
-            },
-            // {
-            //     label: "Create Child (Fetch)",
-            //     action: (data) =>
-            //         this.pages.createPage({ kind: "fetch" }, data)
-            // },
-            "separator",
-            {
-                label: "Set Icon",
-                childTemplate: IconPickerComponent
-            },
-            "separator",
-            {
-                label: "Delete",
-                action: async page => {
-                    await this.util.confirmAction("Confirm"
-                        , `Are you sure you want to delete ${page.label}?`);
-                    this.pages.deletePage(page);
-                }
-            },
-            {
-                label: "Rename",
-                childTemplate: this.renameTemplate,
-                isVisible: page => page.kind != "directory",
-                action: async page => {
-                    this.pages.savePage(page);
-                }
-            },
-            { label: "Edit...", action: p => this.onEntryEdit(p) }
-        ];
         this.changeDetector.detectChanges();
     }
 

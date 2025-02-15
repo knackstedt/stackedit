@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, Component } from '@angular/core';
 import sanitizeFilename from "sanitize-filename";
 import { Page } from '../types/page';
 import { BrowserFS } from 'src/app/utils/browser-fs';
 import { useElectron, ElectronFS } from 'src/app/utils/electron-fs';
+import { PagesService } from 'src/app/services/pages.service';
 
 const fs: BrowserFS = useElectron ? new ElectronFS() as any : new BrowserFS();
 
@@ -10,6 +11,15 @@ const fs: BrowserFS = useElectron ? new ElectronFS() as any : new BrowserFS();
     providedIn: 'root'
 })
 export class FilesService {
+
+    private pages: PagesService;
+
+    constructor() {
+
+    }
+    init(pages: PagesService) {
+        this.pages = pages;
+    }
 
     /**
      * Read a directory for all of the files we can view.
@@ -24,11 +34,9 @@ export class FilesService {
         // console.log("readdir from path", path);
         return fs.readDir(path)
             .then(items => {
-                const files = items.filter(i => i.isFile()).filter(i => !i.name.startsWith("."));
+                const files = items.filter(i => i.isFile());
                 // TODO: directory support.
                 const dirs = items.filter(i => i.isDirectory());
-
-                // console.log("file from path", files);
 
                 return Promise.all(
                     dirs.map(async f => {
@@ -43,16 +51,18 @@ export class FilesService {
                             // console.log("incoming metadata", meta);
                             return meta;
                         }
-
-                        return {
-                            path: f.path || '/',
-                            filename: f.name,
-                            created: f.stats?.ctimeMs,
-                            modified: f.stats?.mtimeMs,
-                            kind: "directory",
-                            autoLabel: true,
-                            content: ''
-                        } as Page;
+                        else {
+                            return {
+                                path: f.path || '/',
+                                label: f.name,
+                                filename: f.name,
+                                created: f.stats?.ctimeMs,
+                                modified: f.stats?.mtimeMs,
+                                kind: "directory",
+                                autoLabel: true,
+                                content: ''
+                            } as Page;
+                        }
                     })
                     .concat(
                         files.map(async f => {
@@ -92,33 +102,62 @@ export class FilesService {
     /**
      * Saves page metadata.
      */
-    async saveFileMetadata(file: Page): Promise<void> {
-        const data = structuredClone(file);
-        data.content = '';
+    async saveMetadata(file: Page): Promise<void> {
+        // file.content
+        try {
+            // If we have an appState (excalidraw)
+            // remove the context menu before we clone the object
+            // to prevent structuredClone errors.
+            if (file.content?.['appState'])
+                file.content['appState'].contextMenu = null;
 
-        // console.log("sfm", file.path + file.filename);
-        return fs.writeFile(file.path + '.' + file.filename, JSON.stringify(data));
+            const parent = file._parent;
+            file._parent = null;
+            const data = structuredClone(file);
+            data.content = '';
+            file._parent = parent;
+
+            // console.log("sfm", file.path + file.filename);
+            return fs.writeFile(file.path + '.' + file.filename, JSON.stringify(data));
+        }
+        catch(er) {
+            debugger;
+        }
     }
 
     /**
      * Saves page contents.
      */
-    async saveFileContents(file: Page): Promise<void> {
+    async saveFileContents(file: Page, parent: Page, data: string): Promise<void> {
+        let oldFilename: string;
         if (file.autoFilename) {
             const filename = sanitizeFilename(file.label || file.filename);
-            file.filename = filename;
+            // Prevent deleting the source file if it's unchanged.
+            if (filename != file.filename) {
+                // Look for any files that already have the filename we're
+                // trying to auto-rename to. DO NOT OVERWRITE these.
+                const existingPage = parent.children.find(p => p.path == file.path && p.filename == filename);
+                if (!existingPage) {
+                    oldFilename = file.filename;
+                    file.filename = filename;
+                }
+            }
         }
 
         if (file.kind == "fetch") {
-            file.content = '';
+            data = '';
         }
         else if (file.kind == "directory") {
-            fs.mkdir(file.path + file.filename)
+            fs.mkdir(file.path + file.filename);
             return;
         }
 
         // console.log("sfc", file.path + file.filename);
-        return fs.writeFile(file.path + file.filename, file.content);
+        await fs.writeFile(file.path + file.filename, data);
+        if (oldFilename) {
+            await fs.unlink(file.path + oldFilename);
+            await fs.unlink(file.path + '.' + oldFilename);
+        }
     }
 
     /**
@@ -138,10 +177,16 @@ export class FilesService {
 
     // Delete a file
     async deleteFile(path: string): Promise<void> {
-        // Delete both the .md and the .md.json files.
-        return fs.unlink(path)
+        return fs.unlink(path);
     }
 
+    async deleteFolder(path: string): Promise<void> {
+        return fs.rmdir(path);
+    }
+
+    async createFolder(path: string): Promise<void> {
+        return fs.mkdir(path);
+    }
     /**
      * Parse metadata into a Page object.
      */

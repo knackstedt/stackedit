@@ -71,12 +71,12 @@ export class IconPickerComponent {
         this.page.icon = null;
 
         if (!this.disableAutoSave)
-            await this.pages.savePage(this.page);
+            await this.pages.savePage(this.page, this.page._parent);
     };
     async setIcon(icon: string) {
         this.page.icon = icon;
 
         if (!this.disableAutoSave)
-            await this.pages.savePage(this.page);
+            await this.pages.savePage(this.page, this.page._parent);
     };
 }

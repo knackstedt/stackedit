@@ -815,7 +815,7 @@ ng-scrollbar {
                 }
             }
 
-            .img-wrapper {
+            &.img-wrapper {
                 position: relative;
                 width: fit-content;
                 user-select: none;
@@ -830,6 +830,7 @@ ng-scrollbar {
                 }
             }
 
+            // 404
             img::after {
                 content: "";
                 width: 64px;

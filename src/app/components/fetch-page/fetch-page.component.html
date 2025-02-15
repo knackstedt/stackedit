@@ -8,7 +8,7 @@
             <mat-form-field style="width: 120px">
                 <mat-select
                     [(value)]="page.options['method']"
-                    (valueChange)="pages.savePage(page)"
+                    (valueChange)="pages.savePage(page, page._parent)"
                 >
                     @for (method of methods; track method) {
                         <mat-option [value]="method">{{method}}</mat-option>
@@ -22,7 +22,7 @@
             >
                 <input matInput type="text"
                     [(ngModel)]="page.options['url']"
-                    (change)="pages.savePage(page)"
+                    (change)="pages.savePage(page, page._parent)"
                     (keyup)="checkUrl(); $event.key == 'Enter' && submitRequest()"
                 >
             </mat-form-field>
@@ -53,7 +53,7 @@
                                         matInput
                                         type="text"
                                         [(ngModel)]="par.key"
-                                        (ngModelChange)="pages.savePage(page)"
+                                        (ngModelChange)="pages.savePage(page, page._parent)"
                                     >
                                 </mat-form-field>
                                 <mat-form-field style="flex: 1; width: 50%">
@@ -62,7 +62,7 @@
                                         matInput
                                         type="text"
                                         [(ngModel)]="par.value"
-                                        (ngModelChange)="pages.savePage(page)"
+                                        (ngModelChange)="pages.savePage(page, page._parent)"
                                     >
                                 </mat-form-field>
                             </div>
@@ -83,7 +83,7 @@
                                         matInput
                                         type="text"
                                         [(ngModel)]="header.key"
-                                        (ngModelChange)="pages.savePage(page)"
+                                        (ngModelChange)="pages.savePage(page, page._parent)"
                                     >
                                 </mat-form-field>
                                 <mat-form-field style="flex: 1; width: 50%">
@@ -92,7 +92,7 @@
                                         matInput
                                         type="text"
                                         [(ngModel)]="header.value"
-                                        (ngModelChange)="pages.savePage(page)"
+                                        (ngModelChange)="pages.savePage(page, page._parent)"
                                     >
                                 </mat-form-field>
                             </div>
@@ -106,7 +106,7 @@
                 <mat-tab label="Body">
                     <app-vscode
                         [(code)]="page.content"
-                        (codeChange)="pages.savePage(page)"
+                        (codeChange)="pages.savePage(page, page._parent)"
                     />
                 </mat-tab>
                 <!-- <mat-tab label="Settings">

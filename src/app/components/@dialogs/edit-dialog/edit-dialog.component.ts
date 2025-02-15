@@ -62,7 +62,7 @@ export class EditDialogComponent implements OnInit {
         // Apply changes
         Object.keys(this.page).forEach(k => this.data[k] = this.page[k]);
 
-        this.pages.savePage(this.page);
+        this.pages.savePage(this.page, this.page._parent);
         this.dialog.close();
     }
 }

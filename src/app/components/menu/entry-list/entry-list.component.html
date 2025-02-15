@@ -28,12 +28,12 @@
                             ? page.children
                                 ? null
                                 : pages.loadPageChildren(page)
-                            : pages.addTab(page)
+                            : pages.addTab(page, item)
                     "
                     (dblclick)="
                         page.kind == 'directory'
                             ? null
-                            : pages.addTab(page, false)
+                            : pages.addTab(page, item, false)
                     "
                 >
                     @if (page.icon) {
@@ -58,7 +58,12 @@
                             />
                         }
                     }
-                    <span>{{page.label?.slice(0, 20)}}</span>
+                    @if (page.kind == "directory") {
+                        <span [matTooltip]="page.path + page.filename">{{page.filename?.slice(0, 20)}}</span>
+                    }
+                    @else {
+                        <span>{{page.label?.slice(0, 20)}}</span>
+                    }
                 </div>
             </mat-expansion-panel-header>
 
@@ -66,7 +71,6 @@
                 <app-entry-list
                     [item]="page"
                     [items]="page['children']"
-                    [ctxMenu]="ctxMenu"
                     [depth]="depth + 1"
                 />
             }
@@ -85,7 +89,7 @@
         </span>
         <ng-template #addTooltip>
             <div class="add__list">
-                <span class="add__btn" (click)="create('markdown', 'markdown')">
+                <span class="add__btn" (click)="createDirectory(item)">
                     <mat-icon>folder</mat-icon>
                     Folder
                 </span>
@@ -110,3 +114,11 @@
         </span> -->
     </div>
 }
+
+
+<ng-template #renameTemplate let-data let-dialog="dialog">
+    <app-folder-rename
+        [dialog]="dialog"
+        [data]="data"
+    />
+</ng-template>

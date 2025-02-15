@@ -17,24 +17,26 @@ export class BrowserFS {
         return await fs.exists.apply(null, args);
     }
 
-    readDir = async (path: string) => {
+    readDir = async (path: string, showHidden = false) => {
         await this.initPromise;
         return await fs.readdir(path, { withFileTypes: true }).then(result => {
             // TODO: The ZenFS "polyfill" doesn't return the correct format in the current version.
-            return result.map(r => {
-                let path: string = r.path;
+            return result
+                .filter(r => showHidden || !r.name.startsWith('.'))
+                .map(r => {
+                    let path: string = r.path;
 
-                if (!path.startsWith('/'))
-                    path = '/' + path;
+                    if (!path.startsWith('/'))
+                        path = '/' + path;
 
-                return {
-                    name: path.split('/').pop(),
-                    path: path.split('/').slice(0, -1).join('/') || '/',
-                    isFile: () => r.isFile(),
-                    isDirectory: () => r.isDirectory(),
-                    stats: r['stats'] as Stats
-                }
-            });
+                    return {
+                        name: path.split('/').pop(),
+                        path: path.split('/').slice(0, -1).join('/') || '/',
+                        isFile: () => r.isFile(),
+                        isDirectory: () => r.isDirectory(),
+                        stats: r['stats'] as Stats
+                    }
+                });
         });
     }
 
@@ -59,5 +61,10 @@ export class BrowserFS {
     mkdir: FS['mkdir'] = async (...args) => {
         await this.initPromise;
         return await fs.mkdir.apply(null, args);
+    }
+
+    rmdir: FS['rmdir'] = async (...args) => {
+        await this.initPromise;
+        return await fs.rmdir.apply(null, args);
     }
 }
