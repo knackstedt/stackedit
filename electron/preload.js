@@ -6,7 +6,12 @@ contextBridge.exposeInMainWorld('electronFs', {
     readdir: (...args) => ipc.callMain("readdir", args),
     readFile: (...args) => ipc.callMain("readFile", args),
     mkdir: (...args) => ipc.callMain("mkdir", args),
+    rmdir: (...args) => ipc.callMain("rmdir", args),
     writeFile: (...args) => ipc.callMain("writeFile", args),
     unlink: (...args) => ipc.callMain("unlink", args),
+});
+
+contextBridge.exposeInMainWorld('electronGlobals', {
+    devTools: (...args) => ipc.callMain("devtools", args)
 });
 

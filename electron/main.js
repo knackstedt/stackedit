@@ -1,12 +1,14 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu } = require('electron');
 const { ipcMain: ipc } = require('electron-better-ipc');
 const fs = require("fs/promises");
 const Path = require("path");
 
+console.log("Electron shell booting");
+
 app.commandLine.appendSwitch('--enable-unsafe-webgpu');
 app.commandLine.appendSwitch('--enable-precise-memory-info');
 app.commandLine.appendSwitch('--enable-font-antialiasing');
-app.commandLine.appendSwitch('--force-browser-crash-on-gpu-crash');
+// app.commandLine.appendSwitch('--force-browser-crash-on-gpu-crash');
 
 function isDev() {
     return !app.getAppPath().includes('app.asar');
@@ -23,6 +25,8 @@ const createWindow = () => {
             devTools: true,
         }
     });
+
+    Menu.setApplicationMenu(null)
 
     if (isDev()) {
         win.loadURL('https://localhost:4400', { })
@@ -83,6 +87,7 @@ function checkPath(path) {
 
 app.whenReady().then(() => {
 
+
     ipc.answerRenderer("access", ([path], bw) => fs.access(checkPath(path), fs.constants.R_OK | fs.constants.W_OK));
     ipc.answerRenderer("readdir", ([path], bw) => fs.readdir(checkPath(path), { withFileTypes: true })
         .then(arr => arr.map(a => {
@@ -99,6 +104,10 @@ app.whenReady().then(() => {
     ipc.answerRenderer("mkdir", ([path, opts], bw) => fs.mkdir(checkPath(path), opts));
     ipc.answerRenderer("writeFile", ([path, data], bw) => fs.writeFile(checkPath(path), data));
     ipc.answerRenderer("unlink", ([path, opts], bw) => fs.unlink(checkPath(path), opts));
+    ipc.answerRenderer("rmdir", ([path, opts], bw) => fs.rmdir(checkPath(path), opts));
+    ipc.answerRenderer("devtools", (args, bw) => bw.openDevTools());
 
     createWindow();
+
+    console.log("Electron shell ready");
 });
