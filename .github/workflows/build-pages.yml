@@ -50,7 +50,7 @@ jobs:
         # run: npm run test:ci
       # {6}
       - name: Build
-        run: npm run build
+        run: npm run build:app
       - name: PWD
         run: pwd
       - name: LS 1
