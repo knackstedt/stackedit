@@ -3,9 +3,9 @@ name: Angular Build
 # {1}
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 # Sets the GITHUB_TOKEN permissions to allow deployment to GitHub Pages
 permissions:
