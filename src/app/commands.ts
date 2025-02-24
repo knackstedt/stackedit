@@ -27,10 +27,16 @@ export const InitializeCommandPalette = (
                 pages.closeTab(pages.getFocusedTab())
         },
         {
-            label: "Open DevTools",
+            label: "Toggle DevTools",
             shortcutKey: 'f12',
             action: e =>
                 window['electronGlobals']?.devTools()
+        },
+        {
+            label: "Toggle Fullscreen",
+            shortcutKey: 'f11',
+            action: e =>
+                window['electronGlobals']?.fullScreen()
         },
         {
             label: "Reload Window",

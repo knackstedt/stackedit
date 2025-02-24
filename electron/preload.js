@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('electronFs', {
 });
 
 contextBridge.exposeInMainWorld('electronGlobals', {
-    devTools: (...args) => ipc.callMain("devtools", args)
+    devTools: (...args) => ipc.callMain("devtools", args),
+    fullScreen: (...args) => ipc.callMain("fullscreen", args)
 });
 

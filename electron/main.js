@@ -106,6 +106,7 @@ app.whenReady().then(() => {
     ipc.answerRenderer("unlink", ([path, opts], bw) => fs.unlink(checkPath(path), opts));
     ipc.answerRenderer("rmdir", ([path, opts], bw) => fs.rmdir(checkPath(path), opts));
     ipc.answerRenderer("devtools", (args, bw) => bw.openDevTools());
+    ipc.answerRenderer("fullscreen", (args, bw) => bw.setFullScreen(!bw.fullScreen));
 
     createWindow();
 
