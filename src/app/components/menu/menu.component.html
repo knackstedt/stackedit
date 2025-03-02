@@ -14,6 +14,7 @@
     <div (click)="pages.openWorkspace()">Open Workspace</div> -->
 
     <app-entry-list
+        [item]="pages.rootPage"
         [items]="pages.rootPage.children"
         [style.display]="config.value.menuCollapsed ? 'none' : ''"
         style="overflow-y: auto"

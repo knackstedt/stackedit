@@ -57,61 +57,63 @@ export class EntryListComponent implements OnInit {
     }
 
     ngAfterViewInit() {
-        this.ctxMenu = [
-            {
-                label: "Add subdirectory",
-                isVisible: data => data.kind == "directory",
-                action: (data) =>
-                    // TODO
-                    this.pages.createPage({ kind: "directory", path: data.path + data.filename }, data)
-            },
-            {
-                label: "Add new Markdown file",
-                isVisible: data => data.kind == "directory",
-                action: (parent) =>
-                    this.pages.createPage({ kind: "markdown", icon: "markdown" }, parent)
-            },
-            {
-                label: "Add new Diagram file",
-                isVisible: data => data.kind == "directory",
-                action: (parent) =>
-                    this.pages.createPage({ kind: "canvas", icon: "network_node" }, parent)
-            },
-            {
-                label: "Add new Code file",
-                isVisible: data => data.kind == "directory",
-                action: (parent) =>
-                    this.pages.createPage({ kind: "code", icon: "code_blocks" }, parent)
-            },
-            // {
-            //     label: "Create Child (Fetch)",
-            //     action: (data) =>
-            //         this.pages.createPage({ kind: "fetch" }, data)
-            // },
-            "separator",
-            {
-                label: "Set Icon",
-                childTemplate: IconPickerComponent
-            },
-            "separator",
-            {
-                label: "Delete",
-                action: async page => {
-                    await this.util.confirmAction("Confirm"
-                        , `Are you sure you want to delete ${page.label}?`);
-                    this.pages.deletePage(page);
-                }
-            },
-            {
-                label: "Rename",
-                childTemplate: this.renameTemplate,
-                isVisible: page => page.kind != "directory",
-                action: async page => {
-                    this.pages.savePage(page, this.item);
-                }
-            },
-            { label: "Edit...", action: p => this.onEntryEdit(p) }
-        ];
+        setTimeout(() => {
+            this.ctxMenu = [
+                {
+                    label: "Add subdirectory",
+                    isVisible: data => data.kind == "directory",
+                    action: (data) =>
+                        // TODO
+                        this.pages.createPage({ kind: "directory", path: data.path + data.filename }, data)
+                },
+                {
+                    label: "Add new Markdown file",
+                    isVisible: data => data.kind == "directory",
+                    action: (parent) =>
+                        this.pages.createPage({ kind: "markdown", icon: "markdown" }, parent)
+                },
+                {
+                    label: "Add new Diagram file",
+                    isVisible: data => data.kind == "directory",
+                    action: (parent) =>
+                        this.pages.createPage({ kind: "canvas", icon: "network_node" }, parent)
+                },
+                {
+                    label: "Add new Code file",
+                    isVisible: data => data.kind == "directory",
+                    action: (parent) =>
+                        this.pages.createPage({ kind: "code", icon: "code_blocks" }, parent)
+                },
+                // {
+                //     label: "Create Child (Fetch)",
+                //     action: (data) =>
+                //         this.pages.createPage({ kind: "fetch" }, data)
+                // },
+                "separator",
+                {
+                    label: "Set Icon",
+                    childTemplate: IconPickerComponent
+                },
+                "separator",
+                {
+                    label: "Delete",
+                    action: async page => {
+                        await this.util.confirmAction("Confirm"
+                            , `Are you sure you want to delete ${page.label || page.filename}?`);
+                        this.pages.deletePage(page, this.item);
+                    }
+                },
+                {
+                    label: "Rename",
+                    childTemplate: this.renameTemplate,
+                    isVisible: page => page.kind != "directory",
+                    action: async page => {
+                        this.pages.savePage(page, this.item);
+                    }
+                },
+                { label: "Edit...", action: p => this.onEntryEdit(p) }
+            ];
+        }, 1)
     }
 
     async drop(event: CdkDragDrop<any, any, any>) {
@@ -139,7 +141,7 @@ export class EntryListComponent implements OnInit {
     createDirectory(parent?: Partial<Page>) {
         this.dialog.open(DirectoryCreateComponent, {
             data: {
-                parent
+                parent: parent || this.pages.rootPage
             }
         })
     }
