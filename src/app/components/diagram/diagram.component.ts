@@ -94,7 +94,7 @@ export class DiagramComponent {
         // Excalidraw emits an event that clears everything when the appState
         // is replaced, in order to mitigate that from wiping out our data
         // we'll disable that scenario manually.
-        if (value.elements.length == 0 && this.initialData.elements.length > 0) {
+        if (value.elements.length == 0 && this.initialData.elements?.length > 0) {
             this.ngOnInit();
             return;
         }
