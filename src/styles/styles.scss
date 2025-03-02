@@ -25,6 +25,10 @@ html, body {
     box-sizing: border-box;
 }
 
+img {
+    -webkit-user-drag: none;
+}
+
 a {
     color: var(--text-color);
     text-decoration: none;
@@ -34,17 +38,18 @@ a {
 // dark
 :root {
     --text-color: #efefef;
-    --background-color: #121212;
+    --background-color: #1f1f1f;
     --menu-guide-color: #313131;
     --menu-text-color: #ccc;
     --menu-background-color: #181818;
     --menu-item-background-color: #1c1e1f;
+    --menu-item-background-hover-color: #222323;
     --menu-item-fill-color: #69f0aeaa;
     --menu-item-selected-fill-color: #69f0ae;
     --button-primary-background-color: #69f0ae;
     --menu-item-hover-background-color: #292c2d;
     --splitter-hover-background-color: #07fa87;
-    --splitter-background-color: #555;
+    --splitter-background-color: #2b2b2b;
     --splitter-transition: 200ms ease;
 }
 
