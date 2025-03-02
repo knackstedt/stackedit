@@ -64,11 +64,11 @@ app-entry-list {
 
     .mat-expansion-indicator {
         position: absolute;
-        left: 17px;
+        left: 8px;
     }
 
     .mat-expansion-panel-header {
-        padding: 0 0 0 12px;
+        padding: 0;
         transition: background-color 100ms ease;
         border-radius: 5px;
 

@@ -309,14 +309,14 @@ export class PagesService {
         return page;
     }
 
-    async createDirectory(partial: Page, parent: Page) {
+    async createDirectory(partial: Partial<Page>, parent: Page) {
         partial.created = Date.now();
         partial.modified = Date.now();
 
         await this.files.createFolder(partial.path + '/' + partial.filename);
-        await this.files.saveMetadata(partial);
+        await this.files.saveMetadata(partial as Page);
 
-        parent.children.push(partial);
+        parent.children.push(partial as Page);
     }
 
     /**

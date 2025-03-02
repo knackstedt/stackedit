@@ -54,6 +54,7 @@ export class EntryListComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.items?.sort((a, b) => a.order - b.order);
     }
 
     ngAfterViewInit() {
@@ -62,9 +63,8 @@ export class EntryListComponent implements OnInit {
                 {
                     label: "Add subdirectory",
                     isVisible: data => data.kind == "directory",
-                    action: (data) =>
-                        // TODO
-                        this.pages.createPage({ kind: "directory", path: data.path + data.filename }, data)
+                    action: (parent) =>
+                        this.createDirectory(parent)
                 },
                 {
                     label: "Add new Markdown file",

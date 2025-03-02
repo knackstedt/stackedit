@@ -10,31 +10,33 @@
     @for (page of items; track page; let i = $index) {
         <mat-expansion-panel
             cdkDrag
-            [class.isleaf]="!page['children'] || page['children'].length == 0"
-            [disabled]="!page['children'] || page['children'].length == 0"
+            [class.isleaf]="page.kind != 'directory'"
             [(expanded)]="page['expanded']"
+            (expandedChange)="page.kind == 'directory' &&
+                page.kind == 'directory'
+                    ? page.children
+                        ? null
+                        : pages.loadPageChildren(page)
+                    : pages.addTab(page, item)
+            "
+            (dblclick)="
+                page.kind == 'directory'
+                    ? null
+                    : pages.addTab(page, item, false)
+            "
             style="cursor: default;"
         >
             <div class="placeholder" *cdkDragPlaceholder></div>
-            <mat-expansion-panel-header cdkDragHandle [style.color]="'var(--text-color)'">
+            <mat-expansion-panel-header
+                cdkDragHandle
+                [style.color]="'var(--text-color)'"
+            >
                 <div
                     class="label"
                     [ngx-contextmenu]="ctxMenu"
                     [ngx-menu-context]="page"
                     [matTooltip]="page.label"
                     [matTooltipShowDelay]="750"
-                    (click)="
-                        page.kind == 'directory'
-                            ? page.children
-                                ? null
-                                : pages.loadPageChildren(page)
-                            : pages.addTab(page, item)
-                    "
-                    (dblclick)="
-                        page.kind == 'directory'
-                            ? null
-                            : pages.addTab(page, item, false)
-                    "
                 >
                     @if (page.icon) {
                         <mat-icon
@@ -62,7 +64,7 @@
                         <span [matTooltip]="page.path + page.filename">{{page.filename?.slice(0, 20)}}</span>
                     }
                     @else {
-                        <span>{{page.label?.slice(0, 20)}}</span>
+                        <span>{{page.label?.slice(0, 20) || page.filename.slice(0, 20) || "UNKNOWN"}}</span>
                     }
                 </div>
             </mat-expansion-panel-header>

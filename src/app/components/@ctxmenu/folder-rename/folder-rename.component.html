@@ -1,4 +1,4 @@
-@if (!data) {
+@if (data) {
     <mat-form-field style="width: 280px;">
         <mat-label>Name</mat-label>
         <input matInput type="text" [(ngModel)]="data.label" (keyup)="$event.key == 'Enter' && onSave()">
