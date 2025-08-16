@@ -2,7 +2,7 @@ import 'zone.js';  // Included with Angular CLI.
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { MatDialogModule } from '@angular/material/dialog';
 import { withInterceptorsFromDi, provideHttpClient } from '@angular/common/http';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { BrowserAnimationsModule, provideAnimations } from '@angular/platform-browser/animations';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { CommonModule } from '@angular/common';
 import { isDevMode, importProvidersFrom } from '@angular/core';
@@ -11,6 +11,7 @@ import { LazyLoaderModule } from '@dotglitch/ngx-common';
 
 bootstrapApplication(AppComponent, {
     providers: [
+        BrowserAnimationsModule,
         importProvidersFrom(
             CommonModule,
             BrowserModule,

@@ -38,6 +38,8 @@ a {
 // dark
 :root {
     --text-color: #efefef;
+    --text-muted-color: #999;
+    --hr-color: #777;
     --background-color: #1f1f1f;
     --menu-guide-color: #313131;
     --menu-text-color: #ccc;
@@ -55,6 +57,8 @@ a {
 
 .light {
     --text-color: #121212;
+    --text-muted-color: #999;
+    --hr-color: #444;
     --background-color: #efefef;
     --ngx-ctx-menu-text-color: #111;
     --menu-guide-color: #bebebe;
