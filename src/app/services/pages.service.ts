@@ -87,7 +87,7 @@ export class PagesService {
 
     public async loadPageContent(page: Page) {
         if (!page) {
-            console.trace(page);
+            // console.trace(page);
             return;
         }
 
@@ -151,7 +151,7 @@ export class PagesService {
             }
 
             if (page.hasLoaded) {
-                console.trace("Save");
+                // console.trace("Save");
                 console.log("SAVE PAGE", page);
                 await this.files.saveFileContents(page, parent, data).catch(e => console.error(e));
             }
