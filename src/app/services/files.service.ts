@@ -47,8 +47,8 @@ export class FilesService {
                             const meta = JSON.parse(metadata || "{}") as Page;
                             meta.path = f.path || '/';
                             meta.filename = f.name;
+                            meta.hasLoaded = false;
 
-                            // console.log("incoming metadata", meta);
                             return meta;
                         }
                         else {
@@ -60,6 +60,7 @@ export class FilesService {
                                 modified: f.stats?.mtimeMs,
                                 kind: "directory",
                                 autoLabel: true,
+                                hasLoaded: false,
                                 content: ''
                             } as Page;
                         }
@@ -75,6 +76,7 @@ export class FilesService {
                                 const meta = JSON.parse(metadata || "{}") as Page;
                                 meta.path = f.path || '/';
                                 meta.filename = f.name;
+                                meta.hasLoaded = false;
 
                                 // console.log("incoming metadata", meta);
                                 return meta;
@@ -90,6 +92,7 @@ export class FilesService {
                                     modified: f.stats?.mtimeMs,
                                     kind: "code",
                                     autoLabel: true,
+                                    hasLoaded: true,
                                     content: contents
                                 } as Page;
                             }

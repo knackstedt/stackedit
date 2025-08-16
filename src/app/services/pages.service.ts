@@ -78,119 +78,6 @@ export class PagesService {
         });
     }
 
-    // Open a workspace via WFSA
-    // TODO: Convert this into a FS interface. (zenfs might do this already?)
-    // async openWorkspace() {
-    //     const dirHandle = this.workspaceHandle = await window['showDirectoryPicker']({
-    //         mode: "readwrite"
-    //     });
-
-    //     const files: Page[] = [];
-    //     const flatPages: Page[] = [];
-
-    //     // TODO: make this run in parallel?
-    //     const traverseDirs = async (dir: FileSystemDirectoryHandle, path: string) => {
-    //         const results = [];
-    //         const metadataFiles: FileSystemFileHandle[] = [];
-    //         const files: FileSystemFileHandle[] = [];
-    //         const dirs: FileSystemDirectoryHandle[] = [];
-
-    //         // @ts-ignore .values()
-    //         for await (const entry of dir.values()) {
-    //             if (entry.kind == "directory")
-    //                 dirs.push(entry);
-    //             else if (entry.name.endsWith(metadata_ext))
-    //                 metadataFiles.push(entry);
-    //             else
-    //                 files.push(entry);
-    //         }
-
-    //         // Metadata files will sort to the start
-    //         files.sort((a,b) => {
-    //             if (a.name.endsWith(metadata_ext))
-    //                 return -1;
-    //             if (b.name.endsWith(metadata_ext))
-    //                 return 1;
-    //             // Default to alphabetical sort
-    //             return a.name > b.name ? 1 : -1;
-    //         });
-    //         console.log("sorted files", files)
-
-    //         // Only perform lookup _after_ all entries in the dir have
-    //         // resolved -- this lets us check if there are other
-    //         // relevant files in the directory
-
-    //         for (const dir of dirs) {
-    //             const index = path + dir.name + '/';
-    //             this.dirHandles[index] = {
-    //                 handle: dir,
-    //                 entries: await traverseDirs(dir, index)
-    //             };
-    //             // results.push(...this.dirHandles[index].entries);
-    //         }
-
-    //         for (const metadata of metadataFiles) {
-    //             const fileName = metadata.name.replace(metadata_ext, '');
-    //             const dataFile = files.findIndex(f => f.name == fileName);
-
-    //             if (dataFile == -1) {
-    //                 console.warn("Found metadata, but not data file!")
-    //             }
-    //             else {
-    //                 const data = await metadata.getFile();
-    //                 const text = await data.text();
-    //                 const json = JSON5.parse(text) as Page;
-
-    //                 json.path = "wfsa://" + path;
-    //                 json.metadataEntry = metadata;
-    //                 json.fileEntry = files[dataFile];
-    //                 json.hasLoaded = false;
-    //                 json.content = '';
-    //                 results.push(json);
-    //                 flatPages.push(json);
-
-    //                 // Remove the file -- it's added already
-    //                 files.splice(dataFile, 1);
-    //             }
-    //         }
-
-    //         for (const file of files) {
-    //             const obj: Page = {
-    //                 path: "wfsa://" + path,
-    //                 content: undefined,
-    //                 hasLoaded: false,
-    //                 created: 0,
-    //                 modified: Date.now(),
-    //                 kind: "raw",
-    //                 name: file.name,
-    //                 fileEntry: file
-    //             };
-
-    //             results.push(obj);
-    //             flatPages.push(obj);
-    //         }
-
-    //         return results;
-    //     }
-
-    //     const roots = await traverseDirs(dirHandle, '');
-
-    //     Object.entries(this.dirHandles).forEach(([path, handle]) => {
-
-    //     })
-
-    //     console.log({
-    //         roots,
-    //         files,
-    //         dirs: this.dirHandles
-    //     });
-
-    //     this.flatPages = flatPages;
-    //     this.pages = roots;
-
-    //     this.calculatePageTree();
-    // }
-
     public loadCurrentPageContent() {
         const tab = this.tabs[this._selectedTabIndex];
         if (!tab) return null;
@@ -203,24 +90,32 @@ export class PagesService {
             console.trace(page);
             return;
         }
-        if (!page.hasLoaded) {
-            const res = await this.files.readFile(page.path + page.filename) as any;
 
-            if (JSON_PAGE_KINDS.includes(page.kind)) {
-                page.content = JSON.parse(res || '{}');
-            }
-            else {
-                page.content = res;
-            }
+        console.log("LOAD PAGE CONTENT", page)
+
+        const res = await this.files.readFile(page.path + page.filename) as any;
+
+        if (JSON_PAGE_KINDS.includes(page.kind)) {
+            page.content = JSON.parse(res || '{}');
         }
+        else {
+            page.content = res;
+        }
+
+        // Regenerate the label once the page has been loaded.
+        this.genLabel(page);
+
+        page.hasLoaded = true;
     }
 
     async loadPageChildren(page: Page) {
         if (page.kind != "directory") return;
 
         page.loading = true;
+
         const contents = await this.files.readDir(page.path + page.filename + '/');
         page.children = contents;
+
         page.expanded = true;
         page.loading = false;
     }
@@ -236,13 +131,17 @@ export class PagesService {
             // Raw markdown files are always saved
             // without metadata.
             if (page.kind == "raw") {
-                await this.files.saveFileContents(page, parent, page.content);
+                if (page.hasLoaded) {
+                    await this.files.saveFileContents(page, parent, page.content);
+                }
                 return;
             }
             this.genLabel(page);
+
             if (
                 page.content === 'null' ||
-                page.content === null
+                page.content === null ||
+                page.content === undefined
             )
                 debugger;
 
@@ -251,7 +150,11 @@ export class PagesService {
                 data = JSON.stringify(page.content);
             }
 
-            await this.files.saveFileContents(page, parent, data).catch(e => console.error(e));
+            if (page.hasLoaded) {
+                console.trace("Save");
+                console.log("SAVE PAGE", page);
+                await this.files.saveFileContents(page, parent, data).catch(e => console.error(e));
+            }
         }
 
         await this.files.saveMetadata(page).catch(e => console.error(e));
@@ -275,6 +178,8 @@ export class PagesService {
             path = parent.path + parent.filename;
         }
 
+        console.log("CREATE PAGE >:(");
+
         const page: Page = {
             path: (path ? path + "/" : '/'),
             content: '',
@@ -287,6 +192,7 @@ export class PagesService {
             options: {},
             tags: [],
             variables: {},
+            hasLoaded: true,
             ...abstract
         };
 
@@ -326,7 +232,10 @@ export class PagesService {
      * TODO: fix deleting things that are nested
      */
     async deletePage(page: Page, parent: Page, destroy = false) {
-        console.log("deleteing page", page)
+        console.log("deleting page", page);
+
+        // Disable the update tracker to prevent pages being undeletable
+        page[$debounce].unsubscribe();
 
         if (destroy) {
             if (page.kind == "directory") {
@@ -463,20 +372,35 @@ export class PagesService {
                 page.label = "Fetch Request";
             }
             else {
-                page.label = page.content?.trim()?.split('\n')?.[0]?.slice(0, 20);
-                if (!page.label || page.label.trim().length < 2)
-                    page.label = "Untitled";
+                if (page.hasLoaded) {
+                    page.label = page.content?.trim()?.split('\n')?.[0]?.slice(0, 20);
+                    if (!page.label || page.label.trim().length < 2)
+                        page.label = "Untitled";
+                }
+                else {
+                    // page keeps whatever name it had or defaults to Untitled.
+                    page.label ||= "Untitled";
+                }
             }
         }
     }
 
     onPageContentChange(page: Page, value: string) {
+
+        console.log("ON PAGE CONTENT CHANGE")
+
+        if (!page.hasLoaded) {
+            console.error("Page received content change event before loading!")
+            debugger;
+        }
+
         this.genLabel(page);
 
         page.content = value;
 
         if (!page[$debounce])
             this.attachPageChangeEmitter(page);
+
         page[$debounce].next();
     }
 
