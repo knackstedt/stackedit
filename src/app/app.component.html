@@ -18,6 +18,7 @@
     <as-split-area>
         <mat-tab-group
             style="flex: 1"
+            [style.display]="pages.tabs.length > 0 ? '' : 'none'"
             [(selectedIndex)]="pages.selectedTabIndex"
             (selectedIndexChange)="pages.loadCurrentPageContent()"
         >
@@ -95,7 +96,7 @@
                                 [showCodeRunButton]="true"
                                 codeRunner="piston"
                                 [(value)]="page.content"
-                                (valueChange)="pages.onPageContentChange(page, $event)"
+                                (valueChange)="$event.trim() && pages.onPageContentChange(page, $event)"
                                 (onImageUpload)="onImageUpload($event)"
                             />
                         }
@@ -104,12 +105,15 @@
             }
         }
         @empty {
-            <div>
+            <div class="empty-panel">
                 <div class="logo">
                     <img src="/assets/app-icon.png" style="width: 300px;"/>
                 </div>
                 <div>
-
+                    <div>Show All Commands</div>
+                    <div>Go to File</div>
+                    <div>Toggle Terminal</div>
+                    <div>Find in Files</div>
                 </div>
             </div>
         }
