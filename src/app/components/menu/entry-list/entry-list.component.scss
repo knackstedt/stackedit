@@ -151,6 +151,30 @@ app-entry-list {
     }
 }
 
+.empty {
+    color: var(--text-muted-color);
+    font-style: italic;
+    position: relative;
+    display: flex;
+    justify-content: center;
+
+    &:before {
+        content: "";
+        position: absolute;
+        top: calc(50% - .5px);
+        height: 1px;
+        background-color: var(--hr-color);
+        width: 100%;
+        z-index: 0;
+    }
+    div {
+        position: relative;
+        background-color: var(--menu-background-color);
+        z-index: 1;
+        padding: 0 6px;
+    }
+}
+
 hr {
     width: 90%;
     border: 1px solid #434343;

@@ -126,6 +126,8 @@ export class EntryListComponent implements OnInit {
             item.order = index;
         });
 
+        // debugger;
+
         for (let i = 0; i < this.items.length; i++)
             await this.pages.savePage(this.items[i], this.item);
     }
@@ -148,5 +150,9 @@ export class EntryListComponent implements OnInit {
 
     onEntryEdit(entry: Partial<Page>) {
         this.dialog.open(EditDialogComponent, { data: entry })
+    }
+
+    debug(e) {
+        console.log(e)
     }
 }

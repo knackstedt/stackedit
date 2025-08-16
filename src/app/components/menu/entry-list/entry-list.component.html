@@ -1,84 +1,86 @@
-
-<mat-accordion
-    displayMode="flat"
-    [multi]="true"
-    class="menu-accordion list"
-    cdkDropList
-    cdkDropListConnectedTo="entryList"
-    (cdkDropListDropped)="drop($event)"
->
-    @for (page of items; track page; let i = $index) {
-        <mat-expansion-panel
-            cdkDrag
-            [class.isleaf]="page.kind != 'directory'"
-            [(expanded)]="page['expanded']"
-            (expandedChange)="page.kind == 'directory' &&
-                page.kind == 'directory'
-                    ? page.children
+@if (items?.length > 0) {
+    <mat-accordion
+        displayMode="flat"
+        [multi]="true"
+        class="menu-accordion list"
+        cdkDropList
+        cdkDropListConnectedTo="entryList"
+        (cdkDropListDropped)="drop($event)"
+    >
+        @for (page of items; track page; let i = $index) {
+            <mat-expansion-panel
+                cdkDrag
+                [class.isleaf]="page.kind != 'directory'"
+                [(expanded)]="page['expanded']"
+                (click)="page.kind != 'directory' && pages.addTab(page, item)"
+                (opened)="
+                    page.kind == 'directory' &&
+                         pages.loadPageChildren(page)
+                "
+                (dblclick)="
+                    page.kind == 'directory'
                         ? null
-                        : pages.loadPageChildren(page)
-                    : pages.addTab(page, item)
-            "
-            (dblclick)="
-                page.kind == 'directory'
-                    ? null
-                    : pages.addTab(page, item, false)
-            "
-            style="cursor: default;"
-        >
-            <div class="placeholder" *cdkDragPlaceholder></div>
-            <mat-expansion-panel-header
-                cdkDragHandle
-                [style.color]="'var(--text-color)'"
+                        : pages.addTab(page, item, false)
+                "
+                style="cursor: default;"
             >
-                <div
-                    class="label"
-                    [ngx-contextmenu]="ctxMenu"
-                    [ngx-menu-context]="page"
-                    [matTooltip]="page.label"
-                    [matTooltipShowDelay]="750"
+                <div class="placeholder" *cdkDragPlaceholder></div>
+                <mat-expansion-panel-header
+                    cdkDragHandle
+                    [style.color]="'var(--text-color)'"
                 >
-                    @if (page.icon) {
-                        <mat-icon
-                            [fontIcon]="page.icon"
-                            [style.color]="page.color"
-                        />
-                    }
-                    @else if (page.kind == "directory") {
-                        <!-- Show a progress indicator when fetching children -->
-                        @if (page.loading) {
-                            <mat-progress-spinner
-                                mode="indeterminate"
-                                diameter="18"
-                                style="margin: 2px"
-                            />
-                        }
-                        @else {
+                    <div
+                        class="label"
+                        [ngx-contextmenu]="ctxMenu"
+                        [ngx-menu-context]="page"
+                        [matTooltip]="page.label"
+                        [matTooltipShowDelay]="750"
+                    >
+                        @if (page.icon) {
                             <mat-icon
-                                [fontIcon]="page.expanded ? 'folder_open' : 'folder'"
+                                [fontIcon]="page.icon"
                                 [style.color]="page.color"
                             />
                         }
-                    }
-                    @if (page.kind == "directory") {
-                        <span [matTooltip]="page.path + page.filename">{{page.filename?.slice(0, 20)}}</span>
-                    }
-                    @else {
-                        <span>{{page.label?.slice(0, 20) || page.filename.slice(0, 20) || "UNKNOWN"}}</span>
-                    }
-                </div>
-            </mat-expansion-panel-header>
+                        @else if (page.kind == "directory") {
+                            <!-- Show a progress indicator when fetching children -->
+                            @if (page.loading) {
+                                <mat-progress-spinner
+                                    mode="indeterminate"
+                                    diameter="18"
+                                    style="margin: 2px"
+                                />
+                            }
+                            @else {
+                                <mat-icon
+                                    [fontIcon]="page.expanded ? 'folder_open' : 'folder'"
+                                    [style.color]="page.color"
+                                />
+                            }
+                        }
+                        @if (page.kind == "directory") {
+                            <span [matTooltip]="page.path + page.filename">{{page.filename?.slice(0, 20)}}</span>
+                        }
+                        @else {
+                            <span>{{page.label?.slice(0, 20) || page.filename.slice(0, 20) || "UNKNOWN"}}</span>
+                        }
+                    </div>
+                </mat-expansion-panel-header>
 
-            @if (page['children'] && depth < 5) {
-                <app-entry-list
-                    [item]="page"
-                    [items]="page['children']"
-                    [depth]="depth + 1"
-                />
-            }
-        </mat-expansion-panel>
-    }
-</mat-accordion>
+                @if (page.kind == "directory") {
+                    <app-entry-list
+                        [item]="page"
+                        [items]="page['children']"
+                        [depth]="depth + 1"
+                    />
+                }
+            </mat-expansion-panel>
+        }
+    </mat-accordion>
+}
+@else {
+    <div class="empty"><div>empty</div></div>
+}
 
 <!-- Only show this on the root level (this component is recursive) -->
 @if (depth == 0) {
@@ -116,7 +118,6 @@
         </span> -->
     </div>
 }
-
 
 <ng-template #renameTemplate let-data let-dialog="dialog">
     <app-folder-rename
