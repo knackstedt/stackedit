@@ -51,16 +51,8 @@ jobs:
       # {6}
       - name: Build
         run: npm run build:app
-      - name: PWD
-        run: pwd
-      - name: LS 1
-        run: ls .
-      - name: LS 2
-        run: ls ./dist
-      - name: LS 3
-        run: ls ./dist/stackedit
-      - name: LS 4
-        run: ls ./dist/stackedit/browser
+
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
