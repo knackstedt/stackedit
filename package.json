@@ -58,7 +58,7 @@
     "markdown-it-pandoc-renderer": "1.2.0",
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "^1.0.0",
-    "mermaid": "^9.4.3",
+    "mermaid": "^11.10.0",
     "monaco-editor": "^0.52.2",
     "ngx-scrollbar": "^13.0.3",
     "prismjs": "^1.29.0",
