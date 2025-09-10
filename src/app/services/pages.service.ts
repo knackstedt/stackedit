@@ -53,18 +53,61 @@ export class PagesService {
     }
 
     private async loadRootPages() {
-        const pages = await this.files.readDir("/");
         const tabsState = this.config.get("tabs-state");
-        const tabs = tabsState?.tabs || [];
-        const selectedTabIndex = tabsState?.selectedTabIndex || 0;
 
-        this.rootPage.children = pages;
+        const tabs: string[] = tabsState?.tabs || [];
+        const selectedTabIndex: number = tabsState?.selectedTabIndex || 0;
 
-        this.tabs = pages.filter(p => tabs.find(t => t == p.path + p.filename));
+        const dirs = {};
+        tabs.forEach(tab => {
+            dirs[tab] = true;
+        });
+
+        // All files that were previously loaded
+        // we need to open the directories in the tree
+        const targetDirs = Object.keys(dirs);
+
+        const dirsToLoad: { [key: string]: {
+            children?: Page[]
+        }; } = {};
+
+        targetDirs.forEach(dir => {
+            dir.slice(1).split('/')
+
+            const dirs = [...dir.matchAll(/[^\/]+\//g)]
+                .map(({ [0]: match, index, input }) => input.slice(0, index + match.length))
+
+            dirs.forEach(d => dirsToLoad[d] = {});
+        });
+
+
+        // array of dir paths
+        const finalDirs = Object.keys(dirsToLoad);
+        const loadedPages: Page[] = [];
+
+        await Promise.all(finalDirs.map(d =>
+            this.files.readDir(d).then(c => {
+                dirsToLoad[d].children = c;
+                c.forEach(page => loadedPages.push(page));
+            })
+        ))
+
+        // We always load the root directory.
+        const rootPages = await this.files.readDir("/");
+        this.rootPage.children = rootPages;
+        rootPages.forEach(page => loadedPages.push(page));
+
+        // TODO: auto-expand the folder paths
+
+        this.tabs = loadedPages.filter(p => tabs.find(t => t == p.path + p.filename));
         this.selectedTabIndex = selectedTabIndex;
 
-        if (pages.length > 0 && this.tabs.length == 0)
-            this.addTab(pages[0], this.rootPage);
+        // this.tabs.forEach(t => {
+        //     let parent = loadedPages.find(p => p.path + p.filename == t.path);
+        // })
+
+        if (loadedPages.length > 0 && this.tabs.length == 0)
+            this.addTab(loadedPages[0], this.rootPage);
 
         this.saveTabsState();
     }
@@ -90,8 +133,6 @@ export class PagesService {
             // console.trace(page);
             return;
         }
-
-        console.log("LOAD PAGE CONTENT", page)
 
         const res = await this.files.readFile(page.path + page.filename) as any;
 
@@ -152,7 +193,7 @@ export class PagesService {
 
             if (page.hasLoaded) {
                 // console.trace("Save");
-                console.log("SAVE PAGE", page);
+                // console.log("SAVE PAGE", page);
                 await this.files.saveFileContents(page, parent, data).catch(e => console.error(e));
             }
         }
@@ -177,8 +218,6 @@ export class PagesService {
         if (parent) {
             path = parent.path + parent.filename;
         }
-
-        console.log("CREATE PAGE >:(");
 
         const page: Page = {
             path: (path ? path + "/" : '/'),
